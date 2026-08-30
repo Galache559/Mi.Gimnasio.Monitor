@@ -4714,6 +4714,7 @@ checkbox.checked
 }
 
 
+```js
 function saveStudentRoutine(){
 
 if(currentStudent===null)
@@ -4775,10 +4776,10 @@ saveStudents();
 
 renderStudents();
 
-document.getElementById(
-'studentExitBtn'
-).style.display='block';
+/* CERRAR EL EDITOR DE LA RUTINA */
+exitStudentEditor();
 
+/* Actualizar la zona de entrenamiento */
 renderMonitorWorkout();
 
 alert(
@@ -4786,6 +4787,7 @@ alert(
 );
 
 }
+```
 
 
 /* =====================================================
