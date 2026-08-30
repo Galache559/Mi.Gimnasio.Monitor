@@ -1,10 +1,9 @@
-```html
 <!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Mi Gimnasio Monitor v1.0</title>
+<title>Mi Gimnasio Monitor v1.1</title>
 <meta name="theme-color" content="#121212">
 
 <style>
@@ -611,6 +610,16 @@ line-height:1.45;
 margin-bottom:10px;
 }
 
+.studentSelected{
+background:#07351f;
+border:1px solid #176b43;
+color:var(--a);
+border-radius:8px;
+padding:9px;
+margin-top:8px;
+font-size:.72rem;
+}
+
 @media(max-width:380px){
 
 td input{
@@ -663,6 +672,18 @@ color:#000;
 <section id="tab-entrenar" class="tab active">
 
 <div class="card">
+
+<h2>👤 Alumno</h2>
+
+<select id="trainStudent" onchange="changeTrainingStudent()">
+<option value="">— Entrenamiento general —</option>
+</select>
+
+<div
+id="activeStudentMsg"
+class="studentSelected"
+style="display:none">
+</div>
 
 <h2>Selecciona el día</h2>
 
@@ -1215,9 +1236,7 @@ images:['','','','','']
 ===================================================== */
 
 function structuredCloneSafe(obj){
-
 return JSON.parse(JSON.stringify(obj));
-
 }
 
 
@@ -1628,6 +1647,151 @@ return null;
 
 
 /* =====================================================
+   RUTINA DEL ALUMNO
+===================================================== */
+
+function getBaseRoutine(){
+
+let base=safeParse(
+localStorage.getItem(K+'routine'),
+structuredCloneSafe(DEFAULT_ROUTINE)
+);
+
+if(!base || typeof base!=='object')
+base=structuredCloneSafe(DEFAULT_ROUTINE);
+
+for(let d=1;d<=5;d++){
+
+if(!base[d])
+base[d]=structuredCloneSafe(DEFAULT_ROUTINE[d]);
+
+}
+
+return base;
+
+}
+
+
+/* =====================================================
+   BUSCAR IMAGEN EN RUTINA GENERAL
+===================================================== */
+
+function findBaseExerciseImage(base,groupName,exercise){
+
+for(let d=1;d<=5;d++){
+
+let groups=
+base[d] &&
+Array.isArray(base[d].groups)
+?base[d].groups
+:[];
+
+for(let g of groups){
+
+if(
+String(g.name||'').toUpperCase() !==
+String(groupName||'').toUpperCase()
+)
+continue;
+
+let index=
+(g.exercises||[]).indexOf(exercise);
+
+if(index>=0){
+
+return (g.images||[])[index]||'';
+
+}
+
+}
+
+}
+
+return '';
+
+}
+
+
+/* =====================================================
+   CONSTRUIR RUTINA DEL ALUMNO
+===================================================== */
+
+function buildStudentRoutine(student){
+
+let result={};
+
+for(let d=1;d<=5;d++){
+
+result[d]={
+groups:[]
+};
+
+}
+
+if(!student || !student.routine)
+return result;
+
+
+/*
+   De momento los grupos seleccionados por el alumno
+   están disponibles en los cinco días.
+
+   En la siguiente fase cada grupo podrá asignarse
+   individualmente a Día 1, Día 2, Día 3, Día 4 o Día 5.
+*/
+
+let base=getBaseRoutine();
+
+Object.keys(student.routine).forEach(groupName=>{
+
+let data=
+student.routine[groupName];
+
+if(
+!data ||
+!data.enabled
+)
+return;
+
+let exercises=
+Array.isArray(data.exercises)
+?data.exercises
+:[];
+
+if(!exercises.length)
+return;
+
+let images=
+exercises.map(
+ex=>findBaseExerciseImage(
+base,
+groupName,
+ex
+)
+);
+
+for(let d=1;d<=5;d++){
+
+result[d].groups.push({
+
+name:groupName,
+
+exercises:exercises.slice(),
+
+images:images.slice()
+
+});
+
+}
+
+});
+
+return result;
+
+}
+
+
+/* =====================================================
    SELECCIONAR DÍA
 ===================================================== */
 
@@ -1635,10 +1799,25 @@ function selectDay(d){
 
 day=d;
 
+if(
+activeTrainingStudent!==null &&
+students[activeTrainingStudent]
+){
+
+let student=
+students[activeTrainingStudent];
+
+routine=
+buildStudentRoutine(student);
+
+}else{
+
 routine=safeParse(
 localStorage.getItem(K+'routine'),
 structuredCloneSafe(DEFAULT_ROUTINE)
 );
+
+}
 
 normalizeRoutine();
 
@@ -1652,7 +1831,20 @@ work.style.display='block';
 
 title.innerText='Entrenamiento - Día '+d;
 
-date.value=new Date().toISOString().slice(0,10);
+if(
+activeTrainingStudent!==null &&
+students[activeTrainingStudent]
+){
+
+title.innerText=
+'Entrenamiento - '+
+students[activeTrainingStudent].name+
+' - Día '+d;
+
+}
+
+date.value=
+new Date().toISOString().slice(0,10);
 
 summary.innerHTML='';
 
@@ -2483,6 +2675,15 @@ document.getElementById(
 <h3>🎉 ENTRENAMIENTO GUARDADO</h3>
 
 <div class="big">
+${
+activeTrainingStudent!==null &&
+students[activeTrainingStudent]
+?esc(students[activeTrainingStudent].name)
+:'Entrenamiento general'
+}
+</div>
+
+<div class="big">
 Día ${day}
 </div>
 
@@ -2877,7 +3078,7 @@ K+'routine',
 JSON.stringify(routine)
 );
 
-if(day===d){
+if(day===d && activeTrainingStudent===null){
 
 let previous=
 previousDayLog(d);
@@ -2909,7 +3110,9 @@ exported:new Date().toISOString(),
 
 routine:routine,
 
-logs:logs
+logs:logs,
+
+students:students
 
 };
 
@@ -3014,6 +3217,9 @@ structuredCloneSafe(routine);
 let oldLogs=
 structuredCloneSafe(logs);
 
+let oldStudents=
+structuredCloneSafe(students);
+
 try{
 
 routine=
@@ -3026,16 +3232,29 @@ structuredCloneSafe(
 data.logs
 );
 
+if(Array.isArray(data.students)){
+
+students=
+structuredCloneSafe(
+data.students
+);
+
+}
+
 normalizeRoutine();
 
 save();
+
+saveStudents();
 
 }catch(err){
 
 routine=oldRoutine;
 logs=oldLogs;
+students=oldStudents;
 
 save();
+saveStudents();
 
 throw err;
 
@@ -3043,7 +3262,7 @@ throw err;
 
 alert(
 '✓ Datos recuperados correctamente.\n\n'+
-'Rutina, grupos, ejercicios, imágenes y entrenamientos han sido restaurados.'
+'Rutina, alumnos, grupos, ejercicios, imágenes y entrenamientos han sido restaurados.'
 );
 
 location.reload();
@@ -4170,6 +4389,8 @@ students=[];
 
 let currentStudent=null;
 
+let activeTrainingStudent=null;
+
 
 /* =====================================================
    GUARDAR ALUMNOS
@@ -4186,10 +4407,135 @@ JSON.stringify(students)
 
 
 /* =====================================================
+   CARGAR ALUMNOS EN ENTRENAR
+===================================================== */
+
+function loadTrainingStudents(){
+
+let select=
+document.getElementById('trainStudent');
+
+if(!select)return;
+
+let current=
+activeTrainingStudent;
+
+select.innerHTML=
+'<option value="">— Entrenamiento general —</option>';
+
+students.forEach((student,i)=>{
+
+let option=
+document.createElement('option');
+
+option.value=i;
+
+option.textContent=
+'👤 '+student.name;
+
+select.appendChild(option);
+
+});
+
+if(
+current!==null &&
+students[current]
+){
+
+select.value=
+String(current);
+
+}else{
+
+select.value='';
+
+}
+
+updateActiveStudentMessage();
+
+}
+
+
+/* =====================================================
+   CAMBIAR ALUMNO DE ENTRENAMIENTO
+===================================================== */
+
+function changeTrainingStudent(){
+
+let select=
+document.getElementById('trainStudent');
+
+if(!select)return;
+
+if(select.value===''){
+
+activeTrainingStudent=null;
+
+}else{
+
+activeTrainingStudent=
+Number(select.value);
+
+}
+
+updateActiveStudentMessage();
+
+document.getElementById(
+'work'
+).style.display='none';
+
+document.getElementById(
+'summary'
+).innerHTML='';
+
+}
+
+
+/* =====================================================
+   MENSAJE ALUMNO ACTIVO
+===================================================== */
+
+function updateActiveStudentMessage(){
+
+let box=
+document.getElementById(
+'activeStudentMsg'
+);
+
+if(!box)return;
+
+if(
+activeTrainingStudent===null ||
+!students[activeTrainingStudent]
+){
+
+box.style.display='none';
+box.innerHTML='';
+
+return;
+
+}
+
+let student=
+students[activeTrainingStudent];
+
+box.style.display='block';
+
+box.innerHTML=
+'👤 Entrenando con la rutina de <b>'+
+esc(student.name)+
+'</b>';
+
+}
+
+
+/* =====================================================
    LISTA DE ALUMNOS
 ===================================================== */
 
 function renderStudents(){
+
+loadTrainingStudents();
 
 let box=
 document.getElementById('studentList');
@@ -4383,6 +4729,18 @@ index,
 
 if(currentStudent===index)
 currentStudent=null;
+
+if(activeTrainingStudent===index)
+activeTrainingStudent=null;
+
+if(
+activeTrainingStudent!==null &&
+activeTrainingStudent>index
+){
+
+activeTrainingStudent--;
+
+}
 
 saveStudents();
 
@@ -4735,8 +5093,9 @@ loadConfig();
 
 renderStudents();
 
+loadTrainingStudents();
+
 </script>
 
 </body>
 </html>
-```
