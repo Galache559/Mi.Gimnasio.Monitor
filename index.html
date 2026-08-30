@@ -1,9 +1,10 @@
+```html
 <!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Mi Gimnasio Pro v6.0</title>
+<title>Mi Gimnasio Monitor v1.0</title>
 <meta name="theme-color" content="#121212">
 
 <style>
@@ -70,7 +71,7 @@ padding:7px 0;
 }
 
 nav button{
-width:25%;
+width:20%;
 background:none;
 border:0;
 color:var(--sub);
@@ -106,7 +107,9 @@ justify-content:space-between;
 align-items:center;
 }
 
-button,.btn{cursor:pointer}
+button,.btn{
+cursor:pointer;
+}
 
 .btn{
 background:var(--a);
@@ -485,7 +488,9 @@ margin:12px 0;
 color:#fff;
 }
 
-.timerDisplay.warning{color:var(--gold)}
+.timerDisplay.warning{
+color:var(--gold);
+}
 
 .timerDisplay.last{
 color:var(--red);
@@ -541,6 +546,69 @@ margin-bottom:8px;
 .groupEditorTitle strong{
 color:var(--a);
 font-size:.82rem;
+}
+
+.studentGroupBox{
+background:#191919;
+border:1px solid var(--bor);
+border-radius:8px;
+padding:10px;
+margin-bottom:10px;
+}
+
+.studentGroupHeader{
+display:flex;
+justify-content:space-between;
+align-items:center;
+gap:8px;
+margin-bottom:8px;
+}
+
+.studentGroupHeader strong{
+color:var(--a);
+font-size:.85rem;
+}
+
+.exerciseOption{
+display:flex;
+align-items:center;
+gap:8px;
+background:var(--item);
+padding:9px;
+margin-bottom:5px;
+border-radius:6px;
+}
+
+.exerciseOption input{
+width:auto;
+margin:0;
+}
+
+.studentActions{
+display:flex;
+gap:5px;
+align-items:center;
+}
+
+.studentName{
+font-weight:bold;
+font-size:.9rem;
+}
+
+.studentInfo{
+font-size:.68rem;
+color:var(--sub);
+margin-top:4px;
+}
+
+.monitorNotice{
+background:#062d3c;
+border:1px solid #17607c;
+border-radius:8px;
+padding:10px;
+font-size:.72rem;
+line-height:1.45;
+margin-bottom:10px;
 }
 
 @media(max-width:380px){
@@ -665,7 +733,6 @@ color:#000;
 
 </div>
 
-
 <div class="card">
 
 <h2>💾 Seguridad de datos</h2>
@@ -749,7 +816,6 @@ onchange="importData(event)"
 
 </div>
 
-
 <div class="card">
 
 <h2>📋 Historial por grupos</h2>
@@ -778,6 +844,83 @@ Selecciona un periodo.
 
 </section>
 
+
+<!-- =====================================================
+     MONITOR
+===================================================== -->
+
+<section id="tab-monitor" class="tab">
+
+<div class="card">
+
+<h2>👤 Gestión de alumnos</h2>
+
+<div class="monitorNotice">
+
+Aquí puedes crear cada alumno y preparar su rutina
+seleccionando los grupos musculares y los ejercicios
+que tendrá disponibles.
+
+</div>
+
+<label>Nombre del alumno</label>
+
+<div style="display:flex;gap:5px">
+
+<input
+id="newStudent"
+placeholder="Nombre del alumno"
+style="margin-bottom:0"
+>
+
+<button
+class="btn sm"
+style="width:auto"
+onclick="addStudent()">
+➕ Añadir
+</button>
+
+</div>
+
+</div>
+
+
+<div class="card">
+
+<h2>👥 Alumnos</h2>
+
+<div id="studentList" class="empty">
+No hay alumnos creados.
+</div>
+
+</div>
+
+
+<div
+id="studentEditor"
+style="display:none">
+
+<div class="card">
+
+<h2>
+💪 Rutina de
+<span id="studentNameTitle"></span>
+</h2>
+
+<div id="studentGroups"></div>
+
+<button
+class="btn"
+onclick="saveStudentRoutine()">
+💾 Guardar rutina del alumno
+</button>
+
+</div>
+
+</div>
+
+</section>
+
 </div>
 
 
@@ -787,25 +930,35 @@ Selecciona un periodo.
 
 <nav>
 
-<button id="n-entrenar"
+<button
+id="n-entrenar"
 class="active"
 onclick="tab('entrenar')">
 🏋️<span>Entrenar</span>
 </button>
 
-<button id="n-rutina"
+<button
+id="n-rutina"
 onclick="tab('rutina')">
 ⚙️<span>Rutina</span>
 </button>
 
-<button id="n-calendario"
+<button
+id="n-calendario"
 onclick="tab('calendario')">
 📅<span>Calendario</span>
 </button>
 
-<button id="n-informes"
+<button
+id="n-informes"
 onclick="tab('informes')">
 📊<span>Informes</span>
+</button>
+
+<button
+id="n-monitor"
+onclick="tab('monitor')">
+👤<span>Monitor</span>
 </button>
 
 </nav>
@@ -839,22 +992,17 @@ Cerrar
 <script>
 "use strict";
 
-/* =====================================================
-   MI GIMNASIO PRO v6.0
-   ===================================================== */
 
-/*
-   IMPORTANTE:
-   v6 utiliza una clave diferente de almacenamiento.
-   Así no mezcla los datos de v5 con los de v6.
-*/
+/* =====================================================
+   MI GIMNASIO PRO v6.0 + MONITOR
+===================================================== */
 
 const K='gym_v6_';
 
 
 /* =====================================================
    RUTINA INICIAL v6
-   ===================================================== */
+===================================================== */
 
 const DEFAULT_ROUTINE={
 
@@ -1134,13 +1282,17 @@ x.groups=x.groups.map(g=>{
 g=g||{};
 
 let result={
+
 name:String(g.name||'Grupo'),
+
 exercises:Array.isArray(g.exercises)
 ?g.exercises.map(e=>String(e||'')).filter(Boolean)
 :[],
+
 images:Array.isArray(g.images)
 ?g.images.slice()
 :[]
+
 };
 
 while(result.images.length<result.exercises.length)
@@ -1159,15 +1311,10 @@ return result;
 
 
 /* =====================================================
-   MIGRACIÓN DE ESTRUCTURA v5
+   MIGRACIÓN
 ===================================================== */
 
 function migrateOldRoutine(){
-
-/*
-   Si por alguna razón existe una rutina antigua
-   dentro del almacenamiento v6, la convertimos.
-*/
 
 for(let d=1;d<=5;d++){
 
@@ -1403,11 +1550,14 @@ renderCalendar();
 if(x==='informes')
 stats();
 
+if(x==='monitor')
+renderStudents();
+
 }
 
 
 /* =====================================================
-   HISTORIAL DE EJERCICIO
+   HISTORIAL
 ===================================================== */
 
 function history(ex){
@@ -1790,7 +1940,7 @@ setTimeout(
 
 
 /* =====================================================
-   OBTENER DATOS ACTUALES
+   DATOS ACTUALES
 ===================================================== */
 
 function getCurrentExerciseData(prefix,ex){
@@ -2490,7 +2640,6 @@ html+=`
 </div>
 
 </div>
-
 `;
 
 });
@@ -2502,7 +2651,6 @@ class="btn blue"
 onclick="addGroup()">
 ➕ AÑADIR GRUPO MUSCULAR
 </button>
-
 `;
 
 document.getElementById(
@@ -2549,7 +2697,6 @@ onclick="removeExercise(this)">
 </div>
 
 </div>
-
 `;
 
 }
@@ -2807,8 +2954,7 @@ setTimeout(
 
 document.getElementById(
 'backupStatus'
-).innerHTML=
-`
+).innerHTML=`
 
 <span class="backupOk">
 
@@ -3339,7 +3485,6 @@ oninput="calc('${prefix}')"
 <td></td>
 
 </tr>
-
 `;
 
 });
@@ -3677,7 +3822,6 @@ Datos de ejercicios realmente realizados.
 </span>
 
 </div>
-
 `;
 
 let entries=
@@ -3762,7 +3906,6 @@ style="font-size:.65rem;color:var(--sub);margin-top:6px">
 Sesiones realizadas: ${z.sessions.size}
 
 </div>
-
 `;
 
 z.exercisesData.forEach(ex=>{
@@ -3787,7 +3930,6 @@ margin-bottom:4px;
 ${esc(ex.name)}
 
 </div>
-
 `;
 
 ex.sets.forEach(record=>{
@@ -3812,7 +3954,6 @@ ${record.sets.map(
 ).join(' · ')}
 
 </div>
-
 `;
 
 });
@@ -3820,7 +3961,6 @@ ${record.sets.map(
 h+=`
 
 </div>
-
 `;
 
 });
@@ -3828,7 +3968,6 @@ h+=`
 h+=`
 
 </div>
-
 `;
 
 }
@@ -3864,7 +4003,6 @@ Los abdominales no se incluyen en el volumen en kg.
 </div>
 
 </div>
-
 `;
 
 document.getElementById(
@@ -4017,6 +4155,575 @@ c.currentTime+.18
 
 
 /* =====================================================
+   MONITOR — ALUMNOS
+===================================================== */
+
+const STUDENTS_KEY=K+'students';
+
+let students=safeParse(
+localStorage.getItem(STUDENTS_KEY),
+[]
+);
+
+if(!Array.isArray(students))
+students=[];
+
+let currentStudent=null;
+
+
+/* =====================================================
+   GUARDAR ALUMNOS
+===================================================== */
+
+function saveStudents(){
+
+localStorage.setItem(
+STUDENTS_KEY,
+JSON.stringify(students)
+);
+
+}
+
+
+/* =====================================================
+   LISTA DE ALUMNOS
+===================================================== */
+
+function renderStudents(){
+
+let box=
+document.getElementById('studentList');
+
+if(!box)return;
+
+if(!students.length){
+
+box.innerHTML=
+'<div class="empty">No hay alumnos creados.</div>';
+
+return;
+
+}
+
+let html='';
+
+students.forEach(
+(student,i)=>{
+
+let groups=
+Object.values(student.routine||{})
+.filter(g=>g.enabled);
+
+let exercises=
+groups.reduce(
+(total,g)=>
+total+
+(g.exercises||[]).length,
+0
+);
+
+html+=`
+
+<div class="ex">
+
+<div class="exhead">
+
+<div>
+
+<div class="studentName">
+👤 ${esc(student.name)}
+</div>
+
+<div class="studentInfo">
+${groups.length} grupos · ${exercises} ejercicios
+</div>
+
+</div>
+
+<div class="studentActions">
+
+<button
+class="btn blue sm"
+onclick="selectStudent(${i})">
+Abrir
+</button>
+
+<button
+class="btn danger sm"
+onclick="deleteStudent(${i})">
+🗑️
+</button>
+
+</div>
+
+</div>
+
+</div>
+`;
+
+});
+
+box.innerHTML=html;
+
+}
+
+
+/* =====================================================
+   AÑADIR ALUMNO
+===================================================== */
+
+function addStudent(){
+
+let input=
+document.getElementById('newStudent');
+
+if(!input)return;
+
+let name=
+input.value.trim();
+
+if(!name){
+
+alert(
+'Escribe el nombre del alumno.'
+);
+
+return;
+
+}
+
+let exists=
+students.some(
+s=>
+String(s.name||'')
+.toLowerCase()===
+name.toLowerCase()
+);
+
+if(exists){
+
+alert(
+'Ese alumno ya existe.'
+);
+
+return;
+
+}
+
+students.push({
+
+id:Date.now(),
+
+name:name,
+
+routine:{}
+
+});
+
+saveStudents();
+
+input.value='';
+
+renderStudents();
+
+selectStudent(
+students.length-1
+);
+
+}
+
+
+/* =====================================================
+   SELECCIONAR ALUMNO
+===================================================== */
+
+function selectStudent(index){
+
+let student=
+students[index];
+
+if(!student)return;
+
+currentStudent=index;
+
+document.getElementById(
+'studentEditor'
+).style.display='block';
+
+document.getElementById(
+'studentNameTitle'
+).innerText=
+student.name;
+
+renderStudentGroups();
+
+}
+
+
+/* =====================================================
+   ELIMINAR ALUMNO
+===================================================== */
+
+function deleteStudent(index){
+
+let student=
+students[index];
+
+if(!student)return;
+
+if(!confirm(
+`¿Eliminar al alumno "${student.name}" y toda su configuración?`
+))
+return;
+
+students.splice(
+index,
+1
+);
+
+if(currentStudent===index)
+currentStudent=null;
+
+saveStudents();
+
+renderStudents();
+
+document.getElementById(
+'studentEditor'
+).style.display='none';
+
+}
+
+
+/* =====================================================
+   GRUPOS MUSCULARES
+===================================================== */
+
+const MUSCLE_GROUPS=[
+
+'PECHO',
+'ESPALDA',
+'PIERNAS',
+'HOMBROS',
+'BÍCEPS',
+'TRÍCEPS',
+'ABDOMINALES',
+'GLÚTEOS',
+'PANTORRILLAS',
+'ANTEBRAZOS'
+
+];
+
+
+/* =====================================================
+   BIBLIOTECA DE EJERCICIOS
+===================================================== */
+
+const EXERCISE_LIBRARY={
+
+'PECHO':[
+
+'Press de banca plano',
+'Press inclinado con mancuernas',
+'Aperturas con mancuernas',
+'Cruce de poleas a la altura del pecho',
+'Cruce de poleas de arriba hacia abajo'
+
+],
+
+'ESPALDA':[
+
+'Jalón al pecho con polea',
+'Remo con barra',
+'Remo con mancuerna a una mano',
+'Peso muerto',
+'Remo unilateral con polea'
+
+],
+
+'PIERNAS':[
+
+'Sentadilla con barra',
+'Prensa de piernas',
+'Extensión de cuádriceps',
+'Curl femoral',
+'Elevación de gemelos'
+
+],
+
+'HOMBROS':[
+
+'Press militar',
+'Elevaciones laterales',
+'Elevaciones frontales',
+'Pájaros',
+'Remo al mentón'
+
+],
+
+'BÍCEPS':[
+
+'Curl con barra',
+'Curl martillo',
+'Curl alterno con mancuernas en rotación',
+'Curl predicador en banco Scott',
+'Curl en plano inclinado con mancuernas'
+
+],
+
+'TRÍCEPS':[
+
+'Extensión en polea alta con barra',
+'Extensión en polea con cuerda',
+'Extensión a una mano en polea',
+'Press francés con mancuernas',
+'Press francés con barra Scott'
+
+],
+
+'ABDOMINALES':[
+
+'Abdominales 1',
+'Abdominales 2',
+'Abdominales 3',
+'Abdominales 4',
+'Abdominales 5'
+
+],
+
+'GLÚTEOS':[
+
+'Puente de glúteos',
+'Empuje de cadera',
+'Patada de glúteo',
+'Abducción de cadera',
+'Sentadilla sumo'
+
+],
+
+'PANTORRILLAS':[
+
+'Elevación de gemelos de pie',
+'Elevación de gemelos sentado',
+'Prensa para gemelos',
+'Gemelo unilateral',
+'Elevación de gemelos en máquina'
+
+],
+
+'ANTEBRAZOS':[
+
+'Curl de muñeca',
+'Curl inverso de muñeca',
+'Curl inverso con barra',
+'Farmer walk',
+'Extensión de muñeca'
+
+]
+
+};
+
+
+/* =====================================================
+   MOSTRAR GRUPOS DEL ALUMNO
+===================================================== */
+
+function renderStudentGroups(){
+
+if(currentStudent===null)
+return;
+
+let student=
+students[currentStudent];
+
+let saved=
+student.routine||
+{};
+
+let html='';
+
+MUSCLE_GROUPS.forEach(
+group=>{
+
+let groupData=
+saved[group]||
+{
+enabled:false,
+exercises:[]
+};
+
+html+=`
+
+<div class="studentGroupBox">
+
+<div class="studentGroupHeader">
+
+<strong>
+💪 ${group}
+</strong>
+
+<label
+style="
+display:flex;
+align-items:center;
+gap:5px;
+">
+
+<input
+type="checkbox"
+class="studentGroup"
+data-group="${esc(group)}"
+${groupData.enabled?'checked':''}
+onchange="toggleStudentGroup('${esc(group)}')"
+style="width:auto;margin:0"
+>
+
+Usar grupo
+
+</label>
+
+</div>
+
+<div
+id="studentExercises-${group}"
+style="${groupData.enabled?'':'display:none'}"
+>
+`;
+
+(EXERCISE_LIBRARY[group]||[])
+.forEach(
+ex=>{
+
+let checked=
+Array.isArray(groupData.exercises) &&
+groupData.exercises.includes(ex);
+
+html+=`
+
+<label class="exerciseOption">
+
+<input
+type="checkbox"
+class="studentExercise"
+data-group="${esc(group)}"
+value="${esc(ex)}"
+${checked?'checked':''}
+>
+
+<span>
+${esc(ex)}
+</span>
+
+</label>
+`;
+
+});
+
+html+=`
+
+</div>
+
+</div>
+`;
+
+});
+
+document.getElementById(
+'studentGroups'
+).innerHTML=html;
+
+}
+
+
+/* =====================================================
+   ACTIVAR / DESACTIVAR GRUPO
+===================================================== */
+
+function toggleStudentGroup(group){
+
+let checkbox=
+document.querySelector(
+`.studentGroup[data-group="${CSS.escape(group)}"]`
+);
+
+let box=
+document.getElementById(
+`studentExercises-${group}`
+);
+
+if(!checkbox||!box)
+return;
+
+box.style.display=
+checkbox.checked
+?'block'
+:'none';
+
+}
+
+
+/* =====================================================
+   GUARDAR RUTINA DEL ALUMNO
+===================================================== */
+
+function saveStudentRoutine(){
+
+if(currentStudent===null)
+return;
+
+let student=
+students[currentStudent];
+
+let studentRoutine={};
+
+MUSCLE_GROUPS.forEach(
+group=>{
+
+let groupCheck=
+document.querySelector(
+`.studentGroup[data-group="${CSS.escape(group)}"]`
+);
+
+if(
+!groupCheck||
+!groupCheck.checked
+)
+return;
+
+let exercises=[
+...document.querySelectorAll(
+`.studentExercise[data-group="${CSS.escape(group)}"]:checked`
+)
+]
+.map(
+e=>e.value
+);
+
+studentRoutine[group]={
+
+enabled:true,
+
+exercises:exercises
+
+};
+
+});
+
+student.routine=
+studentRoutine;
+
+saveStudents();
+
+renderStudents();
+
+alert(
+`✓ Rutina de ${student.name} guardada correctamente.`
+);
+
+}
+
+
+/* =====================================================
    INICIO
 ===================================================== */
 
@@ -4026,7 +4733,10 @@ renderCalendar();
 
 loadConfig();
 
+renderStudents();
+
 </script>
 
 </body>
 </html>
+```
