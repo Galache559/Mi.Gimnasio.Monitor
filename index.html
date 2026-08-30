@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Mi Gimnasio Monitor v1.1</title>
+<title>Mi Gimnasio Monitor v1.0</title>
 <meta name="theme-color" content="#121212">
 
 <style>
@@ -610,14 +610,24 @@ line-height:1.45;
 margin-bottom:10px;
 }
 
-.studentSelected{
-background:#07351f;
-border:1px solid #176b43;
-color:var(--a);
+.daySelector{
+background:#191919;
+border:1px solid var(--bor);
 border-radius:8px;
-padding:9px;
+padding:10px;
+margin-bottom:10px;
+}
+
+.daySelector label{
+display:block;
+margin-bottom:5px;
+}
+
+.backButton{
 margin-top:8px;
-font-size:.72rem;
+background:#333;
+color:#fff;
+border:1px solid var(--bor);
 }
 
 @media(max-width:380px){
@@ -672,18 +682,6 @@ color:#000;
 <section id="tab-entrenar" class="tab active">
 
 <div class="card">
-
-<h2>👤 Alumno</h2>
-
-<select id="trainStudent" onchange="changeTrainingStudent()">
-<option value="">— Entrenamiento general —</option>
-</select>
-
-<div
-id="activeStudentMsg"
-class="studentSelected"
-style="display:none">
-</div>
 
 <h2>Selecciona el día</h2>
 
@@ -879,7 +877,7 @@ Selecciona un periodo.
 <div class="monitorNotice">
 
 Aquí puedes crear cada alumno y preparar su rutina
-seleccionando los grupos musculares y los ejercicios
+seleccionando el día, los grupos musculares y los ejercicios
 que tendrá disponibles.
 
 </div>
@@ -928,12 +926,40 @@ style="display:none">
 <span id="studentNameTitle"></span>
 </h2>
 
+<!-- NUEVO: SELECCIÓN DEL DÍA -->
+
+<div class="daySelector">
+
+<label>📅 Selecciona el día que quieres configurar</label>
+
+<select id="studentDay" onchange="changeStudentDay()">
+
+<option value="1">Día 1</option>
+<option value="2">Día 2</option>
+<option value="3">Día 3</option>
+<option value="4">Día 4</option>
+<option value="5">Día 5</option>
+
+</select>
+
+</div>
+
 <div id="studentGroups"></div>
 
 <button
 class="btn"
 onclick="saveStudentRoutine()">
 💾 Guardar rutina del alumno
+</button>
+
+<!-- NUEVO: BOTÓN SALIR -->
+
+<button
+id="studentExitBtn"
+class="btn backButton"
+style="display:none"
+onclick="exitStudentEditor()">
+↩️ SALIR / VOLVER
 </button>
 
 </div>
@@ -1013,16 +1039,11 @@ Cerrar
 <script>
 "use strict";
 
-
-/* =====================================================
-   MI GIMNASIO PRO v6.0 + MONITOR
-===================================================== */
-
 const K='gym_v6_';
 
 
 /* =====================================================
-   RUTINA INICIAL v6
+   RUTINA INICIAL
 ===================================================== */
 
 const DEFAULT_ROUTINE={
@@ -1502,7 +1523,7 @@ String(d.getDate()).padStart(2,'0');
 
 
 /* =====================================================
-   SESIONES ÚNICAS
+   SESIONES
 ===================================================== */
 
 function uniqueSessions(source){
@@ -1647,151 +1668,6 @@ return null;
 
 
 /* =====================================================
-   RUTINA DEL ALUMNO
-===================================================== */
-
-function getBaseRoutine(){
-
-let base=safeParse(
-localStorage.getItem(K+'routine'),
-structuredCloneSafe(DEFAULT_ROUTINE)
-);
-
-if(!base || typeof base!=='object')
-base=structuredCloneSafe(DEFAULT_ROUTINE);
-
-for(let d=1;d<=5;d++){
-
-if(!base[d])
-base[d]=structuredCloneSafe(DEFAULT_ROUTINE[d]);
-
-}
-
-return base;
-
-}
-
-
-/* =====================================================
-   BUSCAR IMAGEN EN RUTINA GENERAL
-===================================================== */
-
-function findBaseExerciseImage(base,groupName,exercise){
-
-for(let d=1;d<=5;d++){
-
-let groups=
-base[d] &&
-Array.isArray(base[d].groups)
-?base[d].groups
-:[];
-
-for(let g of groups){
-
-if(
-String(g.name||'').toUpperCase() !==
-String(groupName||'').toUpperCase()
-)
-continue;
-
-let index=
-(g.exercises||[]).indexOf(exercise);
-
-if(index>=0){
-
-return (g.images||[])[index]||'';
-
-}
-
-}
-
-}
-
-return '';
-
-}
-
-
-/* =====================================================
-   CONSTRUIR RUTINA DEL ALUMNO
-===================================================== */
-
-function buildStudentRoutine(student){
-
-let result={};
-
-for(let d=1;d<=5;d++){
-
-result[d]={
-groups:[]
-};
-
-}
-
-if(!student || !student.routine)
-return result;
-
-
-/*
-   De momento los grupos seleccionados por el alumno
-   están disponibles en los cinco días.
-
-   En la siguiente fase cada grupo podrá asignarse
-   individualmente a Día 1, Día 2, Día 3, Día 4 o Día 5.
-*/
-
-let base=getBaseRoutine();
-
-Object.keys(student.routine).forEach(groupName=>{
-
-let data=
-student.routine[groupName];
-
-if(
-!data ||
-!data.enabled
-)
-return;
-
-let exercises=
-Array.isArray(data.exercises)
-?data.exercises
-:[];
-
-if(!exercises.length)
-return;
-
-let images=
-exercises.map(
-ex=>findBaseExerciseImage(
-base,
-groupName,
-ex
-)
-);
-
-for(let d=1;d<=5;d++){
-
-result[d].groups.push({
-
-name:groupName,
-
-exercises:exercises.slice(),
-
-images:images.slice()
-
-});
-
-}
-
-});
-
-return result;
-
-}
-
-
-/* =====================================================
    SELECCIONAR DÍA
 ===================================================== */
 
@@ -1799,25 +1675,10 @@ function selectDay(d){
 
 day=d;
 
-if(
-activeTrainingStudent!==null &&
-students[activeTrainingStudent]
-){
-
-let student=
-students[activeTrainingStudent];
-
-routine=
-buildStudentRoutine(student);
-
-}else{
-
 routine=safeParse(
 localStorage.getItem(K+'routine'),
 structuredCloneSafe(DEFAULT_ROUTINE)
 );
-
-}
 
 normalizeRoutine();
 
@@ -1831,20 +1692,7 @@ work.style.display='block';
 
 title.innerText='Entrenamiento - Día '+d;
 
-if(
-activeTrainingStudent!==null &&
-students[activeTrainingStudent]
-){
-
-title.innerText=
-'Entrenamiento - '+
-students[activeTrainingStudent].name+
-' - Día '+d;
-
-}
-
-date.value=
-new Date().toISOString().slice(0,10);
+date.value=new Date().toISOString().slice(0,10);
 
 summary.innerHTML='';
 
@@ -2675,15 +2523,6 @@ document.getElementById(
 <h3>🎉 ENTRENAMIENTO GUARDADO</h3>
 
 <div class="big">
-${
-activeTrainingStudent!==null &&
-students[activeTrainingStudent]
-?esc(students[activeTrainingStudent].name)
-:'Entrenamiento general'
-}
-</div>
-
-<div class="big">
 Día ${day}
 </div>
 
@@ -3078,7 +2917,7 @@ K+'routine',
 JSON.stringify(routine)
 );
 
-if(day===d && activeTrainingStudent===null){
+if(day===d){
 
 let previous=
 previousDayLog(d);
@@ -3232,19 +3071,15 @@ structuredCloneSafe(
 data.logs
 );
 
-if(Array.isArray(data.students)){
-
+if(Array.isArray(data.students))
 students=
-structuredCloneSafe(
-data.students
-);
-
-}
+structuredCloneSafe(data.students);
 
 normalizeRoutine();
 
-save();
+migrateStudentData();
 
+save();
 saveStudents();
 
 }catch(err){
@@ -3262,7 +3097,7 @@ throw err;
 
 alert(
 '✓ Datos recuperados correctamente.\n\n'+
-'Rutina, alumnos, grupos, ejercicios, imágenes y entrenamientos han sido restaurados.'
+'Rutina, grupos, ejercicios, imágenes, entrenamientos y alumnos han sido restaurados.'
 );
 
 location.reload();
@@ -4389,7 +4224,53 @@ students=[];
 
 let currentStudent=null;
 
-let activeTrainingStudent=null;
+
+/* =====================================================
+   MIGRAR RUTINAS ANTIGUAS DE ALUMNOS
+===================================================== */
+
+function migrateStudentData(){
+
+students.forEach(student=>{
+
+if(!student||typeof student!=='object')
+return;
+
+if(!student.routine||typeof student.routine!=='object'){
+
+student.routine={};
+
+return;
+
+}
+
+/*
+   Si la rutina antigua tiene directamente PECHO,
+   ESPALDA, etc., la pasamos al Día 1.
+*/
+
+let oldKeys=
+Object.keys(student.routine);
+
+let looksOld=
+oldKeys.some(
+k=>MUSCLE_GROUPS.includes(k)
+);
+
+if(looksOld){
+
+let oldRoutine=
+structuredCloneSafe(student.routine);
+
+student.routine={
+1:oldRoutine
+};
+
+}
+
+});
+
+}
 
 
 /* =====================================================
@@ -4397,6 +4278,8 @@ let activeTrainingStudent=null;
 ===================================================== */
 
 function saveStudents(){
+
+migrateStudentData();
 
 localStorage.setItem(
 STUDENTS_KEY,
@@ -4407,135 +4290,10 @@ JSON.stringify(students)
 
 
 /* =====================================================
-   CARGAR ALUMNOS EN ENTRENAR
-===================================================== */
-
-function loadTrainingStudents(){
-
-let select=
-document.getElementById('trainStudent');
-
-if(!select)return;
-
-let current=
-activeTrainingStudent;
-
-select.innerHTML=
-'<option value="">— Entrenamiento general —</option>';
-
-students.forEach((student,i)=>{
-
-let option=
-document.createElement('option');
-
-option.value=i;
-
-option.textContent=
-'👤 '+student.name;
-
-select.appendChild(option);
-
-});
-
-if(
-current!==null &&
-students[current]
-){
-
-select.value=
-String(current);
-
-}else{
-
-select.value='';
-
-}
-
-updateActiveStudentMessage();
-
-}
-
-
-/* =====================================================
-   CAMBIAR ALUMNO DE ENTRENAMIENTO
-===================================================== */
-
-function changeTrainingStudent(){
-
-let select=
-document.getElementById('trainStudent');
-
-if(!select)return;
-
-if(select.value===''){
-
-activeTrainingStudent=null;
-
-}else{
-
-activeTrainingStudent=
-Number(select.value);
-
-}
-
-updateActiveStudentMessage();
-
-document.getElementById(
-'work'
-).style.display='none';
-
-document.getElementById(
-'summary'
-).innerHTML='';
-
-}
-
-
-/* =====================================================
-   MENSAJE ALUMNO ACTIVO
-===================================================== */
-
-function updateActiveStudentMessage(){
-
-let box=
-document.getElementById(
-'activeStudentMsg'
-);
-
-if(!box)return;
-
-if(
-activeTrainingStudent===null ||
-!students[activeTrainingStudent]
-){
-
-box.style.display='none';
-box.innerHTML='';
-
-return;
-
-}
-
-let student=
-students[activeTrainingStudent];
-
-box.style.display='block';
-
-box.innerHTML=
-'👤 Entrenando con la rutina de <b>'+
-esc(student.name)+
-'</b>';
-
-}
-
-
-/* =====================================================
    LISTA DE ALUMNOS
 ===================================================== */
 
 function renderStudents(){
-
-loadTrainingStudents();
 
 let box=
 document.getElementById('studentList');
@@ -4556,17 +4314,41 @@ let html='';
 students.forEach(
 (student,i)=>{
 
-let groups=
-Object.values(student.routine||{})
-.filter(g=>g.enabled);
+let groups=0;
+let exercises=0;
+let configuredDays=0;
 
-let exercises=
-groups.reduce(
+let studentRoutine=
+student.routine||{};
+
+for(let d=1;d<=5;d++){
+
+let dayRoutine=
+studentRoutine[d];
+
+if(!dayRoutine||typeof dayRoutine!=='object')
+continue;
+
+let dayGroups=
+Object.values(dayRoutine)
+.filter(g=>g&&g.enabled);
+
+if(dayGroups.length){
+
+configuredDays++;
+
+groups+=dayGroups.length;
+
+exercises+=dayGroups.reduce(
 (total,g)=>
 total+
 (g.exercises||[]).length,
 0
 );
+
+}
+
+}
 
 html+=`
 
@@ -4581,7 +4363,11 @@ html+=`
 </div>
 
 <div class="studentInfo">
-${groups.length} grupos · ${exercises} ejercicios
+
+${configuredDays} días configurados ·
+${groups} grupos ·
+${exercises} ejercicios
+
 </div>
 
 </div>
@@ -4690,6 +4476,8 @@ students[index];
 
 if(!student)return;
 
+migrateStudentData();
+
 currentStudent=index;
 
 document.getElementById(
@@ -4701,7 +4489,58 @@ document.getElementById(
 ).innerText=
 student.name;
 
+/*
+   Siempre comenzamos en el Día 1.
+*/
+
+document.getElementById(
+'studentDay'
+).value='1';
+
+document.getElementById(
+'studentExitBtn'
+).style.display='none';
+
 renderStudentGroups();
+
+}
+
+
+/* =====================================================
+   CAMBIAR DÍA DEL ALUMNO
+===================================================== */
+
+function changeStudentDay(){
+
+if(currentStudent===null)
+return;
+
+document.getElementById(
+'studentExitBtn'
+).style.display='none';
+
+renderStudentGroups();
+
+}
+
+
+/* =====================================================
+   SALIR / VOLVER
+===================================================== */
+
+function exitStudentEditor(){
+
+currentStudent=null;
+
+document.getElementById(
+'studentEditor'
+).style.display='none';
+
+document.getElementById(
+'studentExitBtn'
+).style.display='none';
+
+renderStudents();
 
 }
 
@@ -4729,18 +4568,6 @@ index,
 
 if(currentStudent===index)
 currentStudent=null;
-
-if(activeTrainingStudent===index)
-activeTrainingStudent=null;
-
-if(
-activeTrainingStudent!==null &&
-activeTrainingStudent>index
-){
-
-activeTrainingStudent--;
-
-}
 
 saveStudents();
 
@@ -4894,8 +4721,23 @@ return;
 let student=
 students[currentStudent];
 
+let selectedDay=
+Number(
+document.getElementById('studentDay').value
+);
+
+if(!selectedDay)
+selectedDay=1;
+
+if(!student.routine)
+student.routine={};
+
+/*
+   AHORA LA RUTINA DEL ALUMNO SE GUARDA POR DÍA
+*/
+
 let saved=
-student.routine||
+student.routine[selectedDay]||
 {};
 
 let html='';
@@ -5032,6 +4874,14 @@ return;
 let student=
 students[currentStudent];
 
+let selectedDay=
+Number(
+document.getElementById('studentDay').value
+);
+
+if(!selectedDay)
+selectedDay=1;
+
 let studentRoutine={};
 
 MUSCLE_GROUPS.forEach(
@@ -5067,15 +4917,30 @@ exercises:exercises
 
 });
 
-student.routine=
+/*
+   GUARDAMOS SOLO EL DÍA SELECCIONADO
+*/
+
+if(!student.routine)
+student.routine={};
+
+student.routine[selectedDay]=
 studentRoutine;
 
 saveStudents();
 
 renderStudents();
 
+/*
+   El botón SALIR aparece solamente después de guardar.
+*/
+
+document.getElementById(
+'studentExitBtn'
+).style.display='block';
+
 alert(
-`✓ Rutina de ${student.name} guardada correctamente.`
+`✓ Rutina de ${student.name} guardada correctamente para el Día ${selectedDay}.`
 );
 
 }
@@ -5085,15 +4950,17 @@ alert(
    INICIO
 ===================================================== */
 
+migrateStudentData();
+
 save();
+
+saveStudents();
 
 renderCalendar();
 
 loadConfig();
 
 renderStudents();
-
-loadTrainingStudents();
 
 </script>
 
