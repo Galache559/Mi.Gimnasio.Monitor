@@ -8,260 +8,767 @@
 
 <style>
 :root{
---bg:#121212;--card:#1e1e1e;--item:#252525;--input:#2a2a2a;
---a:#00e676;--txt:#fff;--sub:#aaa;--bor:#333;--red:#ff5252;
---gold:#ffd700;--blue:#29b6f6;--orange:#ff9800
+--bg:#121212;
+--card:#1e1e1e;
+--item:#252525;
+--input:#2a2a2a;
+--a:#00e676;
+--txt:#fff;
+--sub:#aaa;
+--bor:#333;
+--red:#ff5252;
+--gold:#ffd700;
+--blue:#29b6f6;
+--orange:#ff9800
 }
+
 *{
-box-sizing:border-box;margin:0;padding:0;
+box-sizing:border-box;
+margin:0;
+padding:0;
 font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
 -webkit-tap-highlight-color:transparent
 }
-body{background:var(--bg);color:var(--txt);padding-bottom:80px}
+
+body{
+background:var(--bg);
+color:var(--txt);
+padding-bottom:80px
+}
+
 header{
-position:sticky;top:0;z-index:10;background:var(--card);
-padding:12px;text-align:center;border-bottom:1px solid var(--bor)
+position:sticky;
+top:0;
+z-index:10;
+background:var(--card);
+padding:12px;
+text-align:center;
+border-bottom:1px solid var(--bor)
 }
-h1{font-size:1.15rem;color:var(--a);letter-spacing:1px}
-.container{max-width:680px;margin:auto;padding:10px}
+
+h1{
+font-size:1.15rem;
+color:var(--a);
+letter-spacing:1px
+}
+
+.container{
+max-width:680px;
+margin:auto;
+padding:10px
+}
+
 nav{
-position:fixed;bottom:0;left:0;right:0;z-index:20;background:var(--card);
-display:flex;border-top:1px solid var(--bor);padding:7px 0
+position:fixed;
+bottom:0;
+left:0;
+right:0;
+z-index:20;
+background:var(--card);
+display:flex;
+border-top:1px solid var(--bor);
+padding:7px 0
 }
+
 nav button{
-width:20%;background:none;border:0;color:var(--sub);font-size:.7rem;
-display:flex;flex-direction:column;gap:2px;align-items:center
+width:20%;
+background:none;
+border:0;
+color:var(--sub);
+font-size:.7rem;
+display:flex;
+flex-direction:column;
+gap:2px;
+align-items:center
 }
-nav button.active{color:var(--a);font-weight:bold}
-.tab{display:none}.tab.active{display:block}
+
+nav button.active{
+color:var(--a);
+font-weight:bold
+}
+
+.tab{display:none}
+.tab.active{display:block}
+
 .card{
-background:var(--card);border:1px solid var(--bor);border-radius:11px;
-padding:12px;margin-bottom:10px
+background:var(--card);
+border:1px solid var(--bor);
+border-radius:11px;
+padding:12px;
+margin-bottom:10px
 }
+
 .card h2{
-font-size:1rem;color:var(--a);margin-bottom:10px;
-display:flex;justify-content:space-between;align-items:center
+font-size:1rem;
+color:var(--a);
+margin-bottom:10px;
+display:flex;
+justify-content:space-between;
+align-items:center
 }
+
 button,.btn{cursor:pointer}
+
 .btn{
-background:var(--a);color:#000;border:0;border-radius:7px;
-padding:10px;width:100%;font-weight:bold
+background:var(--a);
+color:#000;
+border:0;
+border-radius:7px;
+padding:10px;
+width:100%;
+font-weight:bold
 }
-.out{background:transparent;color:var(--txt);border:1px solid var(--bor)}
-.danger{background:transparent;color:var(--red);border:1px solid var(--red)}
-.sm{width:auto;padding:5px 9px;font-size:.75rem}
-.blue{background:transparent;color:var(--blue);border:1px solid var(--blue)}
-.orange{background:transparent;color:var(--orange);border:1px solid var(--orange)}
-.days{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+
+.out{
+background:transparent;
+color:var(--txt);
+border:1px solid var(--bor)
+}
+
+.danger{
+background:transparent;
+color:var(--red);
+border:1px solid var(--red)
+}
+
+.sm{
+width:auto;
+padding:5px 9px;
+font-size:.75rem
+}
+
+.blue{
+background:transparent;
+color:var(--blue);
+border:1px solid var(--blue)
+}
+
+.orange{
+background:transparent;
+color:var(--orange);
+border:1px solid var(--orange)
+}
+
+.days{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:7px
+}
+
 .group{
-color:var(--sub);font-size:.73rem;text-transform:uppercase;margin:12px 0 6px
+color:var(--sub);
+font-size:.73rem;
+text-transform:uppercase;
+margin:12px 0 6px
 }
-.ex{background:var(--item);padding:9px;border-radius:8px;margin-bottom:8px}
+
+.ex{
+background:var(--item);
+padding:9px;
+border-radius:8px;
+margin-bottom:8px
+}
+
 .exhead{
-display:flex;justify-content:space-between;align-items:center;
-font-weight:bold;margin-bottom:6px
+display:flex;
+justify-content:space-between;
+align-items:center;
+font-weight:bold;
+margin-bottom:6px
 }
+
 .badge{
-background:var(--gold);color:#000;border-radius:4px;padding:2px 5px;font-size:.62rem
+background:var(--gold);
+color:#000;
+border-radius:4px;
+padding:2px 5px;
+font-size:.62rem
 }
+
 .last,.suggest,.history{
-font-size:.7rem;padding:5px;border-radius:5px;margin-bottom:5px
+font-size:.7rem;
+padding:5px;
+border-radius:5px;
+margin-bottom:5px
 }
-.last{color:var(--a);background:#07351f;border:1px solid #176b43}
+
+.last{
+color:var(--a);
+background:#07351f;
+border:1px solid #176b43
+}
+
 .suggest{
-color:var(--blue);background:#062d3c;border:1px solid #17607c;cursor:pointer
+color:var(--blue);
+background:#062d3c;
+border:1px solid #17607c;
+cursor:pointer
 }
-table{width:100%;border-collapse:collapse}
-th{color:var(--sub);font-size:.63rem;font-weight:normal}
-td{text-align:center;padding:1px}
-td input{margin:0;text-align:center;padding:6px 1px}
+
+table{
+width:100%;
+border-collapse:collapse
+}
+
+th{
+color:var(--sub);
+font-size:.63rem;
+font-weight:normal
+}
+
+td{
+text-align:center;
+padding:1px
+}
+
+td input{
+margin:0;
+text-align:center;
+padding:6px 1px
+}
+
 input,select{
-width:100%;background:var(--input);color:var(--txt);
-border:1px solid var(--bor);border-radius:6px;padding:8px;
-margin-bottom:7px;font-size:.88rem
+width:100%;
+background:var(--input);
+color:var(--txt);
+border:1px solid var(--bor);
+border-radius:6px;
+padding:8px;
+margin-bottom:7px;
+font-size:.88rem
 }
-label{font-size:.73rem;color:var(--sub)}
-.rm,.vol{font-size:.7rem;margin-top:5px}
-.rm{color:var(--gold)}.vol{color:var(--a)}
-.row{display:flex;gap:5px;margin-top:6px}
+
+label{
+font-size:.73rem;
+color:var(--sub)
+}
+
+.rm,.vol{
+font-size:.7rem;
+margin-top:5px
+}
+
+.rm{color:var(--gold)}
+.vol{color:var(--a)}
+
+.row{
+display:flex;
+gap:5px;
+margin-top:6px
+}
+
 .finish{
-background:#333;color:#fff;border:1px solid var(--bor);
-padding:6px 9px;border-radius:6px;font-size:.68rem
+background:#333;
+color:#fff;
+border:1px solid var(--bor);
+padding:6px 9px;
+border-radius:6px;
+font-size:.68rem
 }
+
 .restbtn{
-width:100%;margin-top:7px;background:#333;color:#fff;
-border:1px solid var(--bor);padding:8px;border-radius:6px;font-size:.72rem
+width:100%;
+margin-top:7px;
+background:#333;
+color:#fff;
+border:1px solid var(--bor);
+padding:8px;
+border-radius:6px;
+font-size:.72rem
 }
+
 .save-ex{
-width:100%;margin-top:7px;background:#064d2d;color:#fff;
-border:1px solid #176b43;padding:8px;border-radius:6px;
-font-size:.72rem;font-weight:bold
+width:100%;
+margin-top:7px;
+background:#064d2d;
+color:#fff;
+border:1px solid #176b43;
+padding:8px;
+border-radius:6px;
+font-size:.72rem;
+font-weight:bold
 }
-.save-ex.saved{background:#00a854;color:#000}
+
+.save-ex.saved{
+background:#00a854;
+color:#000
+}
+
 .calendar{
-display:grid;grid-template-columns:repeat(7,1fr);gap:3px;text-align:center
+display:grid;
+grid-template-columns:repeat(7,1fr);
+gap:3px;
+text-align:center
 }
-.cal{padding:7px 2px;background:var(--item);border-radius:5px;font-size:.75rem}
-.cal.on{background:var(--a);color:#000;font-weight:bold}
+
+.cal{
+padding:7px 2px;
+background:var(--item);
+border-radius:5px;
+font-size:.75rem
+}
+
+.cal.on{
+background:var(--a);
+color:#000;
+font-weight:bold
+}
+
 .cal.empty{background:none}
-.statgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
-.stat{background:var(--item);padding:8px;border-radius:7px;text-align:center}
-.stat b{display:block;color:var(--a);font-size:1rem}
-.stat span{font-size:.66rem;color:var(--sub)}
-.report{border-bottom:1px solid var(--bor);padding:8px 0;font-size:.76rem}
-.empty{text-align:center;color:var(--sub);padding:15px;font-size:.8rem}
+
+.statgrid{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:6px
+}
+
+.stat{
+background:var(--item);
+padding:8px;
+border-radius:7px;
+text-align:center
+}
+
+.stat b{
+display:block;
+color:var(--a);
+font-size:1rem
+}
+
+.stat span{
+font-size:.66rem;
+color:var(--sub)
+}
+
+.report{
+border-bottom:1px solid var(--bor);
+padding:8px 0;
+font-size:.76rem
+}
+
+.empty{
+text-align:center;
+color:var(--sub);
+padding:15px;
+font-size:.8rem
+}
+
 .imgbox{
-display:none;text-align:center;margin:6px 0;padding:6px;background:#191919;
-border:1px solid var(--bor);border-radius:7px
+display:none;
+text-align:center;
+margin:6px 0;
+padding:6px;
+background:#191919;
+border:1px solid var(--bor);
+border-radius:7px
 }
-.imgbox img{max-width:100%;max-height:320px;border-radius:6px}
+
+.imgbox img{
+max-width:100%;
+max-height:320px;
+border-radius:6px
+}
+
 .imgbtn{
-background:#333;color:#fff;border:1px solid var(--bor);
-padding:5px 9px;border-radius:6px;font-size:.68rem
+background:#333;
+color:#fff;
+border:1px solid var(--bor);
+padding:5px 9px;
+border-radius:6px;
+font-size:.68rem
 }
+
 .loaded{
-color:var(--blue);background:#062d3c;border:1px solid #17607c;
-border-radius:6px;padding:6px;margin-bottom:8px;font-size:.7rem
+color:var(--blue);
+background:#062d3c;
+border:1px solid #17607c;
+border-radius:6px;
+padding:6px;
+margin-bottom:8px;
+font-size:.7rem
 }
+
 .summary{
-background:#07351f;border:1px solid #176b43;border-radius:9px;
-padding:12px;margin-top:10px
+background:#07351f;
+border:1px solid #176b43;
+border-radius:9px;
+padding:12px;
+margin-top:10px
 }
+
 .summary h3{
-color:var(--a);font-size:1rem;margin-bottom:8px;text-align:center
+color:var(--a);
+font-size:1rem;
+margin-bottom:8px;
+text-align:center
 }
-.summary div{font-size:.78rem;padding:3px 0}
+
+.summary div{
+font-size:.78rem;
+padding:3px 0
+}
+
 .summary .big{
-text-align:center;font-size:1.1rem;font-weight:bold;color:var(--a);margin:6px 0
+text-align:center;
+font-size:1.1rem;
+font-weight:bold;
+color:var(--a);
+margin:6px 0
 }
+
 .muscleReport{
-background:var(--item);border:1px solid var(--bor);
-border-radius:8px;padding:9px;margin:7px 0
+background:var(--item);
+border:1px solid var(--bor);
+border-radius:8px;
+padding:9px;
+margin:7px 0
 }
-.muscleReport h3{color:var(--a);font-size:.9rem;margin-bottom:6px}
-.muscleStats{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
-.muscleStat{text-align:center;background:#191919;border-radius:6px;padding:6px}
-.muscleStat b{display:block;color:var(--a);font-size:.85rem}
-.muscleStat span{font-size:.6rem;color:var(--sub)}
+
+.muscleReport h3{
+color:var(--a);
+font-size:.9rem;
+margin-bottom:6px
+}
+
+.muscleStats{
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:5px
+}
+
+.muscleStat{
+text-align:center;
+background:#191919;
+border-radius:6px;
+padding:6px
+}
+
+.muscleStat b{
+display:block;
+color:var(--a);
+font-size:.85rem
+}
+
+.muscleStat span{
+font-size:.6rem;
+color:var(--sub)
+}
+
 .timerOverlay{
-display:none;position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.78);
-align-items:center;justify-content:center;padding:20px
+display:none;
+position:fixed;
+inset:0;
+z-index:100;
+background:rgba(0,0,0,.78);
+align-items:center;
+justify-content:center;
+padding:20px
 }
+
 .timerBox{
-width:100%;max-width:330px;background:var(--card);border:1px solid var(--bor);
-border-radius:15px;padding:22px;text-align:center;box-shadow:0 10px 40px #000
+width:100%;
+max-width:330px;
+background:var(--card);
+border:1px solid var(--bor);
+border-radius:15px;
+padding:22px;
+text-align:center;
+box-shadow:0 10px 40px #000
 }
-.timerTitle{color:var(--a);font-size:1rem;margin-bottom:12px}
+
+.timerTitle{
+color:var(--a);
+font-size:1rem;
+margin-bottom:12px
+}
+
 .timerDisplay{
-font-size:4rem;font-weight:bold;letter-spacing:2px;margin:12px 0;color:#fff
+font-size:4rem;
+font-weight:bold;
+letter-spacing:2px;
+margin:12px 0;
+color:#fff
 }
+
 .timerDisplay.warning{color:var(--gold)}
-.timerDisplay.last{color:var(--red);background:none;border:0;padding:0}
+.timerDisplay.last{
+color:var(--red);
+background:none;
+border:0;
+padding:0
+}
+
 .timerClose{
-background:#333;color:#fff;border:1px solid var(--bor);
-border-radius:7px;padding:9px 15px;font-size:.75rem
+background:#333;
+color:#fff;
+border:1px solid var(--bor);
+border-radius:7px;
+padding:9px 15px;
+font-size:.75rem
 }
+
 .backupBox{
-background:#062d3c;border:1px solid #17607c;border-radius:8px;
-padding:10px;margin-top:10px;font-size:.72rem;line-height:1.4
+background:#062d3c;
+border:1px solid #17607c;
+border-radius:8px;
+padding:10px;
+margin-top:10px;
+font-size:.72rem;
+line-height:1.4
 }
-.backupOk{color:var(--a)}.backupWarn{color:var(--gold)}
+
+.backupOk{color:var(--a)}
+.backupWarn{color:var(--gold)}
+
 .editorTitle{
-display:flex;justify-content:space-between;align-items:center;margin-bottom:5px
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:5px
 }
+
 .groupEditor{
-background:#191919;border:1px solid var(--bor);
-border-radius:8px;padding:9px;margin-bottom:10px
+background:#191919;
+border:1px solid var(--bor);
+border-radius:8px;
+padding:9px;
+margin-bottom:10px
 }
+
 .groupEditorTitle{
-display:flex;justify-content:space-between;align-items:center;margin-bottom:8px
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:8px
 }
-.groupEditorTitle strong{color:var(--a);font-size:.82rem}
+
+.groupEditorTitle strong{
+color:var(--a);
+font-size:.82rem
+}
+
 .monitorStudent{
-background:var(--item);border:1px solid var(--bor);
-border-radius:9px;padding:10px;margin-bottom:8px
+background:var(--item);
+border:1px solid var(--bor);
+border-radius:9px;
+padding:10px;
+margin-bottom:8px
 }
-.monitorStudent strong{color:var(--a);font-size:.95rem}
-.monitorStudent small{color:var(--sub);font-size:.7rem}
+
+.monitorStudent strong{
+color:var(--a);
+font-size:.95rem
+}
+
+.monitorStudent small{
+color:var(--sub);
+font-size:.7rem
+}
+
+.studentInfo{
+font-size:.72rem;
+color:var(--sub);
+line-height:1.6;
+margin:5px 0
+}
+
+.phoneBtn{
+background:#075d36;
+color:#fff;
+border:1px solid #0b8f54;
+border-radius:6px;
+padding:6px 9px;
+font-size:.7rem;
+text-decoration:none;
+display:inline-block
+}
+
 .daybox{
-background:#191919;border:1px solid var(--bor);
-border-radius:8px;padding:9px;margin:7px 0
+background:#191919;
+border:1px solid var(--bor);
+border-radius:8px;
+padding:9px;
+margin:7px 0
 }
-.daybox h3{color:var(--a);font-size:.85rem;margin-bottom:7px}
+
+.daybox h3{
+color:var(--a);
+font-size:.85rem;
+margin-bottom:7px
+}
+
 .check{
-display:flex;align-items:center;gap:7px;background:var(--item);
-padding:7px;border-radius:6px;margin:4px 0;font-size:.75rem
+display:flex;
+align-items:center;
+gap:7px;
+background:var(--item);
+padding:7px;
+border-radius:6px;
+margin:4px 0;
+font-size:.75rem
 }
-.check input{width:auto;margin:0}
-.monitorBack{margin-bottom:10px}
-.monitorBack button{font-size:.78rem}
+
+.check input{
+width:auto;
+margin:0
+}
+
+.monitorBack{
+margin-bottom:10px
+}
+
+.monitorBack button{
+font-size:.78rem
+}
+
 .monitorTitle{
-background:#062d3c;border:1px solid #17607c;border-radius:8px;
-padding:9px;margin-bottom:10px;text-align:center;color:var(--blue);font-weight:bold
+background:#062d3c;
+border:1px solid #17607c;
+border-radius:8px;
+padding:9px;
+margin-bottom:10px;
+text-align:center;
+color:var(--blue);
+font-weight:bold
 }
+
 .monitorMenu{
-display:grid;grid-template-columns:1fr 1fr;gap:7px
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:7px
 }
-.monitorMenu button{min-height:55px}
-.infoLine{
-background:#191919;border:1px solid var(--bor);border-radius:7px;
-padding:8px;margin:5px 0;font-size:.76rem
+
+.monitorMenu button{
+min-height:55px
 }
-.phone{
-color:var(--blue);font-weight:bold
+
+/* CONTABILIDAD */
+
+.accountingTable{
+overflow-x:auto
 }
-.place{
-display:inline-block;padding:3px 7px;border-radius:5px;
-font-size:.65rem;margin-top:5px
+
+.accountingTable table{
+min-width:420px
 }
-.place.gym{background:#07351f;color:var(--a)}
-.place.home{background:#062d3c;color:var(--blue)}
-.moneyCard{
-background:#191919;border:1px solid var(--bor);
-border-radius:8px;padding:10px;margin:7px 0
+
+.accountingTable th{
+background:#191919;
+padding:8px 4px;
+font-size:.68rem
 }
-.moneyPaid{color:var(--a)}
-.moneyPending{color:var(--gold)}
-.moneyTotal{
-font-size:1.25rem;font-weight:bold;text-align:center;
-color:var(--a);padding:8px
+
+.accountingTable td{
+padding:7px 4px;
+border-bottom:1px solid var(--bor);
+font-size:.72rem
 }
-.appointment{
-background:#191919;border:1px solid var(--bor);
-border-radius:8px;padding:10px;margin:7px 0
+
+.accountingTable tr:last-child td{
+border-bottom:0
 }
-.appointment strong{color:var(--a)}
-.appointmentDate{color:var(--blue);font-weight:bold;font-size:.82rem}
-.smallText{font-size:.68rem;color:var(--sub)}
-.quickGrid{
-display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:7px
+
+.money{
+color:var(--a);
+font-weight:bold
 }
-.quickGrid button{min-height:45px}
+
+.totalRow{
+background:#07351f;
+font-weight:bold
+}
+
+.accountingHeader{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:7px;
+margin-bottom:10px
+}
+
+.accountingTotal{
+background:#07351f;
+border:1px solid #176b43;
+border-radius:9px;
+padding:14px;
+text-align:center;
+margin-bottom:10px
+}
+
+.accountingTotal small{
+display:block;
+color:var(--sub);
+font-size:.7rem
+}
+
+.accountingTotal strong{
+display:block;
+color:var(--a);
+font-size:1.5rem;
+margin-top:4px
+}
+
+.monthAlumno{
+background:var(--item);
+border-radius:7px;
+padding:7px;
+margin:4px 0;
+font-size:.72rem
+}
+
+.monthAlumno b{
+color:var(--a)
+}
+
 @media(max-width:380px){
-td input{font-size:.7rem;padding:5px 1px}
-.muscleStats{grid-template-columns:1fr 1fr}
+td input{
+font-size:.7rem;
+padding:5px 1px
 }
+
+.muscleStats{
+grid-template-columns:1fr 1fr
+}
+}
+
 @media print{
-nav,header,button,input,select,.timerOverlay,canvas{display:none!important}
-body{background:#fff;color:#000}
-.card{border:0;background:#fff}
-.report{color:#000}
+nav,header,button,input,select,.timerOverlay,canvas{
+display:none!important
+}
+
+body{
+background:#fff;
+color:#000
+}
+
+.card{
+border:0;
+background:#fff
+}
+
+.report{
+color:#000
+}
 }
 </style>
 </head>
 
 <body>
 
-<header><h1>MI GIMNASIO PRO v6.2</h1></header>
+<header>
+<h1>MI GIMNASIO PRO v6.2</h1>
+</header>
 
 <div class="container">
 
-<!-- ================= ENTRENAR PERSONAL ================= -->
+<!-- ======================================================
+ENTRENAR PERSONAL
+====================================================== -->
 
 <section id="tab-entrenar" class="tab active">
 
 <div class="card">
 <h2>Selecciona el día</h2>
+
 <div class="days">
 <button class="btn out" onclick="selectDay(1)">Día 1</button>
 <button class="btn out" onclick="selectDay(2)">Día 2</button>
@@ -272,27 +779,41 @@ body{background:#fff;color:#000}
 </div>
 
 <div id="work" style="display:none">
+
 <div class="card">
+
 <h2 id="daytitle">Día</h2>
+
 <div id="loadedmsg"></div>
+
 <label>Fecha</label>
 <input type="date" id="date">
-<div id="form"></div>
-<button class="btn" onclick="saveWorkout()">💾 Guardar entrenamiento</button>
-<div id="summary"></div>
-</div>
-</div>
 
+<div id="form"></div>
+
+<button class="btn" onclick="saveWorkout()">
+💾 Guardar entrenamiento
+</button>
+
+<div id="summary"></div>
+
+</div>
+</div>
 </section>
 
-<!-- ================= RUTINA PERSONAL ================= -->
+
+<!-- ======================================================
+RUTINA PERSONAL
+====================================================== -->
 
 <section id="tab-rutina" class="tab">
 
 <div class="card">
+
 <h2>⚙️ Configurar rutina</h2>
 
 <label>Día</label>
+
 <select id="cfgday" onchange="loadConfig()">
 <option value="1">Día 1</option>
 <option value="2">Día 2</option>
@@ -303,91 +824,145 @@ body{background:#fff;color:#000}
 
 <div id="editor"></div>
 
-<button class="btn" onclick="saveConfig()">💾 Guardar configuración</button>
+<button class="btn" onclick="saveConfig()">
+💾 Guardar configuración
+</button>
+
 </div>
 
 <div class="card">
+
 <h2>💾 Seguridad de datos</h2>
 
 <div style="font-size:.72rem;color:var(--sub);line-height:1.5;margin-bottom:10px">
-La rutina, entrenamientos, alumnos, agenda y contabilidad se guardan en el navegador.
+La rutina, entrenamientos, alumnos y contabilidad se guardan en el navegador.
 Utiliza regularmente la copia JSON para conservar tus datos.
 </div>
 
-<button class="btn out" onclick="exportData()">📦 Crear copia de seguridad</button>
+<button class="btn out" onclick="exportData()">
+📦 Crear copia de seguridad
+</button>
+
 <br><br>
 
-<button class="btn out" onclick="document.getElementById('file').click()">
+<button class="btn out"
+onclick="document.getElementById('file').click()">
 📥 Recuperar copia de seguridad
 </button>
 
-<input id="file" type="file" accept=".json" style="display:none" onchange="importData(event)">
+<input id="file"
+type="file"
+accept=".json"
+style="display:none"
+onchange="importData(event)">
 
 <div id="backupStatus" class="backupBox">
-<span class="backupWarn">⚠️ Todavía no se ha comprobado una copia externa.</span>
+<span class="backupWarn">
+⚠️ Todavía no se ha comprobado una copia externa.
+</span>
 </div>
+
 </div>
 
 </section>
 
-<!-- ================= CALENDARIO PERSONAL ================= -->
+
+<!-- ======================================================
+CALENDARIO
+====================================================== -->
 
 <section id="tab-calendario" class="tab">
 
 <div class="card">
 
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+
 <button class="btn out sm" onclick="month(-1)">❮</button>
+
 <h2 id="monthname" style="margin:0"></h2>
+
 <button class="btn out sm" onclick="month(1)">❯</button>
+
 </div>
 
 <div class="calendar" id="calendar"></div>
+
 <div id="detail"></div>
 
 </div>
 
 </section>
 
-<!-- ================= INFORMES PERSONAL ================= -->
+
+<!-- ======================================================
+INFORMES PERSONAL
+====================================================== -->
 
 <section id="tab-informes" class="tab">
 
 <div class="card">
+
 <h2>📊 Resumen</h2>
+
 <div id="stats" class="statgrid"></div>
+
 </div>
 
 <div class="card">
+
 <h2>📋 Historial por grupos</h2>
 
 <div style="display:flex;gap:5px;flex-wrap:wrap">
-<button class="btn out sm" onclick="report(15)">15 días</button>
-<button class="btn out sm" onclick="report(30)">Mensual</button>
-<button class="btn out sm" onclick="window.print()">PDF</button>
+
+<button class="btn out sm" onclick="report(15)">
+15 días
+</button>
+
+<button class="btn out sm" onclick="report(30)">
+Mensual
+</button>
+
+<button class="btn out sm" onclick="window.print()">
+PDF
+</button>
+
 </div>
 
-<div id="reports" class="empty">Selecciona un periodo.</div>
+<div id="reports" class="empty">
+Selecciona un periodo.
+</div>
 
 </div>
 
 </section>
 
-<!-- ================= MONITOR ================= -->
+
+<!-- ======================================================
+MONITOR
+====================================================== -->
 
 <section id="tab-monitor" class="tab">
 
 <div id="monitorHome">
 
 <div class="card">
+
 <h2>👥 Monitor</h2>
 
-<div class="quickGrid">
-<button class="btn" onclick="newStudent()">➕ NUEVO ALUMNO</button>
-<button class="btn blue" onclick="showAgenda()">📅 AGENDA</button>
-<button class="btn orange" onclick="showAccounting()">💰 CONTABILIDAD</button>
-<button class="btn out" onclick="showMonitorSummary()">📊 RESUMEN</button>
+<button class="btn" onclick="newStudent()">
+➕ NUEVO ALUMNO
+</button>
+
 </div>
+
+<div class="card">
+
+<h2>💰 Gestión</h2>
+
+<button class="btn orange"
+onclick="monitorAccounting()">
+💶 CONTABILIDAD
+</button>
 
 </div>
 
@@ -401,171 +976,302 @@ Utiliza regularmente la copia JSON para conservar tus datos.
 
 </div>
 
-<!-- ================= NAVEGACION ================= -->
+
+<!-- ======================================================
+NAVEGACION
+====================================================== -->
 
 <nav>
-<button id="n-entrenar" class="active" onclick="tab('entrenar')">
-🏋️<span>Entrenar</span>
+
+<button id="n-entrenar"
+class="active"
+onclick="tab('entrenar')">
+🏋️
+<span>Entrenar</span>
 </button>
 
-<button id="n-rutina" onclick="tab('rutina')">
-⚙️<span>Rutina</span>
+<button id="n-rutina"
+onclick="tab('rutina')">
+⚙️
+<span>Rutina</span>
 </button>
 
-<button id="n-calendario" onclick="tab('calendario')">
-📅<span>Calendario</span>
+<button id="n-calendario"
+onclick="tab('calendario')">
+📅
+<span>Calendario</span>
 </button>
 
-<button id="n-informes" onclick="tab('informes')">
-📊<span>Informes</span>
+<button id="n-informes"
+onclick="tab('informes')">
+📊
+<span>Informes</span>
 </button>
 
-<button id="n-monitor" onclick="tab('monitor')">
-👥<span>Monitor</span>
+<button id="n-monitor"
+onclick="tab('monitor')">
+👥
+<span>Monitor</span>
 </button>
+
 </nav>
 
+
+<!-- ======================================================
+CRONOMETRO
+====================================================== -->
+
 <div id="timerOverlay" class="timerOverlay">
+
 <div class="timerBox">
-<div class="timerTitle">⏱️ DESCANSO</div>
-<div id="timerDisplay" class="timerDisplay">02:00</div>
-<button class="timerClose" onclick="closeTimer()">Cerrar</button>
+
+<div class="timerTitle">
+⏱️ DESCANSO
 </div>
+
+<div id="timerDisplay" class="timerDisplay">
+02:00
 </div>
+
+<button class="timerClose"
+onclick="closeTimer()">
+Cerrar
+</button>
+
+</div>
+
+</div>
+
 
 <script>
 "use strict";
 
-/* =========================================================
-   DATOS GENERALES
-========================================================= */
+
+/* ======================================================
+DATOS GENERALES
+====================================================== */
 
 const K='gym_v6_';
 const MK='gym_monitor_v1_';
 
+
 const DEFAULT_ROUTINE={
-1:{groups:[
-{name:'PECHO',exercises:[
+
+1:{
+groups:[
+{
+name:'PECHO',
+exercises:[
 'Press de banca plano',
 'Press inclinado con mancuernas',
 'Aperturas con mancuernas',
 'Cruce de poleas a la altura del pecho',
 'Cruce de poleas de arriba hacia abajo'
-],images:['','','','','']},
-
-{name:'HOMBROS',exercises:[
+],
+images:['','','','','']
+},
+{
+name:'HOMBROS',
+exercises:[
 'Press militar',
 'Elevaciones laterales',
 'Elevaciones frontales',
 'Pájaros',
 'Remo al mentón'
-],images:['','','','','']},
-
-{name:'TRÍCEPS',exercises:[
+],
+images:['','','','','']
+},
+{
+name:'TRÍCEPS',
+exercises:[
 'Extensión en polea alta con barra',
 'Extensión en polea con cuerda',
 'Extensión a una mano en polea',
 'Press francés con mancuernas',
 'Press francés con barra Scott'
-],images:['','','','','']},
+],
+images:['','','','','']
+},
+{
+name:'ABDOMINALES',
+exercises:[
+'Abdominales 1',
+'Abdominales 2',
+'Abdominales 3',
+'Abdominales 4',
+'Abdominales 5'
+],
+images:['','','','','']
+}
+]
+},
 
-{name:'ABDOMINALES',exercises:[
-'Abdominales 1','Abdominales 2','Abdominales 3','Abdominales 4','Abdominales 5'
-],images:['','','','','']}
-]},
-
-2:{groups:[
-{name:'ESPALDA',exercises:[
+2:{
+groups:[
+{
+name:'ESPALDA',
+exercises:[
 'Jalón al pecho con polea',
 'Remo con barra',
 'Remo con mancuerna a una mano',
 'Peso muerto',
 'Remo unilateral con polea'
-],images:['','','','','']},
-
-{name:'BÍCEPS',exercises:[
+],
+images:['','','','','']
+},
+{
+name:'BÍCEPS',
+exercises:[
 'Curl con barra',
 'Curl martillo',
 'Curl alterno con mancuernas en rotación',
 'Curl predicador en banco Scott',
 'Curl en plano inclinado con mancuernas'
-],images:['','','','','']},
+],
+images:['','','','','']
+},
+{
+name:'ABDOMINALES',
+exercises:[
+'Abdominales 1',
+'Abdominales 2',
+'Abdominales 3',
+'Abdominales 4',
+'Abdominales 5'
+],
+images:['','','','','']
+}
+]
+},
 
-{name:'ABDOMINALES',exercises:[
-'Abdominales 1','Abdominales 2','Abdominales 3','Abdominales 4','Abdominales 5'
-],images:['','','','','']}
-]},
+3:{
+groups:[
+{
+name:'PIERNAS',
+exercises:[
+'Ejercicio 1',
+'Ejercicio 2',
+'Ejercicio 3',
+'Ejercicio 4',
+'Ejercicio 5'
+],
+images:['','','','','']
+},
+{
+name:'PIERNAS',
+exercises:[
+'Ejercicio 6',
+'Ejercicio 7',
+'Ejercicio 8',
+'Ejercicio 9',
+'Ejercicio 10'
+],
+images:['','','','','']
+}
+]
+},
 
-3:{groups:[
-{name:'PIERNAS',exercises:[
-'Ejercicio 1','Ejercicio 2','Ejercicio 3','Ejercicio 4','Ejercicio 5'
-],images:['','','','','']},
-
-{name:'PIERNAS',exercises:[
-'Ejercicio 6','Ejercicio 7','Ejercicio 8','Ejercicio 9','Ejercicio 10'
-],images:['','','','','']}
-]},
-
-4:{groups:[
-{name:'PECHO',exercises:[
+4:{
+groups:[
+{
+name:'PECHO',
+exercises:[
 'Press de banca plano',
 'Press inclinado con mancuernas',
 'Aperturas con mancuernas',
 'Cruce de poleas a la altura del pecho',
 'Cruce de poleas de arriba hacia abajo'
-],images:['','','','','']},
-
-{name:'HOMBROS',exercises:[
+],
+images:['','','','','']
+},
+{
+name:'HOMBROS',
+exercises:[
 'Press militar',
 'Elevaciones laterales',
 'Elevaciones frontales',
 'Pájaros',
 'Remo al mentón'
-],images:['','','','','']},
-
-{name:'TRÍCEPS',exercises:[
+],
+images:['','','','','']
+},
+{
+name:'TRÍCEPS',
+exercises:[
 'Extensión en polea alta con barra',
 'Extensión en polea con cuerda',
 'Extensión a una mano en polea',
 'Press francés con mancuernas',
 'Press francés con barra Scott'
-],images:['','','','','']},
+],
+images:['','','','','']
+},
+{
+name:'ABDOMINALES',
+exercises:[
+'Abdominales 1',
+'Abdominales 2',
+'Abdominales 3',
+'Abdominales 4',
+'Abdominales 5'
+],
+images:['','','','','']
+}
+]
+},
 
-{name:'ABDOMINALES',exercises:[
-'Abdominales 1','Abdominales 2','Abdominales 3','Abdominales 4','Abdominales 5'
-],images:['','','','','']}
-]},
-
-5:{groups:[
-{name:'ESPALDA',exercises:[
+5:{
+groups:[
+{
+name:'ESPALDA',
+exercises:[
 'Jalón al pecho con polea',
 'Remo con barra',
 'Remo con mancuerna a una mano',
 'Peso muerto',
 'Remo unilateral con polea'
-],images:['','','','','']},
-
-{name:'BÍCEPS',exercises:[
+],
+images:['','','','','']
+},
+{
+name:'BÍCEPS',
+exercises:[
 'Curl con barra',
 'Curl martillo',
 'Curl alterno con mancuernas en rotación',
 'Curl predicador en banco Scott',
 'Curl en plano inclinado con mancuernas'
-],images:['','','','','']},
-
-{name:'ABDOMINALES',exercises:[
-'Abdominales 1','Abdominales 2','Abdominales 3','Abdominales 4','Abdominales 5'
-],images:['','','','','']}
-]}
+],
+images:['','','','','']
+},
+{
+name:'ABDOMINALES',
+exercises:[
+'Abdominales 1',
+'Abdominales 2',
+'Abdominales 3',
+'Abdominales 4',
+'Abdominales 5'
+],
+images:['','','','','']
+}
+]
+}
 };
+
 
 function clone(o){
 return JSON.parse(JSON.stringify(o))
 }
 
 function safeParse(v,f){
-try{return v?JSON.parse(v):f}catch(e){return f}
+try{
+return v?JSON.parse(v):f
+}catch(e){
+return f
 }
+}
+
 
 let routine=safeParse(
 localStorage.getItem(K+'routine'),
@@ -583,6 +1289,7 @@ routine=clone(DEFAULT_ROUTINE);
 if(!Array.isArray(logs))
 logs=[];
 
+
 function normalizeRoutine(){
 
 for(let d=1;d<=5;d++){
@@ -599,14 +1306,10 @@ g=g||{};
 
 let r={
 name:String(g.name||'Grupo'),
-
-exercises:Array.isArray(g.exercises)
-?g.exercises.map(e=>String(e||'')).filter(Boolean)
-:[],
-
-images:Array.isArray(g.images)
-?g.images.slice()
-:[]
+exercises:Array.isArray(g.exercises)?
+g.exercises.map(e=>String(e||'')).filter(Boolean):[],
+images:Array.isArray(g.images)?
+g.images.slice():[]
 };
 
 while(r.images.length<r.exercises.length)
@@ -620,7 +1323,9 @@ return r;
 }
 }
 
+
 normalizeRoutine();
+
 
 const esc=s=>String(s??'').replace(
 /[&<>"']/g,
@@ -634,6 +1339,7 @@ m=>({
 );
 
 const num=v=>parseFloat(v)||0;
+
 
 function save(){
 
@@ -653,6 +1359,7 @@ JSON.stringify(logs)
 
 }
 
+
 function volume(s){
 return(s||[]).reduce(
 (a,x)=>a+num(x.weight)*num(x.reps),
@@ -660,9 +1367,11 @@ return(s||[]).reduce(
 )
 }
 
+
 function rm(w,r){
 return w&&r?w*(1+r/30):0
 }
+
 
 function maxSetRM(s){
 
@@ -676,6 +1385,7 @@ x=>rm(num(x.weight),num(x.reps))
 )/10
 
 }
+
 
 function dateKey(v){
 
@@ -693,6 +1403,7 @@ String(d.getDate()).padStart(2,'0');
 
 }
 
+
 function uniqueSessions(a){
 
 let m=new Map();
@@ -707,22 +1418,24 @@ m.set(k,l);
 });
 
 return[...m.values()];
-
 }
+
 
 function findSession(d,date){
 
 let k=dateKey(date);
 
 return logs.find(
-l=>Number(l.day)===Number(d)&&dateKey(l.date)===k
+l=>Number(l.day)===Number(d)&&
+dateKey(l.date)===k
 );
 
 }
 
-/* =========================================================
-   NAVEGACION
-========================================================= */
+
+/* ======================================================
+NAVEGACION
+====================================================== */
 
 function tab(x){
 
@@ -756,35 +1469,21 @@ showMonitorHome();
 
 }
 
-/* =========================================================
-   MONITOR
-========================================================= */
+
+/* ======================================================
+MONITOR
+====================================================== */
 
 let students=safeParse(
 localStorage.getItem(MK+'students'),
 []
 );
 
-let appointments=safeParse(
-localStorage.getItem(MK+'appointments'),
-[]
-);
-
-let accounting=safeParse(
-localStorage.getItem(MK+'accounting'),
-[]
-);
-
 if(!Array.isArray(students))
 students=[];
 
-if(!Array.isArray(appointments))
-appointments=[];
-
-if(!Array.isArray(accounting))
-accounting=[];
-
 let monitorStudentId=null;
+
 
 function saveMonitor(){
 
@@ -793,54 +1492,58 @@ MK+'students',
 JSON.stringify(students)
 );
 
-localStorage.setItem(
-MK+'appointments',
-JSON.stringify(appointments)
-);
-
-localStorage.setItem(
-MK+'accounting',
-JSON.stringify(accounting)
-);
-
 }
 
-/* =========================================================
-   HOME MONITOR
-========================================================= */
 
 function showMonitorHome(){
 
 monitorStudentId=null;
 
-document.getElementById('monitorHome').style.display='block';
+document.getElementById(
+'monitorHome'
+).style.display='block';
 
-document.getElementById('monitorEditor').style.display='none';
+document.getElementById(
+'monitorEditor'
+).style.display='none';
 
 renderStudents();
 
 }
 
+
 function backToMonitor(){
 showMonitorHome();
 }
+
+
+/* ======================================================
+NUEVO ALUMNO
+====================================================== */
 
 function newStudent(){
 
 monitorStudentId=null;
 
-document.getElementById('monitorHome').style.display='none';
+document.getElementById(
+'monitorHome'
+).style.display='none';
 
-let e=document.getElementById('monitorEditor');
+let e=document.getElementById(
+'monitorEditor'
+);
 
 e.style.display='block';
 
 e.innerHTML=`
 
 <div class="monitorBack">
-<button class="btn out" onclick="backToMonitor()">
+
+<button class="btn out"
+onclick="backToMonitor()">
 ← VOLVER A MONITOR
 </button>
+
 </div>
 
 <div class="card">
@@ -848,30 +1551,68 @@ e.innerHTML=`
 <h2>➕ Nuevo alumno</h2>
 
 <label>Nombre del alumno</label>
-<input id="studentName" placeholder="Nombre y apellidos">
 
-<label>Teléfono</label>
-<input id="studentPhone" type="tel" placeholder="Teléfono">
+<input id="studentName"
+placeholder="Nombre y apellidos">
 
-<label>Lugar habitual de entrenamiento</label>
+<label>📞 Teléfono</label>
+
+<input id="studentPhone"
+type="tel"
+placeholder="Teléfono">
+
+<label>📍 Lugar del entrenamiento</label>
+
 <select id="studentPlace">
-<option value="Gimnasio">🏋️ Gimnasio</option>
-<option value="Domicilio">🏠 Domicilio</option>
+
+<option value="Gimnasio">
+Gimnasio
+</option>
+
+<option value="Domicilio">
+Domicilio
+</option>
+
+<option value="Otro">
+Otro
+</option>
+
 </select>
 
-<button class="btn" onclick="saveStudent()">
+<label>💶 Precio por entrenamiento</label>
+
+<input id="studentPrice"
+type="number"
+min="0"
+step=".5"
+value="25">
+
+<button class="btn"
+onclick="saveStudent()">
+
 💾 Guardar alumno
+
 </button>
 
 <br><br>
 
-<button class="btn out" onclick="backToMonitor()">
+<button class="btn out"
+onclick="backToMonitor()">
+
 Salir
+
 </button>
 
-</div>`;
+</div>
+
+`;
 
 }
+
+
+/* ======================================================
+ABRIR ALUMNO
+====================================================== */
 
 function openStudent(id){
 
@@ -881,107 +1622,160 @@ if(!s)return;
 
 monitorStudentId=id;
 
-document.getElementById('monitorHome').style.display='none';
+document.getElementById(
+'monitorHome'
+).style.display='none';
 
-let e=document.getElementById('monitorEditor');
+let e=document.getElementById(
+'monitorEditor'
+);
 
 e.style.display='block';
 
-let place=s.place||'Gimnasio';
-
-let phone=s.phone||'';
 
 let h=`
 
 <div class="monitorBack">
-<button class="btn out" onclick="backToMonitor()">
+
+<button class="btn out"
+onclick="backToMonitor()">
+
 ← VOLVER A MONITOR
+
 </button>
+
 </div>
+
 
 <div class="card">
 
-<h2>👤 ${esc(s.name)}</h2>
+<h2>
+👤 ${esc(s.name)}
+</h2>
 
-${phone?`
-<div class="infoLine">
-📞 <span class="phone">${esc(phone)}</span>
-</div>
-`:''}
 
-<div>
-<span class="place ${place==='Domicilio'?'home':'gym'}">
-${place==='Domicilio'?'🏠 Domicilio':'🏋️ Gimnasio'}
-</span>
+<div class="studentInfo">
+
+${s.phone?
+`📞 ${esc(s.phone)}`
+:'📞 Sin teléfono'}
+
+<br>
+
+📍 ${esc(s.place||'Gimnasio')}
+
+<br>
+
+💶 <b>${money(s.price)}</b> por entrenamiento
+
 </div>
+
+
+${s.phone?
+`<a class="phoneBtn"
+href="tel:${esc(s.phone)}">
+📞 LLAMAR
+</a>`
+:''}
+
 
 <div class="monitorMenu">
 
-<button class="btn" onclick="studentTraining()">
+<button class="btn"
+onclick="studentTraining()">
 🏋️ ENTRENAR
 </button>
 
-<button class="btn blue" onclick="studentReports()">
+<button class="btn blue"
+onclick="studentReports()">
 📊 INFORMES
 </button>
 
-<button class="btn out" onclick="studentRoutine()">
+<button class="btn out"
+onclick="studentRoutine()">
 ⚙️ RUTINA
 </button>
 
-<button class="btn blue" onclick="studentAgenda()">
-📅 AGENDA
+<button class="btn orange"
+onclick="studentAccounting()">
+💶 CUENTAS
 </button>
-
-<button class="btn orange" onclick="studentAccounting()">
-💰 CONTABILIDAD
-</button>
-
-${phone?`
-<button class="btn out" onclick="callStudent()">
-📞 LLAMAR
-</button>
-`:''}
 
 </div>
 
 </div>
+
 
 <div class="card">
 
 <label>Nombre del alumno</label>
-<input id="studentName" value="${esc(s.name)}">
 
-<label>Teléfono</label>
-<input id="studentPhone" type="tel" value="${esc(phone)}">
+<input id="studentName"
+value="${esc(s.name)}">
 
-<label>Lugar habitual de entrenamiento</label>
+
+<label>📞 Teléfono</label>
+
+<input id="studentPhone"
+type="tel"
+value="${esc(s.phone||'')}">
+
+
+<label>📍 Lugar del entrenamiento</label>
+
 <select id="studentPlace">
-<option value="Gimnasio" ${place==='Gimnasio'?'selected':''}>
-🏋️ Gimnasio
+
+<option value="Gimnasio"
+${(s.place||'Gimnasio')==='Gimnasio'?'selected':''}>
+Gimnasio
 </option>
-<option value="Domicilio" ${place==='Domicilio'?'selected':''}>
-🏠 Domicilio
+
+<option value="Domicilio"
+${s.place==='Domicilio'?'selected':''}>
+Domicilio
 </option>
+
+<option value="Otro"
+${s.place==='Otro'?'selected':''}>
+Otro
+</option>
+
 </select>
+
+
+<label>💶 Precio por entrenamiento</label>
+
+<input id="studentPrice"
+type="number"
+min="0"
+step=".5"
+value="${num(s.price)||25}">
+
 
 <h2 style="margin-top:8px">
 📅 Ejercicios asignados
 </h2>
 `;
 
+
 for(let d=1;d<=5;d++){
 
-h+=`<div class="daybox">
-<h3>📅 Día ${d}</h3>`;
+h+=`
+<div class="daybox">
+<h3>📅 Día ${d}</h3>
+`;
 
-(routine[d].groups||[]).forEach((g,gi)=>{
+(routine[d].groups||[])
+.forEach((g,gi)=>{
 
-h+=`<div class="group">
+h+=`
+<div class="group">
 ${esc(g.name)}
-</div>`;
+</div>
+`;
 
-(g.exercises||[]).forEach((ex,i)=>{
+(g.exercises||[])
+.forEach((ex,i)=>{
 
 let checked=!!(
 s.routine&&
@@ -1000,73 +1794,75 @@ type="checkbox"
 data-d="${d}"
 data-g="${gi}"
 data-i="${i}"
-${checked?'checked':''}
->
+${checked?'checked':''}>
 
 ${esc(ex)}
 
-</label>`;
+</label>
+
+`;
 
 });
 
 });
 
-h+=`</div>`;
+h+=`
+</div>
+`;
 
 }
 
+
 h+=`
 
-<button class="btn" onclick="saveStudent()">
+<button class="btn"
+onclick="saveStudent()">
+
 💾 Guardar configuración
+
 </button>
 
 <br><br>
 
-<button class="btn danger" onclick="deleteStudent()">
+<button class="btn danger"
+onclick="deleteStudent()">
+
 🗑️ Eliminar alumno
+
 </button>
 
-</div>`;
+</div>
+
+`;
 
 e.innerHTML=h;
 
 }
 
-function callStudent(){
 
-let s=getMonitorStudent();
-
-if(!s||!s.phone)
-return;
-
-window.location.href='tel:'+String(s.phone).replace(/\s+/g,'');
-
-}
+/* ======================================================
+GUARDAR ALUMNO
+====================================================== */
 
 function saveStudent(){
 
-let name=document.getElementById('studentName').value.trim();
+let name=document
+.getElementById('studentName')
+.value.trim();
 
 if(!name){
 
 alert('Escribe el nombre del alumno.');
 
 return;
-
 }
 
-let phoneEl=document.getElementById('studentPhone');
 
-let placeEl=document.getElementById('studentPlace');
+let s=monitorStudentId?
+students.find(
+x=>x.id===monitorStudentId
+):null;
 
-let phone=phoneEl?phoneEl.value.trim():'';
-
-let place=placeEl?placeEl.value:'Gimnasio';
-
-let s=monitorStudentId
-?students.find(x=>x.id===monitorStudentId)
-:null;
 
 if(!s){
 
@@ -1075,6 +1871,7 @@ id:Date.now(),
 name:'',
 phone:'',
 place:'Gimnasio',
+price:25,
 routine:{},
 logs:[]
 };
@@ -1085,17 +1882,37 @@ monitorStudentId=s.id;
 
 }
 
+
 if(!Array.isArray(s.logs))
 s.logs=[];
 
+
 s.name=name;
-s.phone=phone;
-s.place=place;
+
+s.phone=document
+.getElementById('studentPhone')
+?.value.trim()||'';
+
+s.place=document
+.getElementById('studentPlace')
+?.value||'Gimnasio';
+
+s.price=num(
+document.getElementById('studentPrice')
+?.value
+);
+
+if(s.price<0)
+s.price=0;
+
+
 s.routine={};
+
 
 document.querySelectorAll(
 '#monitorEditor input[type="checkbox"]'
-).forEach(c=>{
+)
+.forEach(c=>{
 
 if(c.checked){
 
@@ -1113,6 +1930,7 @@ i:Number(c.dataset.i)
 
 });
 
+
 saveMonitor();
 
 alert('Alumno guardado correctamente.');
@@ -1120,6 +1938,11 @@ alert('Alumno guardado correctamente.');
 backToMonitor();
 
 }
+
+
+/* ======================================================
+ELIMINAR
+====================================================== */
 
 function deleteStudent(){
 
@@ -1134,19 +1957,12 @@ students=students.filter(
 x=>x.id!==monitorStudentId
 );
 
-appointments=appointments.filter(
-x=>Number(x.studentId)!==Number(monitorStudentId)
-);
-
-accounting=accounting.filter(
-x=>Number(x.studentId)!==Number(monitorStudentId)
-);
-
 saveMonitor();
 
 backToMonitor();
 
 }
+
 
 function quickDeleteStudent(id){
 
@@ -1157,23 +1973,22 @@ students=students.filter(
 x=>x.id!==id
 );
 
-appointments=appointments.filter(
-x=>Number(x.studentId)!==Number(id)
-);
-
-accounting=accounting.filter(
-x=>Number(x.studentId)!==Number(id)
-);
-
 saveMonitor();
 
 renderStudents();
 
 }
 
+
+/* ======================================================
+LISTA ALUMNOS
+====================================================== */
+
 function renderStudents(){
 
-let box=document.getElementById('monitorList');
+let box=document.getElementById(
+'monitorList'
+);
 
 if(!students.length){
 
@@ -1181,75 +1996,911 @@ box.innerHTML=
 '<div class="card empty">Todavía no hay alumnos.</div>';
 
 return;
-
 }
+
 
 box.innerHTML=students.map(s=>{
 
-let days=Object.keys(s.routine||{}).length;
-
-let phone=s.phone||'';
-
-let place=s.place||'Gimnasio';
+let days=Object.keys(
+s.routine||{}
+).length;
 
 return`
 
 <div class="monitorStudent">
 
-<strong>👤 ${esc(s.name)}</strong><br>
+<strong>
+👤 ${esc(s.name)}
+</strong>
 
-${phone?
-`<small>📞 ${esc(phone)}</small><br>`:
-''}
+<div class="studentInfo">
 
-<span class="place ${place==='Domicilio'?'home':'gym'}">
-${place==='Domicilio'?'🏠 Domicilio':'🏋️ Gimnasio'}
-</span>
+${s.phone?
+`📞 ${esc(s.phone)}`
+:'📞 Sin teléfono'}
 
 <br>
 
-<small>${days} día(s) configurado(s)</small>
+📍 ${esc(s.place||'Gimnasio')}
+
+<br>
+
+💶 ${money(s.price)}
+
+</div>
+
 
 <div class="row">
 
-<button
-class="btn sm"
+<button class="btn sm"
 onclick="openStudent(${s.id})">
+
 Abrir ficha
+
 </button>
 
-${phone?
-`<button
-class="btn blue sm"
-onclick="callStudentById(${s.id})">
-📞
-</button>`:
-''}
-
-<button
-class="btn danger sm"
+<button class="btn danger sm"
 onclick="quickDeleteStudent(${s.id})">
+
 Eliminar
+
 </button>
 
 </div>
 
-</div>`;
+</div>
+
+`;
 
 }).join('');
 
 }
 
-function callStudentById(id){
 
-let s=students.find(x=>x.id===id);
+/* ======================================================
+UTILIDADES CONTABILIDAD
+====================================================== */
 
-if(!s||!s.phone)return;
+function money(v){
 
-window.location.href=
-'tel:'+String(s.phone).replace(/\s+/g,'');
+return num(v).toLocaleString(
+'es-ES',
+{
+minimumFractionDigits:2,
+maximumFractionDigits:2
+}
+)+' €';
 
 }
+
+
+function getStudentPrice(s){
+
+return num(s?.price);
+
+}
+
+
+function realStudentSession(l){
+
+return (l.groups||[]).some(g=>
+(g.exercises||[]).some(e=>
+(e.sets||[]).some(
+x=>num(x.reps)>0
+)
+);
+
+}
+
+
+/* ======================================================
+CONTABILIDAD GENERAL MONITOR
+====================================================== */
+
+function monitorAccounting(){
+
+let e=document.getElementById(
+'monitorEditor'
+);
+
+document.getElementById(
+'monitorHome'
+).style.display='none';
+
+e.style.display='block';
+
+
+let now=new Date();
+
+let year=now.getFullYear();
+
+let month=now.getMonth();
+
+
+e.innerHTML=`
+
+<div class="monitorBack">
+
+<button class="btn out"
+onclick="backToMonitor()">
+
+← VOLVER A MONITOR
+
+</button>
+
+</div>
+
+
+<div class="monitorTitle">
+
+💶 CONTABILIDAD DEL MONITOR
+
+</div>
+
+
+<div class="card">
+
+<h2>📅 Tabla mensual</h2>
+
+<div class="accountingHeader">
+
+<select id="accountMonth"
+onchange="renderAccountingMonth()">
+
+${monthOptions(month)}
+
+</select>
+
+
+<select id="accountYear"
+onchange="renderAccountingMonth()">
+
+${yearOptions(year)}
+
+</select>
+
+</div>
+
+
+<div id="accountMonthBox"></div>
+
+</div>
+
+
+<div class="card">
+
+<h2>📊 Tabla anual</h2>
+
+<select id="accountYearAnnual"
+onchange="renderAccountingYear()">
+
+${yearOptions(year)}
+
+</select>
+
+<br><br>
+
+<div id="accountYearBox"></div>
+
+</div>
+
+`;
+
+renderAccountingMonth();
+renderAccountingYear();
+
+}
+
+
+/* ======================================================
+SELECTORES FECHAS
+====================================================== */
+
+function monthOptions(selected){
+
+let names=[
+'Enero','Febrero','Marzo','Abril',
+'Mayo','Junio','Julio','Agosto',
+'Septiembre','Octubre','Noviembre','Diciembre'
+];
+
+return names.map(
+(n,i)=>
+`<option value="${i}"
+${i===selected?'selected':''}>
+${n}
+</option>`
+).join('');
+
+}
+
+
+function yearOptions(selected){
+
+let y=new Date().getFullYear();
+
+let out='';
+
+for(let i=y-5;i<=y+2;i++){
+
+out+=`
+<option value="${i}"
+${i===selected?'selected':''}>
+${i}
+</option>
+`;
+
+}
+
+return out;
+
+}
+
+
+/* ======================================================
+DATOS CONTABILIDAD
+====================================================== */
+
+function monthlyAccounting(month,year){
+
+let rows=[];
+
+students.forEach(s=>{
+
+(s.logs||[]).forEach(l=>{
+
+if(!realStudentSession(l))
+return;
+
+let d=new Date(l.date);
+
+if(
+d.getMonth()!==Number(month)||
+d.getFullYear()!==Number(year)
+)
+return;
+
+rows.push({
+
+date:d,
+student:s.name,
+studentId:s.id,
+price:getStudentPrice(s)
+
+});
+
+});
+
+});
+
+rows.sort(
+(a,b)=>a.date-b.date
+);
+
+return rows;
+
+}
+
+
+/* ======================================================
+TABLA MENSUAL
+====================================================== */
+
+function renderAccountingMonth(){
+
+let month=Number(
+document.getElementById('accountMonth').value
+);
+
+let year=Number(
+document.getElementById('accountYear').value
+);
+
+let box=document.getElementById(
+'accountMonthBox'
+);
+
+let rows=monthlyAccounting(
+month,
+year
+);
+
+
+let total=rows.reduce(
+(a,x)=>a+x.price,
+0
+);
+
+
+let names=[
+'Enero','Febrero','Marzo','Abril',
+'Mayo','Junio','Julio','Agosto',
+'Septiembre','Octubre','Noviembre','Diciembre'
+];
+
+
+if(!rows.length){
+
+box.innerHTML=`
+
+<div class="accountingTotal">
+
+<small>
+${names[month]} ${year}
+</small>
+
+<strong>
+0,00 €
+</strong>
+
+</div>
+
+<div class="empty">
+No hay entrenamientos cobrables este mes.
+</div>
+
+`;
+
+return;
+
+}
+
+
+let h=`
+
+<div class="accountingTotal">
+
+<small>
+TOTAL ${names[month].toUpperCase()} ${year}
+</small>
+
+<strong>
+${money(total)}
+</strong>
+
+</div>
+
+
+<div class="accountingTable">
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Fecha</th>
+<th>Alumno</th>
+<th>Importe</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+`;
+
+
+rows.forEach(r=>{
+
+h+=`
+
+<tr>
+
+<td>
+${r.date.toLocaleDateString('es-ES')}
+</td>
+
+<td>
+${esc(r.student)}
+</td>
+
+<td class="money">
+${money(r.price)}
+</td>
+
+</tr>
+
+`;
+
+});
+
+
+h+=`
+
+<tr class="totalRow">
+
+<td colspan="2">
+TOTAL
+</td>
+
+<td class="money">
+${money(total)}
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+
+<br>
+
+<h2 style="margin-top:10px">
+👥 Resumen por alumno
+</h2>
+
+`;
+
+
+let by={};
+
+rows.forEach(r=>{
+
+if(!by[r.studentId])
+by[r.studentId]={
+name:r.student,
+count:0,
+total:0
+};
+
+by[r.studentId].count++;
+by[r.studentId].total+=r.price;
+
+});
+
+
+Object.values(by).forEach(x=>{
+
+h+=`
+
+<div class="monthAlumno">
+
+<b>${esc(x.name)}</b>
+
+<br>
+
+${x.count} entrenamiento(s)
+·
+<strong>${money(x.total)}</strong>
+
+</div>
+
+`;
+
+});
+
+
+box.innerHTML=h;
+
+}
+
+
+/* ======================================================
+TABLA ANUAL
+====================================================== */
+
+function renderAccountingYear(){
+
+let year=Number(
+document.getElementById('accountYearAnnual').value
+);
+
+let box=document.getElementById(
+'accountYearBox'
+);
+
+
+let monthNames=[
+'Enero','Febrero','Marzo','Abril',
+'Mayo','Junio','Julio','Agosto',
+'Septiembre','Octubre','Noviembre','Diciembre'
+];
+
+
+let data={};
+
+let annualTotal=0;
+
+
+students.forEach(s=>{
+
+(s.logs||[]).forEach(l=>{
+
+if(!realStudentSession(l))
+return;
+
+let d=new Date(l.date);
+
+if(d.getFullYear()!==year)
+return;
+
+let m=d.getMonth();
+
+if(!data[m])
+data[m]={};
+
+if(!data[m][s.id]){
+
+data[m][s.id]={
+name:s.name,
+total:0,
+count:0
+};
+
+}
+
+data[m][s.id].total+=getStudentPrice(s);
+
+data[m][s.id].count++;
+
+annualTotal+=getStudentPrice(s);
+
+});
+
+});
+
+
+let h=`
+
+<div class="accountingTotal">
+
+<small>
+TOTAL AÑO ${year}
+</small>
+
+<strong>
+${money(annualTotal)}
+</strong>
+
+</div>
+
+`;
+
+
+let any=false;
+
+
+for(let m=0;m<12;m++){
+
+if(!data[m])
+continue;
+
+any=true;
+
+
+let monthTotal=Object.values(
+data[m]
+).reduce(
+(a,x)=>a+x.total,
+0
+);
+
+
+h+=`
+
+<div class="card">
+
+<h2>
+📅 ${monthNames[m]}
+<span class="money">
+${money(monthTotal)}
+</span>
+</h2>
+
+<div class="accountingTable">
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Alumno</th>
+<th>Entrenos</th>
+<th>Total</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+`;
+
+
+Object.values(data[m]).forEach(x=>{
+
+h+=`
+
+<tr>
+
+<td style="text-align:left">
+${esc(x.name)}
+</td>
+
+<td>
+${x.count}
+</td>
+
+<td class="money">
+${money(x.total)}
+</td>
+
+</tr>
+
+`;
+
+});
+
+
+h+=`
+
+<tr class="totalRow">
+
+<td>
+TOTAL ${monthNames[m]}
+</td>
+
+<td></td>
+
+<td class="money">
+${money(monthTotal)}
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+`;
+
+}
+
+
+if(!any){
+
+h+=`
+
+<div class="empty">
+
+No hay entrenamientos cobrables
+en ${year}.
+
+</div>
+
+`;
+
+}
+
+
+box.innerHTML=h;
+
+}
+
+
+/* ======================================================
+CONTABILIDAD INDIVIDUAL
+====================================================== */
+
+function studentAccounting(){
+
+let s=getMonitorStudent();
+
+if(!s)return;
+
+
+let e=document.getElementById(
+'monitorEditor'
+);
+
+
+let year=new Date().getFullYear();
+
+
+e.innerHTML=`
+
+<div class="monitorBack">
+
+<button class="btn out"
+onclick="backToMonitor()">
+
+← VOLVER A MONITOR
+
+</button>
+
+</div>
+
+
+<div class="monitorTitle">
+
+💶 CUENTAS — ${esc(s.name)}
+
+</div>
+
+
+<div class="card">
+
+<h2>
+💶 Datos económicos
+</h2>
+
+<div style="font-size:.8rem;line-height:1.7">
+
+📍 Lugar:
+<b>${esc(s.place||'Gimnasio')}</b>
+
+<br>
+
+💶 Precio por entrenamiento:
+<b>${money(s.price)}</b>
+
+</div>
+
+</div>
+
+
+<div class="card">
+
+<h2>
+📊 Historial anual
+</h2>
+
+<select id="studentAccountYear"
+onchange="renderStudentAccounting()">
+
+${yearOptions(year)}
+
+</select>
+
+<div id="studentAccountBox"></div>
+
+</div>
+
+`;
+
+
+renderStudentAccounting();
+
+}
+
+
+function renderStudentAccounting(){
+
+let s=getMonitorStudent();
+
+if(!s)return;
+
+
+let year=Number(
+document.getElementById(
+'studentAccountYear'
+).value
+);
+
+
+let rows=[];
+
+(s.logs||[]).forEach(l=>{
+
+if(!realStudentSession(l))
+return;
+
+let d=new Date(l.date);
+
+if(d.getFullYear()!==year)
+return;
+
+rows.push(d);
+
+});
+
+
+rows.sort((a,b)=>a-b);
+
+
+let total=rows.length*
+getStudentPrice(s);
+
+
+let months={};
+
+rows.forEach(d=>{
+
+let m=d.getMonth();
+
+if(!months[m])
+months[m]=0;
+
+months[m]++;
+
+});
+
+
+let names=[
+'Enero','Febrero','Marzo','Abril',
+'Mayo','Junio','Julio','Agosto',
+'Septiembre','Octubre','Noviembre','Diciembre'
+];
+
+
+let h=`
+
+<div class="accountingTotal">
+
+<small>
+TOTAL ${year}
+</small>
+
+<strong>
+${money(total)}
+</strong>
+
+</div>
+
+`;
+
+
+Object.keys(months)
+.map(Number)
+.sort((a,b)=>a-b)
+.forEach(m=>{
+
+let n=months[m];
+
+h+=`
+
+<div class="monthAlumno">
+
+<b>${names[m]}</b>
+
+<br>
+
+${n} entrenamiento(s)
+
+·
+
+<strong>
+${money(n*getStudentPrice(s))}
+</strong>
+
+</div>
+
+`;
+
+});
+
+
+if(!rows.length){
+
+h+=`
+<div class="empty">
+No hay entrenamientos registrados en ${year}.
+</div>
+`;
+
+}
+
+
+document.getElementById(
+'studentAccountBox'
+).innerHTML=h;
+
+}
+
+
+/* ======================================================
+ENTRENAMIENTO ALUMNO
+====================================================== */
 
 function getMonitorStudent(){
 
@@ -1259,9 +2910,6 @@ x=>x.id===monitorStudentId
 
 }
 
-/* =========================================================
-   ENTRENAMIENTO ALUMNO
-========================================================= */
 
 function studentTraining(){
 
@@ -1272,41 +2920,59 @@ if(!s)return;
 if(!Array.isArray(s.logs))
 s.logs=[];
 
-let e=document.getElementById('monitorEditor');
+
+let e=document.getElementById(
+'monitorEditor'
+);
+
 
 let h=`
 
 <div class="monitorBack">
-<button class="btn out" onclick="backToMonitor()">
+
+<button class="btn out"
+onclick="backToMonitor()">
+
 ← VOLVER A MONITOR
+
 </button>
+
 </div>
 
+
 <div class="monitorTitle">
+
 🏋️ ENTRENAMIENTO — ${esc(s.name)}
+
 </div>
+
 
 <div class="card">
 
 <div class="days">
 
-<button class="btn out" onclick="studentSelectDay(1)">
+<button class="btn out"
+onclick="studentSelectDay(1)">
 Día 1
 </button>
 
-<button class="btn out" onclick="studentSelectDay(2)">
+<button class="btn out"
+onclick="studentSelectDay(2)">
 Día 2
 </button>
 
-<button class="btn out" onclick="studentSelectDay(3)">
+<button class="btn out"
+onclick="studentSelectDay(3)">
 Día 3
 </button>
 
-<button class="btn out" onclick="studentSelectDay(4)">
+<button class="btn out"
+onclick="studentSelectDay(4)">
 Día 4
 </button>
 
-<button class="btn out" onclick="studentSelectDay(5)">
+<button class="btn out"
+onclick="studentSelectDay(5)">
 Día 5
 </button>
 
@@ -1314,12 +2980,15 @@ Día 5
 
 </div>
 
+
 <div id="studentWork"></div>
+
 `;
 
 e.innerHTML=h;
 
 }
+
 
 function studentSelectDay(d){
 
@@ -1327,32 +2996,42 @@ let s=getMonitorStudent();
 
 if(!s)return;
 
+
 let selected=
-s.routine&&s.routine[d]
-?s.routine[d]
-:[];
+s.routine&&s.routine[d]?
+s.routine[d]:[];
+
 
 if(!selected.length){
 
-document.getElementById('studentWork').innerHTML=`
+document.getElementById(
+'studentWork'
+).innerHTML=`
 
 <div class="card">
 
 <div class="empty">
-Este alumno no tiene ejercicios asignados para el Día ${d}.
+
+Este alumno no tiene ejercicios
+asignados para el Día ${d}.
+
 </div>
 
-</div>`;
+</div>
+
+`;
 
 return;
 
 }
+
 
 let previous=null;
 
 let a=s.logs.filter(
 l=>Number(l.day)===d
 );
+
 
 if(a.length){
 
@@ -1364,6 +3043,7 @@ previous=a[a.length-1];
 
 }
 
+
 let h=`
 
 <div class="card">
@@ -1372,37 +3052,49 @@ let h=`
 🏋️ ${esc(s.name)} — Día ${d}
 </h2>
 
+
 <div class="monitorBack">
 
-<button class="btn out" onclick="backToMonitor()">
+<button class="btn out"
+onclick="backToMonitor()">
+
 ← VOLVER A MONITOR
+
 </button>
 
 </div>
+
 
 <label>Fecha</label>
 
 <input
 type="date"
 id="studentDate"
-value="${new Date().toISOString().slice(0,10)}"
->
+value="${new Date().toISOString().slice(0,10)}">
+
 
 <div id="studentForm"></div>
 
-<button
-class="btn"
+
+<button class="btn"
 onclick="saveStudentWorkout(${d})">
+
 💾 GUARDAR ENTRENAMIENTO
+
 </button>
+
 
 <div id="studentSummary"></div>
 
-</div>`;
+</div>
+
+`;
+
 
 document.getElementById(
 'studentWork'
 ).innerHTML=h;
+
 
 renderStudentWorkout(
 d,
@@ -1411,6 +3103,7 @@ previous
 );
 
 }
+
 
 function renderStudentWorkout(
 d,
@@ -1422,7 +3115,9 @@ let s=getMonitorStudent();
 
 let html='';
 
-selected.forEach((item,index)=>{
+
+selected.forEach(
+(item,index)=>{
 
 let g=routine[d].groups[item.g];
 
@@ -1434,13 +3129,14 @@ if(!ex)return;
 
 let img=(g.images||[])[item.i]||'';
 
-let old=previous
-?getStudentPreviousExercise(previous,ex)
-:null;
+let old=previous?
+getStudentPreviousExercise(
+previous,
+ex
+):null;
 
-let ps=old
-?(old.sets||[]).slice(0,3)
-:[];
+let ps=old?
+(old.sets||[]).slice(0,3):[];
 
 while(ps.length<3)
 ps.push({reps:'',weight:''});
@@ -1448,6 +3144,7 @@ ps.push({reps:'',weight:''});
 let prefix='sg'+index+'e'+index;
 
 let iid='simg-'+index;
+
 
 html+=`
 
@@ -1458,59 +3155,84 @@ ${esc(g.name)}
 <div class="ex">
 
 <div class="exhead">
-<span>${esc(ex)}</span>
-</div>`;
+
+<span>
+${esc(ex)}
+</span>
+
+</div>
+
+`;
+
 
 if(img){
 
 html+=`
 
-<button
-class="imgbtn"
+<button class="imgbtn"
 onclick="toggleImage('${iid}')">
+
 🖼️ Ver imagen
+
 </button>
 
-<div
-id="${iid}"
+<div id="${iid}"
 class="imgbox">
 
 <img
 src="${esc(img)}"
-alt="${esc(ex)}"
->
+alt="${esc(ex)}">
 
 <br>
 
-<button
-class="imgbtn"
+<button class="imgbtn"
 onclick="toggleImage('${iid}')">
+
 ✕ Cerrar imagen
+
 </button>
 
-</div>`;
+</div>
+
+`;
 
 }
 
+
 html+=old?
 
-`<div class="last">
-Último ${new Date(previous.date).toLocaleDateString('es-ES')}:
+`
+
+<div class="last">
+
+Último
+${new Date(previous.date)
+.toLocaleDateString('es-ES')}:
+
 ${ps.map(
 (x,j)=>
 'S'+(j+1)+' '+
 (num(x.reps)||'')+
 '×'+
-(x.weight!==''?x.weight:'')+
+(x.weight!==''?
+x.weight:'')+
 'kg'
 ).join(' · ')}
-</div>`
+
+</div>
+
+`
 
 :
 
-`<div class="last">
+`
+
+<div class="last">
 Sin registro previo
-</div>`;
+</div>
+
+`;
+
 
 html+=`
 
@@ -1524,7 +3246,10 @@ html+=`
 </tr>
 </thead>
 
-<tbody>`;
+<tbody>
+
+`;
+
 
 for(let j=0;j<3;j++){
 
@@ -1535,62 +3260,74 @@ html+=`
 <td>${j+1}</td>
 
 <td>
+
 <input
 type="number"
 min="0"
 id="${prefix}-r${j}"
 onfocus="selectCell(this)"
-oninput="studentCalc('${prefix}')"
->
+oninput="studentCalc('${prefix}')">
+
 </td>
 
 <td>
+
 <input
 type="number"
 min="0"
 step=".5"
 id="${prefix}-w${j}"
 onfocus="selectCell(this)"
-oninput="studentCalc('${prefix}')"
->
+oninput="studentCalc('${prefix}')">
+
 </td>
 
-</tr>`;
+</tr>
+
+`;
 
 }
+
 
 html+=`
 
 </tbody>
+
 </table>
 
-<div
-class="rm"
+
+<div class="rm"
 id="rm-${prefix}">
 🔥 1RM estimado: --
 </div>
 
-<div
-class="vol"
+<div class="vol"
 id="vol-${prefix}">
 📦 Volumen: 0 kg
 </div>
 
-<button
-class="restbtn"
+
+<button class="restbtn"
 onclick="startTimer()">
+
 ⏱️ Descanso 2:00
+
 </button>
 
-</div>`;
+
+</div>
+
+`;
 
 });
+
 
 document.getElementById(
 'studentForm'
 ).innerHTML=html;
 
 }
+
 
 function getStudentPreviousExercise(
 log,
@@ -1600,7 +3337,9 @@ name
 if(!log)return null;
 
 for(let g of(log.groups||[]))
+
 for(let e of(g.exercises||[]))
+
 if(e.name===name)
 return e;
 
@@ -1608,10 +3347,12 @@ return null;
 
 }
 
+
 function studentCalc(p){
 
 let best=0;
 let vol=0;
+
 
 for(let j=0;j<3;j++){
 
@@ -1628,6 +3369,7 @@ if(!w||!r)continue;
 let W=num(w.value);
 let R=num(r.value);
 
+
 if(W>0&&R>0){
 
 best=Math.max(
@@ -1641,6 +3383,7 @@ vol+=W*R;
 
 }
 
+
 let a=document.getElementById(
 'rm-'+p
 );
@@ -1649,12 +3392,18 @@ let b=document.getElementById(
 'vol-'+p
 );
 
+
 if(a)
+
 a.innerText=
 '🔥 1RM estimado: '+
-(best?Math.round(best*10)/10+' kg':'--');
+(best?
+Math.round(best*10)/10+' kg':
+'--');
+
 
 if(b)
+
 b.innerText=
 '📦 Volumen: '+
 Math.round(vol*10)/10+
@@ -1662,15 +3411,18 @@ Math.round(vol*10)/10+
 
 }
 
+
 function saveStudentWorkout(d){
 
 let s=getMonitorStudent();
 
 if(!s)return;
 
+
 let cd=document.getElementById(
 'studentDate'
 ).value;
+
 
 if(!cd){
 
@@ -1680,38 +3432,51 @@ return;
 
 }
 
+
 if(!Array.isArray(s.logs))
 s.logs=[];
 
+
 let log=s.logs.find(
-l=>Number(l.day)===d&&dateKey(l.date)===cd
+l=>
+Number(l.day)===d&&
+dateKey(l.date)===cd
 );
+
 
 if(!log){
 
 log={
+
 id:Date.now(),
+
 date:new Date(
 cd+'T12:00:00'
 ).toISOString(),
+
 day:d,
+
 groups:[]
+
 };
 
 s.logs.push(log);
 
 }
 
+
 let selected=
-s.routine&&s.routine[d]
-?s.routine[d]
-:[];
+s.routine&&s.routine[d]?
+s.routine[d]:[];
+
 
 let totalVolume=0;
 let totalSets=0;
 let totalExercises=0;
 
-selected.forEach((item,index)=>{
+
+selected.forEach(
+(item,index)=>{
 
 let g=routine[d].groups[item.g];
 
@@ -1725,6 +3490,7 @@ let prefix='sg'+index+'e'+index;
 
 let sets=[];
 
+
 for(let j=0;j<3;j++){
 
 let r=document.getElementById(
@@ -1736,49 +3502,73 @@ prefix+'-w'+j
 );
 
 sets.push({
-reps:r&&r.value!==''?num(r.value):0,
-weight:w&&w.value!==''?num(w.value):0
+
+reps:r&&r.value!==''?
+num(r.value):0,
+
+weight:w&&w.value!==''?
+num(w.value):0
+
 });
 
 }
+
 
 let real=sets.filter(
 x=>x.reps>0
 );
 
+
 if(!real.length)return;
 
+
 let data={
+
 name:ex,
+
 sets:sets,
+
 volume:volume(real),
+
 rm:maxSetRM(real)
+
 };
 
+
 let group=log.groups.find(
-x=>Number(x.groupIndex)===Number(item.g)
+x=>Number(x.groupIndex)===
+Number(item.g)
 );
+
 
 if(!group){
 
 group={
+
 name:g.name,
+
 groupIndex:item.g,
+
 exercises:[]
+
 };
 
 log.groups.push(group);
 
 }
 
+
 let old=group.exercises.find(
 x=>x.name===ex
 );
 
+
 if(old)
 Object.assign(old,data);
+
 else
 group.exercises.push(data);
+
 
 totalVolume+=data.volume;
 totalSets+=real.length;
@@ -1786,10 +3576,12 @@ totalExercises++;
 
 });
 
+
 log.groups=(log.groups||[]).filter(g=>{
 
-g.exercises=(g.exercises||[]).filter(
-e=>(e.sets||[]).some(
+g.exercises=(g.exercises||[])
+.filter(e=>
+(e.sets||[]).some(
 x=>num(x.reps)>0
 )
 );
@@ -1798,7 +3590,9 @@ return g.exercises.length;
 
 });
 
+
 saveMonitor();
+
 
 document.getElementById(
 'studentSummary'
@@ -1812,6 +3606,11 @@ document.getElementById(
 
 <div class="big">
 ${esc(s.name)}
+</div>
+
+<div>
+💶 Sesión contabilizada:
+<b>${money(s.price)}</b>
 </div>
 
 <div>
@@ -1831,19 +3630,23 @@ kg de volumen
 
 <br>
 
-<button
-class="btn"
+<button class="btn"
 onclick="backToMonitor()">
+
 ← Volver a Monitor
+
 </button>
 
-</div>`;
+</div>
+
+`;
 
 }
 
-/* =========================================================
-   RUTINA ALUMNO
-========================================================= */
+
+/* ======================================================
+RUTINA ALUMNO
+====================================================== */
 
 function studentRoutine(){
 
@@ -1851,39 +3654,54 @@ let s=getMonitorStudent();
 
 if(!s)return;
 
+
 let e=document.getElementById(
 'monitorEditor'
 );
+
 
 let h=`
 
 <div class="monitorBack">
 
-<button
-class="btn out"
+<button class="btn out"
 onclick="backToMonitor()">
+
 ← VOLVER A MONITOR
+
 </button>
 
 </div>
 
 <div class="monitorTitle">
+
 ⚙️ RUTINA — ${esc(s.name)}
-</div>`;
+
+</div>
+
+`;
+
 
 for(let d=1;d<=5;d++){
 
 let assigned=
-s.routine&&s.routine[d]
-?s.routine[d]
-:[];
+s.routine&&s.routine[d]?
+s.routine[d]:[];
 
 if(!assigned.length)
 continue;
 
+
 h+=`
+
 <div class="card">
-<h2>📅 Día ${d}</h2>`;
+
+<h2>
+📅 Día ${d}
+</h2>
+
+`;
+
 
 assigned.forEach(item=>{
 
@@ -1894,6 +3712,7 @@ if(!g)return;
 let ex=g.exercises[item.i];
 
 if(!ex)return;
+
 
 h+=`
 
@@ -1907,43 +3726,61 @@ ${esc(g.name)}
 ${esc(ex)}
 </div>
 
-</div>`;
+</div>
+
+`;
 
 });
 
-h+=`</div>`;
+
+h+=`
+
+</div>
+
+`;
 
 }
+
 
 if(!Object.keys(s.routine||{}).length){
 
 h+=`
 
 <div class="card empty">
+
 Este alumno todavía no tiene rutina asignada.
-</div>`;
+
+</div>
+
+`;
 
 }
+
 
 h+=`
 
 <div class="card">
 
-<button
-class="btn out"
+<button class="btn out"
 onclick="openStudent(${s.id})">
+
 ← Volver a ficha
+
 </button>
 
-</div>`;
+</div>
+
+`;
+
 
 e.innerHTML=h;
 
 }
 
-/* =========================================================
-   INFORMES ALUMNO
-========================================================= */
+
+/* ======================================================
+INFORMES ALUMNO
+====================================================== */
 
 function studentReports(){
 
@@ -1951,36 +3788,43 @@ let s=getMonitorStudent();
 
 if(!s)return;
 
+
 let e=document.getElementById(
 'monitorEditor'
 );
+
 
 e.innerHTML=`
 
 <div class="monitorBack">
 
-<button
-class="btn out"
+<button class="btn out"
 onclick="backToMonitor()">
+
 ← VOLVER A MONITOR
+
 </button>
 
 </div>
 
+
 <div class="monitorTitle">
+
 📊 INFORMES — ${esc(s.name)}
+
 </div>
+
 
 <div class="card">
 
 <h2>📊 Resumen</h2>
 
-<div
-id="studentStats"
+<div id="studentStats"
 class="statgrid">
 </div>
 
 </div>
+
 
 <div class="card">
 
@@ -1988,31 +3832,34 @@ class="statgrid">
 
 <div style="display:flex;gap:5px;flex-wrap:wrap">
 
-<button
-class="btn out sm"
+<button class="btn out sm"
 onclick="studentReport(15)">
 15 días
 </button>
 
-<button
-class="btn out sm"
+<button class="btn out sm"
 onclick="studentReport(30)">
 Mensual
 </button>
 
 </div>
 
-<div
-id="studentReportsBox"
+<div id="studentReportsBox"
 class="empty">
+
 Selecciona un periodo.
+
 </div>
 
-</div>`;
+</div>
+
+`;
+
 
 studentStats();
 
 }
+
 
 function studentStats(){
 
@@ -2020,21 +3867,28 @@ let s=getMonitorStudent();
 
 if(!s)return;
 
+
 let vol=0;
 let sets=0;
 let exercises=0;
 let sessions=0;
 
+
 (s.logs||[]).forEach(l=>{
 
 let real=false;
 
-(l.groups||[]).forEach(
-g=>(g.exercises||[]).forEach(e=>{
 
-let q=(e.sets||[]).filter(
+(l.groups||[]).forEach(
+g=>
+(g.exercises||[]).forEach(
+e=>{
+
+let q=(e.sets||[])
+.filter(
 x=>num(x.reps)>0
 );
+
 
 if(q.length){
 
@@ -2048,36 +3902,61 @@ vol+=volume(q);
 })
 );
 
+
 if(real)
 sessions++;
 
 });
+
 
 document.getElementById(
 'studentStats'
 ).innerHTML=`
 
 <div class="stat">
+
 <b>${sessions}</b>
-<span>Sesiones realizadas</span>
+
+<span>
+Sesiones realizadas
+</span>
+
 </div>
 
 <div class="stat">
+
 <b>${exercises}</b>
-<span>Ejercicios realizados</span>
+
+<span>
+Ejercicios realizados
+</span>
+
 </div>
 
 <div class="stat">
+
 <b>${sets}</b>
-<span>Series realizadas</span>
+
+<span>
+Series realizadas
+</span>
+
 </div>
 
 <div class="stat">
+
 <b>${Math.round(vol)} kg</b>
-<span>Volumen realizado</span>
-</div>`;
+
+<span>
+Volumen realizado
+</span>
+
+</div>
+
+`;
 
 }
+
 
 function studentReport(days){
 
@@ -2085,7 +3964,9 @@ let s=getMonitorStudent();
 
 if(!s)return;
 
+
 let now=new Date();
+
 
 let start=new Date(
 now.getFullYear(),
@@ -2093,10 +3974,13 @@ now.getMonth(),
 now.getDate()-(days-1)
 );
 
+
 let sk=dateKey(start);
 let tk=dateKey(now);
 
-let a=(s.logs||[]).filter(l=>{
+
+let a=(s.logs||[]).filter(
+l=>{
 
 let k=dateKey(l.date);
 
@@ -2104,11 +3988,13 @@ return k>=sk&&k<=tk;
 
 });
 
+
 if(!a.length){
 
 document.getElementById(
 'studentReportsBox'
 ).innerHTML=
+
 `<div class="empty">
 Sin entrenamientos realizados en ${days} días.
 </div>`;
@@ -2117,30 +4003,42 @@ return;
 
 }
 
+
 let groups={};
 
+
 a.forEach(
-l=>(l.groups||[]).forEach(g=>{
+l=>
+(l.groups||[]).forEach(
+g=>{
 
 let key=g.name||'Sin grupo';
+
 
 if(!groups[key])
 
 groups[key]={
+
 volume:0,
 sets:0,
 exercises:new Set(),
 sessions:new Set()
+
 };
+
 
 let z=groups[key];
 let real=false;
 
-(g.exercises||[]).forEach(e=>{
 
-let q=(e.sets||[]).filter(
+(g.exercises||[])
+.forEach(e=>{
+
+let q=(e.sets||[])
+.filter(
 x=>num(x.reps)>0
 );
+
 
 if(!q.length)return;
 
@@ -2152,34 +4050,44 @@ z.volume+=volume(q);
 
 });
 
+
 if(real)
-z.sessions.add(dateKey(l.date));
+
+z.sessions.add(
+dateKey(l.date)
+);
 
 })
 );
+
 
 let html=`
 
 <div class="report">
 
 <b>
-📊 ${
-days===15
-?'HISTORIAL DE 15 DÍAS'
-:'HISTORIAL MENSUAL (30 DÍAS)'
-}
+📊
+${days===15?
+'HISTORIAL DE 15 DÍAS':
+'HISTORIAL MENSUAL (30 DÍAS)'}
 </b>
 
-</div>`;
+</div>
+
+`;
+
 
 let tv=0;
 let ts=0;
 
-Object.entries(groups).forEach(
+
+Object.entries(groups)
+.forEach(
 ([name,z])=>{
 
 tv+=z.volume;
 ts+=z.sets;
+
 
 html+=`
 
@@ -2189,32 +4097,63 @@ html+=`
 💪 ${esc(name)}
 </h3>
 
+
 <div class="muscleStats">
 
 <div class="muscleStat">
-<b>${Math.round(z.volume)} kg</b>
-<span>Volumen</span>
+
+<b>
+${Math.round(z.volume)} kg
+</b>
+
+<span>
+Volumen
+</span>
+
 </div>
+
 
 <div class="muscleStat">
-<b>${z.sets}</b>
-<span>Series</span>
+
+<b>
+${z.sets}
+</b>
+
+<span>
+Series
+</span>
+
 </div>
+
 
 <div class="muscleStat">
-<b>${z.exercises.size}</b>
-<span>Ejercicios</span>
+
+<b>
+${z.exercises.size}
+</b>
+
+<span>
+Ejercicios
+</span>
+
 </div>
 
 </div>
+
 
 <div style="font-size:.65rem;color:var(--sub);margin-top:6px">
-Sesiones: ${z.sessions.size}
+
+Sesiones:
+${z.sessions.size}
+
 </div>
 
-</div>`;
+</div>
+
+`;
 
 });
+
 
 html+=`
 
@@ -2234,7 +4173,10 @@ de volumen
 series
 </div>
 
-</div>`;
+</div>
+
+`;
+
 
 document.getElementById(
 'studentReportsBox'
@@ -2242,1359 +4184,42 @@ document.getElementById(
 
 }
 
-/* =========================================================
-   AGENDA GENERAL
-========================================================= */
 
-function showAgenda(){
-
-monitorStudentId=null;
-
-document.getElementById(
-'monitorHome'
-).style.display='none';
-
-let e=document.getElementById(
-'monitorEditor'
-);
-
-e.style.display='block';
-
-renderAgenda();
-
-}
-
-function renderAgenda(){
-
-let e=document.getElementById(
-'monitorEditor'
-);
-
-let today=new Date();
-let todayKey=dateKey(today);
-
-let upcoming=appointments
-.filter(x=>x.date>=todayKey)
-.sort((a,b)=>{
-
-let aa=(a.date||'')+' '+(a.time||'');
-let bb=(b.date||'')+' '+(b.time||'');
-
-return aa.localeCompare(bb);
-
-});
-
-let h=`
-
-<div class="monitorBack">
-
-<button
-class="btn out"
-onclick="backToMonitor()">
-← VOLVER A MONITOR
-</button>
-
-</div>
-
-<div class="monitorTitle">
-📅 AGENDA DEL MONITOR
-</div>
-
-<div class="card">
-
-<h2>➕ Nueva cita</h2>
-
-<label>Alumno</label>
-
-<select id="appointmentStudent">
-
-<option value="">
-Selecciona alumno
-</option>
-
-${students.map(s=>
-`<option value="${s.id}">
-${esc(s.name)}
-</option>`
-).join('')}
-
-</select>
-
-<label>Fecha</label>
-<input type="date" id="appointmentDate"
-value="${todayKey}">
-
-<label>Hora</label>
-<input type="time" id="appointmentTime">
-
-<label>Lugar</label>
-
-<select id="appointmentPlace">
-<option value="Gimnasio">🏋️ Gimnasio</option>
-<option value="Domicilio">🏠 Domicilio</option>
-</select>
-
-<label>Notas</label>
-
-<input
-id="appointmentNotes"
-placeholder="Observaciones">
-
-<button
-class="btn"
-onclick="addAppointment()">
-📅 GUARDAR CITA
-</button>
-
-</div>
-
-<div class="card">
-
-<h2>📅 Próximas citas</h2>
-
-<div id="appointmentList">
-`;
-
-if(!upcoming.length){
-
-h+=`
-<div class="empty">
-No hay citas próximas.
-</div>`;
-
-}else{
-
-upcoming.forEach(a=>{
-
-let s=students.find(
-x=>Number(x.id)===Number(a.studentId)
-);
-
-let name=s?s.name:'Alumno eliminado';
-
-h+=`
-
-<div class="appointment">
-
-<strong>
-👤 ${esc(name)}
-</strong>
-
-<div class="appointmentDate">
-📅 ${formatDate(a.date)}
-${a.time?' — ⏰ '+esc(a.time):''}
-</div>
-
-<div class="smallText">
-${a.place==='Domicilio'
-?'🏠 Domicilio'
-:'🏋️ Gimnasio'}
-</div>
-
-${a.notes?
-`<div style="margin-top:5px;font-size:.72rem">
-📝 ${esc(a.notes)}
-</div>`:
-''}
-
-<div class="row">
-
-<button
-class="btn out sm"
-onclick="openAppointmentStudent(${a.studentId})">
-👤 Alumno
-</button>
-
-<button
-class="btn danger sm"
-onclick="deleteAppointment(${a.id})">
-🗑️
-</button>
-
-</div>
-
-</div>`;
-
-});
-
-}
-
-h+=`
-
-</div>
-</div>`;
-
-e.innerHTML=h;
-
-}
-
-function formatDate(v){
-
-if(!v)return'';
-
-let p=String(v).split('-');
-
-if(p.length!==3)
-return v;
-
-return p[2]+'/'+p[1]+'/'+p[0];
-
-}
-
-function addAppointment(){
-
-let sid=document.getElementById(
-'appointmentStudent'
-).value;
-
-let date=document.getElementById(
-'appointmentDate'
-).value;
-
-let time=document.getElementById(
-'appointmentTime'
-).value;
-
-let place=document.getElementById(
-'appointmentPlace'
-).value;
-
-let notes=document.getElementById(
-'appointmentNotes'
-).value.trim();
-
-if(!sid){
-
-alert('Selecciona un alumno.');
-
-return;
-
-}
-
-if(!date){
-
-alert('Selecciona una fecha.');
-
-return;
-
-}
-
-appointments.push({
-
-id:Date.now(),
-studentId:Number(sid),
-date,
-time,
-place,
-notes
-
-});
-
-saveMonitor();
-
-alert('Cita guardada correctamente.');
-
-renderAgenda();
-
-}
-
-function deleteAppointment(id){
-
-if(!confirm('¿Eliminar esta cita?'))
-return;
-
-appointments=appointments.filter(
-x=>Number(x.id)!==Number(id)
-);
-
-saveMonitor();
-
-renderAgenda();
-
-}
-
-function openAppointmentStudent(id){
-
-monitorStudentId=Number(id);
-
-openStudent(Number(id));
-
-}
-
-/* =========================================================
-   AGENDA DEL ALUMNO
-========================================================= */
-
-function studentAgenda(){
-
-let s=getMonitorStudent();
-
-if(!s)return;
-
-let e=document.getElementById(
-'monitorEditor'
-);
-
-let list=appointments
-.filter(
-x=>Number(x.studentId)===Number(s.id)
-)
-.sort(
-(a,b)=>
-((a.date||'')+' '+(a.time||''))
-.localeCompare(
-((b.date||'')+' '+(b.time||''))
-)
-);
-
-let h=`
-
-<div class="monitorBack">
-
-<button
-class="btn out"
-onclick="backToMonitor()">
-← VOLVER A MONITOR
-</button>
-
-</div>
-
-<div class="monitorTitle">
-📅 AGENDA — ${esc(s.name)}
-</div>
-
-<div class="card">
-
-<h2>➕ Nueva cita</h2>
-
-<label>Fecha</label>
-
-<input
-type="date"
-id="studentAppointmentDate"
-value="${new Date().toISOString().slice(0,10)}">
-
-<label>Hora</label>
-<input type="time" id="studentAppointmentTime">
-
-<label>Lugar</label>
-
-<select id="studentAppointmentPlace">
-<option value="Gimnasio">🏋️ Gimnasio</option>
-<option value="Domicilio">🏠 Domicilio</option>
-</select>
-
-<label>Notas</label>
-
-<input
-id="studentAppointmentNotes"
-placeholder="Observaciones">
-
-<button
-class="btn"
-onclick="addStudentAppointment()">
-📅 GUARDAR CITA
-</button>
-
-</div>
-
-<div class="card">
-
-<h2>📅 Citas</h2>
-`;
-
-if(!list.length){
-
-h+=`
-<div class="empty">
-Este alumno no tiene citas.
-</div>`;
-
-}else{
-
-list.forEach(a=>{
-
-h+=`
-
-<div class="appointment">
-
-<div class="appointmentDate">
-📅 ${formatDate(a.date)}
-${a.time?' — ⏰ '+esc(a.time):''}
-</div>
-
-<div class="smallText">
-${a.place==='Domicilio'
-?'🏠 Domicilio'
-:'🏋️ Gimnasio'}
-</div>
-
-${a.notes?
-`<div style="margin-top:5px;font-size:.72rem">
-📝 ${esc(a.notes)}
-</div>`:
-''}
-
-<div class="row">
-
-<button
-class="btn danger sm"
-onclick="deleteStudentAppointment(${a.id})">
-🗑️ Eliminar
-</button>
-
-</div>
-
-</div>`;
-
-});
-
-}
-
-h+=`
-
-</div>
-
-<div class="card">
-
-<button
-class="btn out"
-onclick="openStudent(${s.id})">
-← Volver a ficha
-</button>
-
-</div>`;
-
-e.innerHTML=h;
-
-}
-
-function addStudentAppointment(){
-
-let s=getMonitorStudent();
-
-if(!s)return;
-
-let date=document.getElementById(
-'studentAppointmentDate'
-).value;
-
-let time=document.getElementById(
-'studentAppointmentTime'
-).value;
-
-let place=document.getElementById(
-'studentAppointmentPlace'
-).value;
-
-let notes=document.getElementById(
-'studentAppointmentNotes'
-).value.trim();
-
-if(!date){
-
-alert('Selecciona una fecha.');
-
-return;
-
-}
-
-appointments.push({
-
-id:Date.now(),
-studentId:Number(s.id),
-date,
-time,
-place,
-notes
-
-});
-
-saveMonitor();
-
-alert('Cita guardada correctamente.');
-
-studentAgenda();
-
-}
-
-function deleteStudentAppointment(id){
-
-if(!confirm('¿Eliminar esta cita?'))
-return;
-
-appointments=appointments.filter(
-x=>Number(x.id)!==Number(id)
-);
-
-saveMonitor();
-
-studentAgenda();
-
-}
-
-/* =========================================================
-   CONTABILIDAD
-========================================================= */
-
-function showAccounting(){
-
-monitorStudentId=null;
-
-document.getElementById(
-'monitorHome'
-).style.display='none';
-
-let e=document.getElementById(
-'monitorEditor'
-);
-
-e.style.display='block';
-
-renderAccounting();
-
-}
-
-function renderAccounting(){
-
-let e=document.getElementById(
-'monitorEditor'
-);
-
-let total=0;
-let paid=0;
-let pending=0;
-
-accounting.forEach(a=>{
-
-let amount=num(a.amount);
-
-total+=amount;
-
-if(a.status==='Pagado')
-paid+=amount;
-else
-pending+=amount;
-
-});
-
-let h=`
-
-<div class="monitorBack">
-
-<button
-class="btn out"
-onclick="backToMonitor()">
-← VOLVER A MONITOR
-</button>
-
-</div>
-
-<div class="monitorTitle">
-💰 CONTABILIDAD DEL MONITOR
-</div>
-
-<div class="card">
-
-<h2>📊 Resumen económico</h2>
-
-<div class="statgrid">
-
-<div class="stat">
-<b>${total.toFixed(2)} €</b>
-<span>Total</span>
-</div>
-
-<div class="stat">
-<b>${paid.toFixed(2)} €</b>
-<span>Cobrado</span>
-</div>
-
-<div class="stat">
-<b>${pending.toFixed(2)} €</b>
-<span>Pendiente</span>
-</div>
-
-<div class="stat">
-<b>${accounting.length}</b>
-<span>Movimientos</span>
-</div>
-
-</div>
-
-</div>
-
-<div class="card">
-
-<h2>➕ Nuevo movimiento</h2>
-
-<label>Alumno</label>
-
-<select id="accountStudent">
-
-<option value="">
-Selecciona alumno
-</option>
-
-${students.map(s=>
-`<option value="${s.id}">
-${esc(s.name)}
-</option>`
-).join('')}
-
-</select>
-
-<label>Fecha</label>
-
-<input
-type="date"
-id="accountDate"
-value="${new Date().toISOString().slice(0,10)}">
-
-<label>Importe (€)</label>
-
-<input
-type="number"
-step=".01"
-min="0"
-id="accountAmount"
-placeholder="0.00">
-
-<label>Concepto</label>
-
-<input
-id="accountConcept"
-placeholder="Mensualidad, sesión, bono...">
-
-<label>Forma de pago</label>
-
-<select id="accountMethod">
-
-<option value="Efectivo">💵 Efectivo</option>
-<option value="Tarjeta">💳 Tarjeta</option>
-<option value="Transferencia">🏦 Transferencia</option>
-<option value="Bizum">📱 Bizum</option>
-
-</select>
-
-<label>Estado</label>
-
-<select id="accountStatus">
-
-<option value="Pagado">✅ Pagado</option>
-<option value="Pendiente">⏳ Pendiente</option>
-
-</select>
-
-<button
-class="btn orange"
-onclick="addAccounting()">
-💰 GUARDAR MOVIMIENTO
-</button>
-
-</div>
-
-<div class="card">
-
-<h2>📋 Historial</h2>
-
-<div id="accountingList">
-`;
-
-let arr=[...accounting].sort(
-(a,b)=>
-((b.date||'')+(b.id||''))
-.localeCompare(
-((a.date||'')+(a.id||''))
-)
-);
-
-if(!arr.length){
-
-h+=`
-<div class="empty">
-Todavía no hay movimientos.
-</div>`;
-
-}else{
-
-arr.forEach(a=>{
-
-let s=students.find(
-x=>Number(x.id)===Number(a.studentId)
-);
-
-let name=s?s.name:'Alumno eliminado';
-
-let status=a.status==='Pagado';
-
-h+=`
-
-<div class="moneyCard">
-
-<strong>
-👤 ${esc(name)}
-</strong>
-
-<div style="font-size:.7rem;color:var(--sub);margin-top:3px">
-📅 ${formatDate(a.date)}
-</div>
-
-<div
-style="font-size:1.05rem;font-weight:bold;margin-top:6px"
-class="${status?'moneyPaid':'moneyPending'}">
-
-${num(a.amount).toFixed(2)} €
-
-</div>
-
-<div class="smallText">
-${esc(a.concept||'Sin concepto')}
-</div>
-
-<div class="smallText">
-${a.method==='Efectivo'?'💵':
-a.method==='Tarjeta'?'💳':
-a.method==='Transferencia'?'🏦':'📱'}
-${esc(a.method||'')}
-—
-${status?'✅ Pagado':'⏳ Pendiente'}
-</div>
-
-<div class="row">
-
-<button
-class="btn out sm"
-onclick="openStudent(${a.studentId})">
-👤 Alumno
-</button>
-
-<button
-class="btn danger sm"
-onclick="deleteAccounting(${a.id})">
-🗑️
-</button>
-
-</div>
-
-</div>`;
-
-});
-
-}
-
-h+=`
-
-</div>
-</div>`;
-
-e.innerHTML=h;
-
-}
-
-function addAccounting(){
-
-let sid=document.getElementById(
-'accountStudent'
-).value;
-
-let date=document.getElementById(
-'accountDate'
-).value;
-
-let amount=num(
-document.getElementById(
-'accountAmount'
-).value
-);
-
-let concept=document.getElementById(
-'accountConcept'
-).value.trim();
-
-let method=document.getElementById(
-'accountMethod'
-).value;
-
-let status=document.getElementById(
-'accountStatus'
-).value;
-
-if(!sid){
-
-alert('Selecciona un alumno.');
-
-return;
-
-}
-
-if(!date){
-
-alert('Selecciona una fecha.');
-
-return;
-
-}
-
-if(amount<=0){
-
-alert('Introduce un importe válido.');
-
-return;
-
-}
-
-accounting.push({
-
-id:Date.now(),
-studentId:Number(sid),
-date,
-amount,
-concept,
-method,
-status
-
-});
-
-saveMonitor();
-
-alert('Movimiento guardado correctamente.');
-
-renderAccounting();
-
-}
-
-function deleteAccounting(id){
-
-if(!confirm('¿Eliminar este movimiento?'))
-return;
-
-accounting=accounting.filter(
-x=>Number(x.id)!==Number(id)
-);
-
-saveMonitor();
-
-renderAccounting();
-
-}
-
-/* =========================================================
-   CONTABILIDAD ALUMNO
-========================================================= */
-
-function studentAccounting(){
-
-let s=getMonitorStudent();
-
-if(!s)return;
-
-let e=document.getElementById(
-'monitorEditor'
-);
-
-let arr=accounting
-.filter(
-x=>Number(x.studentId)===Number(s.id)
-)
-.sort(
-(a,b)=>
-((b.date||'')+(b.id||''))
-.localeCompare(
-((a.date||'')+(a.id||''))
-)
-);
-
-let total=0;
-let paid=0;
-let pending=0;
-
-arr.forEach(a=>{
-
-let v=num(a.amount);
-
-total+=v;
-
-if(a.status==='Pagado')
-paid+=v;
-else
-pending+=v;
-
-});
-
-let h=`
-
-<div class="monitorBack">
-
-<button
-class="btn out"
-onclick="backToMonitor()">
-← VOLVER A MONITOR
-</button>
-
-</div>
-
-<div class="monitorTitle">
-💰 CONTABILIDAD — ${esc(s.name)}
-</div>
-
-<div class="card">
-
-<h2>📊 Resumen</h2>
-
-<div class="statgrid">
-
-<div class="stat">
-<b>${total.toFixed(2)} €</b>
-<span>Total</span>
-</div>
-
-<div class="stat">
-<b>${paid.toFixed(2)} €</b>
-<span>Cobrado</span>
-</div>
-
-<div class="stat">
-<b>${pending.toFixed(2)} €</b>
-<span>Pendiente</span>
-</div>
-
-</div>
-
-</div>
-
-<div class="card">
-
-<h2>➕ Nuevo cobro</h2>
-
-<label>Fecha</label>
-
-<input
-type="date"
-id="studentAccountDate"
-value="${new Date().toISOString().slice(0,10)}">
-
-<label>Importe (€)</label>
-
-<input
-type="number"
-step=".01"
-min="0"
-id="studentAccountAmount"
-placeholder="0.00">
-
-<label>Concepto</label>
-
-<input
-id="studentAccountConcept"
-placeholder="Mensualidad, sesión, bono...">
-
-<label>Forma de pago</label>
-
-<select id="studentAccountMethod">
-
-<option value="Efectivo">💵 Efectivo</option>
-<option value="Tarjeta">💳 Tarjeta</option>
-<option value="Transferencia">🏦 Transferencia</option>
-<option value="Bizum">📱 Bizum</option>
-
-</select>
-
-<label>Estado</label>
-
-<select id="studentAccountStatus">
-
-<option value="Pagado">✅ Pagado</option>
-<option value="Pendiente">⏳ Pendiente</option>
-
-</select>
-
-<button
-class="btn orange"
-onclick="addStudentAccounting()">
-💰 GUARDAR
-</button>
-
-</div>
-
-<div class="card">
-
-<h2>📋 Movimientos</h2>
-`;
-
-if(!arr.length){
-
-h+=`
-<div class="empty">
-Este alumno no tiene movimientos.
-</div>`;
-
-}else{
-
-arr.forEach(a=>{
-
-h+=`
-
-<div class="moneyCard">
-
-<div class="${
-a.status==='Pagado'
-?'moneyPaid'
-:'moneyPending'
-}"
-style="font-size:1.05rem;font-weight:bold">
-
-${num(a.amount).toFixed(2)} €
-
-</div>
-
-<div class="smallText">
-📅 ${formatDate(a.date)}
-</div>
-
-<div class="smallText">
-📝 ${esc(a.concept||'Sin concepto')}
-</div>
-
-<div class="smallText">
-${a.method==='Efectivo'?'💵':
-a.method==='Tarjeta'?'💳':
-a.method==='Transferencia'?'🏦':'📱'}
-${esc(a.method||'')}
-—
-${a.status==='Pagado'
-?'✅ Pagado'
-:'⏳ Pendiente'}
-</div>
-
-<div class="row">
-
-<button
-class="btn danger sm"
-onclick="deleteStudentAccounting(${a.id})">
-🗑️ Eliminar
-</button>
-
-</div>
-
-</div>`;
-
-});
-
-}
-
-h+=`
-
-</div>
-
-<div class="card">
-
-<button
-class="btn out"
-onclick="openStudent(${s.id})">
-← Volver a ficha
-</button>
-
-</div>`;
-
-e.innerHTML=h;
-
-}
-
-function addStudentAccounting(){
-
-let s=getMonitorStudent();
-
-if(!s)return;
-
-let date=document.getElementById(
-'studentAccountDate'
-).value;
-
-let amount=num(
-document.getElementById(
-'studentAccountAmount'
-).value
-);
-
-let concept=document.getElementById(
-'studentAccountConcept'
-).value.trim();
-
-let method=document.getElementById(
-'studentAccountMethod'
-).value;
-
-let status=document.getElementById(
-'studentAccountStatus'
-).value;
-
-if(!date){
-
-alert('Selecciona una fecha.');
-
-return;
-
-}
-
-if(amount<=0){
-
-alert('Introduce un importe válido.');
-
-return;
-
-}
-
-accounting.push({
-
-id:Date.now(),
-studentId:Number(s.id),
-date,
-amount,
-concept,
-method,
-status
-
-});
-
-saveMonitor();
-
-alert('Movimiento guardado correctamente.');
-
-studentAccounting();
-
-}
-
-function deleteStudentAccounting(id){
-
-if(!confirm('¿Eliminar este movimiento?'))
-return;
-
-accounting=accounting.filter(
-x=>Number(x.id)!==Number(id)
-);
-
-saveMonitor();
-
-studentAccounting();
-
-}
-
-/* =========================================================
-   RESUMEN MONITOR
-========================================================= */
-
-function showMonitorSummary(){
-
-monitorStudentId=null;
-
-document.getElementById(
-'monitorHome'
-).style.display='none';
-
-let e=document.getElementById(
-'monitorEditor'
-);
-
-e.style.display='block';
-
-let total=0;
-let paid=0;
-let pending=0;
-
-accounting.forEach(a=>{
-
-let v=num(a.amount);
-
-total+=v;
-
-if(a.status==='Pagado')
-paid+=v;
-else
-pending+=v;
-
-});
-
-let upcoming=appointments
-.filter(
-a=>a.date>=dateKey(new Date())
-)
-.sort(
-(a,b)=>
-((a.date||'')+(a.time||''))
-.localeCompare(
-((b.date||'')+(b.time||''))
-)
-)
-.slice(0,5);
-
-let h=`
-
-<div class="monitorBack">
-
-<button
-class="btn out"
-onclick="backToMonitor()">
-← VOLVER A MONITOR
-</button>
-
-</div>
-
-<div class="monitorTitle">
-📊 RESUMEN DEL MONITOR
-</div>
-
-<div class="card">
-
-<h2>👥 Alumnos</h2>
-
-<div class="statgrid">
-
-<div class="stat">
-<b>${students.length}</b>
-<span>Alumnos</span>
-</div>
-
-<div class="stat">
-<b>${appointments.length}</b>
-<span>Citas</span>
-</div>
-
-</div>
-
-</div>
-
-<div class="card">
-
-<h2>💰 Contabilidad</h2>
-
-<div class="statgrid">
-
-<div class="stat">
-<b>${total.toFixed(2)} €</b>
-<span>Total</span>
-</div>
-
-<div class="stat">
-<b>${paid.toFixed(2)} €</b>
-<span>Cobrado</span>
-</div>
-
-<div class="stat">
-<b>${pending.toFixed(2)} €</b>
-<span>Pendiente</span>
-</div>
-
-<div class="stat">
-<b>${accounting.length}</b>
-<span>Movimientos</span>
-</div>
-
-</div>
-
-</div>
-
-<div class="card">
-
-<h2>📅 Próximas citas</h2>`;
-
-if(!upcoming.length){
-
-h+=`
-<div class="empty">
-No hay próximas citas.
-</div>`;
-
-}else{
-
-upcoming.forEach(a=>{
-
-let s=students.find(
-x=>Number(x.id)===Number(a.studentId)
-);
-
-h+=`
-
-<div class="appointment">
-
-<strong>
-👤 ${esc(s?s.name:'Alumno')}
-</strong>
-
-<div class="appointmentDate">
-📅 ${formatDate(a.date)}
-${a.time?' — ⏰ '+esc(a.time):''}
-</div>
-
-<div class="smallText">
-${a.place==='Domicilio'
-?'🏠 Domicilio'
-:'🏋️ Gimnasio'}
-</div>
-
-</div>`;
-
-});
-
-}
-
-h+=`
-
-</div>
-
-<div class="card">
-
-<div class="quickGrid">
-
-<button
-class="btn blue"
-onclick="showAgenda()">
-📅 AGENDA
-</button>
-
-<button
-class="btn orange"
-onclick="showAccounting()">
-💰 CONTABILIDAD
-</button>
-
-</div>
-
-</div>`;
-
-e.innerHTML=h;
-
-}
-
-/* =========================================================
-   ENTRENAMIENTO PERSONAL
-========================================================= */
+/* ======================================================
+ENTRENAMIENTO PERSONAL
+====================================================== */
 
 let day=null;
 let monthDate=new Date();
 let timerInterval=null;
 let timerSeconds=0;
 
+
 function history(ex){
 
 let a=[];
+
 
 uniqueSessions(logs).forEach(
 l=>
 (l.groups||[]).forEach(
 g=>
-(g.exercises||[]).forEach(e=>{
+(g.exercises||[]).forEach(
+e=>{
 
 if(e.name===ex)
 
 a.push({
+
 date:new Date(l.date),
 sets:e.sets||[]
+
 });
 
 })
 )
 );
+
 
 return a.sort(
 (a,b)=>a.date-b.date
@@ -3602,14 +4227,15 @@ return a.sort(
 
 }
 
+
 function previousDayLog(d){
 
 let a=logs.filter(
 l=>Number(l.day)===Number(d)
 );
 
-if(!a.length)
-return null;
+if(!a.length)return null;
+
 
 a.sort(
 (x,y)=>new Date(x.date)-new Date(y.date)
@@ -3619,68 +4245,83 @@ return a[a.length-1];
 
 }
 
-function getPreviousExercise(
-log,
-name
-){
+
+function getPreviousExercise(log,name){
 
 if(!log)return null;
 
+
 for(let g of(log.groups||[]))
+
 for(let e of(g.exercises||[]))
+
 if(e.name===name)
 return e;
+
 
 return null;
 
 }
 
+
 function selectDay(d){
 
 day=d;
+
 
 routine=safeParse(
 localStorage.getItem(K+'routine'),
 clone(DEFAULT_ROUTINE)
 );
 
+
 normalizeRoutine();
+
 
 document.getElementById(
 'work'
 ).style.display='block';
+
 
 document.getElementById(
 'daytitle'
 ).innerText=
 'Entrenamiento - Día '+d;
 
+
 document.getElementById(
 'date'
 ).value=
 new Date().toISOString().slice(0,10);
 
+
 document.getElementById(
 'summary'
 ).innerHTML='';
 
+
 let p=previousDayLog(d);
+
 
 document.getElementById(
 'loadedmsg'
 ).innerHTML=
+
 p?
-'<div class="loaded">📋 Último entrenamiento disponible. Las nuevas celdas empiezan vacías.</div>'
-:'';
+'<div class="loaded">📋 Último entrenamiento disponible. Las nuevas celdas empiezan vacías.</div>':
+'';
+
 
 renderWorkout(p);
 
 }
 
+
 function renderWorkout(previous){
 
 let x=routine[day];
 let html='';
+
 
 (x.groups||[]).forEach(
 (g,gi)=>{
@@ -3689,6 +4330,7 @@ html+=
 '<div class="group">'+
 esc(g.name)+
 '</div>';
+
 
 (g.exercises||[]).forEach(
 (ex,i)=>{
@@ -3699,16 +4341,17 @@ previous,
 ex
 );
 
-let ps=
-old
-?(old.sets||[]).slice(0,3)
-:[];
+
+let ps=old?
+(old.sets||[]).slice(0,3):[];
+
 
 while(ps.length<3)
 ps.push({
 reps:'',
 weight:''
 });
+
 
 let lw=Math.max(
 0,
@@ -3717,19 +4360,26 @@ s=>num(s.weight)
 )
 );
 
+
 let suggestion=
-lw
-?Math.round(lw*1.025*10)/10
-:0;
+lw?
+Math.round(
+lw*1.025*10
+)/10:
+0;
+
 
 let img=
 (g.images||[])[i]||'';
 
+
 let iid=
 'img-'+gi+'-'+i;
 
+
 let prefix=
 'g'+gi+'-e'+i;
+
 
 html+=`
 
@@ -3748,20 +4398,21 @@ style="display:none">
 🏆 PR
 </span>
 
-</div>`;
+</div>
+
+`;
+
 
 if(img)
 
 html+=`
 
-<button
-class="imgbtn"
+<button class="imgbtn"
 onclick="toggleImage('${iid}')">
 🖼️ Ver imagen
 </button>
 
-<div
-id="${iid}"
+<div id="${iid}"
 class="imgbox">
 
 <img
@@ -3770,43 +4421,59 @@ alt="${esc(ex)}">
 
 <br>
 
-<button
-class="imgbtn"
+<button class="imgbtn"
 onclick="toggleImage('${iid}')">
 ✕ Cerrar imagen
 </button>
 
-</div>`;
+</div>
+
+`;
+
 
 html+=old?
 
-`<div class="last">
-Último ${new Date(previous.date).toLocaleDateString('es-ES')}:
+`
+
+<div class="last">
+
+Último
+${new Date(previous.date)
+.toLocaleDateString('es-ES')}:
+
 ${ps.map(
 (s,j)=>
 'S'+(j+1)+' '+
 (num(s.reps)||'')+
 '×'+
-(s.weight!==''&&s.weight!=null?s.weight:'')+
+(s.weight!==''&&s.weight!=null?
+s.weight:'')+
 'kg'
 ).join(' · ')}
-</div>`
+
+</div>
+
+`
 
 :
 
 '<div class="last">Sin registro previo</div>';
 
+
 if(suggestion)
 
 html+=`
 
-<div
-class="suggest"
+<div class="suggest"
 onclick="suggest('${prefix}',${suggestion})">
 
-💡 Propuesta: ${suggestion} kg (+2,5%)
+💡 Propuesta:
+${suggestion} kg (+2,5%)
 
-</div>`;
+</div>
+
+`;
+
 
 html+=`
 
@@ -3815,15 +4482,20 @@ html+=`
 <thead>
 
 <tr>
+
 <th>S</th>
 <th>Reps</th>
 <th>Kg</th>
 <th></th>
+
 </tr>
 
 </thead>
 
-<tbody>`;
+<tbody>
+
+`;
+
 
 for(let j=0;j<3;j++)
 
@@ -3860,63 +4532,72 @@ oninput="calc('${prefix}');pr('${prefix}','${esc(ex)}')">
 
 <td></td>
 
-</tr>`;
+</tr>
+
+`;
+
 
 html+=`
 
 </tbody>
+
 </table>
 
-<div
-class="rm"
+
+<div class="rm"
 id="rm-${prefix}">
 🔥 1RM estimado: --
 </div>
 
-<div
-class="vol"
+
+<div class="vol"
 id="vol-${prefix}">
 📦 Volumen: 0 kg
 </div>
 
-<button
-class="restbtn"
+
+<button class="restbtn"
 onclick="startTimer()">
+
 ⏱️ Descanso 2:00
+
 </button>
+
 
 <button
 class="save-ex"
 id="save-${prefix}"
-onclick="saveExercise(
-'${prefix}',
-${gi},
-${i},
-'${esc(ex)}'
-)">
+onclick="saveExercise('${prefix}',${gi},${i},'${esc(ex)}')">
+
 💾 GUARDAR EJERCICIO
+
 </button>
+
 
 <div class="row">
 
-<button
-class="finish"
+<button class="finish"
 onclick="showHistory('${esc(ex)}')">
+
 📜 Historial
+
 </button>
 
 </div>
 
-</div>`;
+</div>
+
+`;
 
 });
 
-}
-);
+});
+
 
 document.getElementById(
 'form'
 ).innerHTML=html;
+
 
 (x.groups||[]).forEach(
 (g,gi)=>
@@ -3933,6 +4614,7 @@ pr(p,ex);
 
 }
 
+
 function selectCell(e){
 
 setTimeout(
@@ -3942,6 +4624,7 @@ setTimeout(
 
 }
 
+
 function getCurrentExerciseData(
 p,
 ex
@@ -3949,6 +4632,7 @@ ex
 
 let sets=[];
 
+
 for(let j=0;j<3;j++){
 
 let r=document.getElementById(
@@ -3959,43 +4643,52 @@ let w=document.getElementById(
 p+'-w'+j
 );
 
-if(!r||!w)
-continue;
+
+if(!r||!w)continue;
+
 
 sets.push({
 
-reps:r.value===''
-?0
-:num(r.value),
+reps:
+r.value===''?
+0:num(r.value),
 
-weight:w.value===''
-?0
-:num(w.value)
+weight:
+w.value===''?
+0:num(w.value)
 
 });
 
 }
 
+
 let real=sets.filter(
 s=>num(s.reps)>0
 );
 
+
 return{
 
 name:ex,
+
 sets,
+
 realSets:real,
+
 volume:volume(real),
+
 rm:maxSetRM(real)
 
 };
 
 }
 
+
 function calc(p){
 
 let best=0;
 let vol=0;
+
 
 for(let j=0;j<3;j++){
 
@@ -4007,11 +4700,13 @@ let r=document.getElementById(
 p+'-r'+j
 );
 
-if(!w||!r)
-continue;
+
+if(!w||!r)continue;
+
 
 let W=num(w.value);
 let R=num(r.value);
+
 
 if(W>0&&R>0){
 
@@ -4026,6 +4721,7 @@ vol+=W*R;
 
 }
 
+
 let a=document.getElementById(
 'rm-'+p
 );
@@ -4034,11 +4730,15 @@ let b=document.getElementById(
 'vol-'+p
 );
 
+
 if(a)
 
 a.innerText=
 '🔥 1RM estimado: '+
-(best?Math.round(best*10)/10+' kg':'--');
+(best?
+Math.round(best*10)/10+' kg':
+'--');
+
 
 if(b)
 
@@ -4048,6 +4748,7 @@ Math.round(vol*10)/10+
 ' kg';
 
 }
+
 
 function suggest(p,w){
 
@@ -4070,9 +4771,11 @@ new Event(
 
 }
 
+
 function maxWeight(ex){
 
 let m=0;
+
 
 history(ex).forEach(
 x=>
@@ -4085,14 +4788,17 @@ num(s.weight)
 )
 );
 
+
 return m;
 
 }
+
 
 function pr(p,ex){
 
 let old=maxWeight(ex);
 let v=0;
+
 
 for(let j=0;j<3;j++){
 
@@ -4108,18 +4814,21 @@ num(e.value)
 
 }
 
+
 let b=document.getElementById(
 'pr-'+p
 );
 
+
 if(b)
 
 b.style.display=
-v>old&&old>0
-?'inline'
-:'none';
+v>old&&old>0?
+'inline':
+'none';
 
 }
+
 
 function saveExercise(
 p,
@@ -4128,14 +4837,15 @@ i,
 ex
 ){
 
-if(day===null)
-return;
+if(day===null)return;
+
 
 let data=
 getCurrentExerciseData(
 p,
 ex
 );
+
 
 if(!data.realSets.length){
 
@@ -4147,17 +4857,20 @@ return;
 
 }
 
+
 let cd=document.getElementById(
 'date'
 ).value;
 
-if(!cd)
-return;
+
+if(!cd)return;
+
 
 let log=findSession(
 day,
 cd
 );
+
 
 if(!log){
 
@@ -4179,15 +4892,17 @@ logs.push(log);
 
 }
 
+
 let gn=
 routine[day].groups[gi].name;
 
-let g=
-(log.groups||[]).find(
+
+let g=(log.groups||[]).find(
 g=>
 Number(g.groupIndex)===Number(gi)&&
 g.name===gn
 );
+
 
 if(!g){
 
@@ -4201,18 +4916,21 @@ log.groups.push(g);
 
 }
 
-let clean=
-data.sets.map(
+
+let clean=data.sets.map(
 s=>({
+
 reps:num(s.reps),
 weight:num(s.weight)
+
 })
 );
 
-let old=
-g.exercises.find(
+
+let old=g.exercises.find(
 e=>e.name===ex
 );
+
 
 if(old){
 
@@ -4233,6 +4951,7 @@ rm:data.rm
 
 }
 
+
 cleanSession(log);
 
 save();
@@ -4242,6 +4961,7 @@ showSavedButton(
 );
 
 }
+
 
 function cleanSession(log){
 
@@ -4256,6 +4976,7 @@ s=>num(s.reps)>0
 )
 );
 
+
 log.groups=
 (log.groups||[]).filter(
 g=>
@@ -4264,16 +4985,19 @@ g=>
 
 }
 
+
 function showSavedButton(id){
 
 let b=document.getElementById(id);
 
 if(!b)return;
 
+
 b.classList.add('saved');
 
 b.innerText=
 '✓ EJERCICIO GUARDADO';
+
 
 setTimeout(
 ()=>{
@@ -4289,12 +5013,13 @@ b.innerText=
 
 }
 
+
 function showHistory(ex){
 
-let a=
-history(ex)
+let a=history(ex)
 .slice(-10)
 .reverse();
+
 
 if(!a.length){
 
@@ -4304,20 +5029,18 @@ return;
 
 }
 
+
 alert(
 a.map(
 x=>
 x.date.toLocaleDateString('es-ES')+
 ' — '+
-x.sets.filter(
-s=>s.reps>0
-)
+x.sets
+.filter(s=>s.reps>0)
 .map(
 s=>
-num(s.reps)+
-'×'+
-num(s.weight)+
-'kg'
+num(s.reps)+'×'+
+num(s.weight)+'kg'
 )
 .join(' · ')
 )
@@ -4326,14 +5049,16 @@ num(s.weight)+
 
 }
 
+
 function saveWorkout(){
 
-if(!day)
-return;
+if(!day)return;
+
 
 let cd=document.getElementById(
 'date'
 ).value;
+
 
 if(!cd){
 
@@ -4345,10 +5070,12 @@ return;
 
 }
 
+
 let log=findSession(
 day,
 cd
 );
+
 
 if(!log){
 
@@ -4370,21 +5097,23 @@ logs.push(log);
 
 }
 
+
 let x=routine[day];
 
 let tv=0;
 let ts=0;
 let te=0;
 
+
 (x.groups||[]).forEach(
 (g,gi)=>{
 
-let lg=
-log.groups.find(
+let lg=log.groups.find(
 z=>
 Number(z.groupIndex)===Number(gi)&&
 z.name===g.name
 );
+
 
 if(!lg){
 
@@ -4398,7 +5127,9 @@ log.groups.push(lg);
 
 }
 
-(g.exercises||[]).forEach(
+
+(g.exercises||[])
+.forEach(
 (ex,i)=>{
 
 let d=
@@ -4407,8 +5138,10 @@ getCurrentExerciseData(
 ex
 );
 
+
 if(!d.realSets.length)
 return;
+
 
 let ed={
 
@@ -4416,25 +5149,32 @@ name:ex,
 
 sets:d.sets.map(
 s=>({
+
 reps:num(s.reps),
 weight:num(s.weight)
+
 })
 ),
 
 volume:d.volume,
+
 rm:d.rm
 
 };
+
 
 let old=
 lg.exercises.find(
 e=>e.name===ex
 );
 
+
 if(old)
 Object.assign(old,ed);
+
 else
 lg.exercises.push(ed);
+
 
 te++;
 ts+=d.realSets.length;
@@ -4442,14 +5182,15 @@ tv+=d.volume;
 
 });
 
-}
-);
+});
+
 
 cleanSession(log);
 
 save();
 
 clearWorkoutInputs();
+
 
 document.getElementById(
 'summary'
@@ -4482,15 +5223,19 @@ kg de volumen realizado
 
 <br>
 
-<button
-class="btn"
+<button class="btn"
 onclick="finishSummary()">
+
 Continuar
+
 </button>
 
-</div>`;
+</div>
+
+`;
 
 }
+
 
 function clearWorkoutInputs(){
 
@@ -4501,23 +5246,24 @@ document.querySelectorAll(
 e=>e.value=''
 );
 
-document.querySelectorAll(
-'.rm'
-)
+
+document.querySelectorAll('.rm')
 .forEach(
-e=>e.innerText=
+e=>
+e.innerText=
 '🔥 1RM estimado: --'
 );
 
-document.querySelectorAll(
-'.vol'
-)
+
+document.querySelectorAll('.vol')
 .forEach(
-e=>e.innerText=
+e=>
+e.innerText=
 '📦 Volumen: 0 kg'
 );
 
 }
+
 
 function finishSummary(){
 
@@ -4531,9 +5277,10 @@ document.getElementById(
 
 }
 
-/* =========================================================
-   CONFIGURACION RUTINA
-========================================================= */
+
+/* ======================================================
+CONFIGURACION RUTINA
+====================================================== */
 
 function loadConfig(){
 
@@ -4544,7 +5291,9 @@ document.getElementById(
 );
 
 let x=routine[d];
+
 let h='';
+
 
 (x.groups||[]).forEach(
 (g,gi)=>{
@@ -4562,10 +5311,13 @@ GRUPO ${gi+1}
 <button
 class="btn danger sm"
 onclick="removeGroup(${gi})">
+
 🗑️ Eliminar grupo
+
 </button>
 
 </div>
+
 
 <label>
 Nombre del grupo
@@ -4576,6 +5328,7 @@ class="groupName"
 data-group="${gi}"
 value="${esc(g.name)}">
 
+
 <div class="editorTitle">
 
 <span class="group">
@@ -4585,39 +5338,54 @@ Ejercicios
 <button
 class="btn out sm"
 onclick="addExercise(${gi})">
+
 + Añadir
+
 </button>
 
 </div>
 
+
 <div id="groupExercises-${gi}">
-${(g.exercises||[]).map(
+
+${(g.exercises||[])
+.map(
 (e,i)=>
 field(
 gi,
 e,
 (g.images||[])[i]||''
 )
-).join('')}
+)
+.join('')}
+
 </div>
 
-</div>`;
+</div>
+
+`;
 
 });
 
+
 h+=`
 
-<button
-class="btn blue"
+<button class="btn blue"
 onclick="addGroup()">
+
 ➕ AÑADIR GRUPO MUSCULAR
-</button>`;
+
+</button>
+
+`;
+
 
 document.getElementById(
 'editor'
 ).innerHTML=h;
 
 }
+
 
 function field(gi,n,img){
 
@@ -4634,6 +5402,7 @@ class="g${gi}e"
 value="${esc(n)}"
 placeholder="Ejercicio">
 
+
 <label>
 Imagen / GIF
 </label>
@@ -4643,15 +5412,21 @@ class="g${gi}i"
 value="${esc(img)}"
 placeholder="URL de imagen o GIF">
 
+
 <button
 class="btn danger sm"
 onclick="removeExercise(this)">
+
 🗑️ Eliminar
+
 </button>
 
-</div>`;
+</div>
+
+`;
 
 }
+
 
 function addGroup(){
 
@@ -4661,6 +5436,7 @@ document.getElementById(
 ).value
 );
 
+
 routine[d].groups.push({
 
 name:'Nuevo grupo',
@@ -4669,9 +5445,11 @@ images:[]
 
 });
 
+
 loadConfig();
 
 }
+
 
 function removeGroup(gi){
 
@@ -4680,6 +5458,7 @@ document.getElementById(
 'cfgday'
 ).value
 );
+
 
 if(routine[d].groups.length<=1){
 
@@ -4690,6 +5469,7 @@ alert(
 return;
 
 }
+
 
 if(confirm(
 '¿Eliminar este grupo y todos sus ejercicios?'
@@ -4706,6 +5486,7 @@ loadConfig();
 
 }
 
+
 function addExercise(gi){
 
 document.getElementById(
@@ -4718,19 +5499,21 @@ field(gi,'','')
 
 }
 
+
 function removeExercise(b){
 
 let x=b.closest('.ex');
 
+
 if(
-x&&
-confirm(
+x&&confirm(
 '¿Eliminar este ejercicio de la rutina?'
 )
 )
 x.remove();
 
 }
+
 
 function saveConfig(){
 
@@ -4740,50 +5523,59 @@ document.getElementById(
 ).value
 );
 
+
 let x={
 groups:[]
 };
 
+
 document.querySelectorAll(
 '.groupEditor'
-).forEach(
+)
+.forEach(
 (ed,gi)=>{
 
 let n=
 ed.querySelector(
 '.groupName'
-).value.trim()
-||
+).value.trim()||
 'Grupo '+(gi+1);
+
 
 let es=[];
 let ims=[];
 
+
 ed.querySelectorAll(
 '.g'+gi+'e'
-).forEach(
+)
+.forEach(
 (e,i)=>{
 
 let v=e.value.trim();
 
+
 if(v){
 
 es.push(v);
+
 
 let im=
 ed.querySelectorAll(
 '.g'+gi+'i'
 )[i];
 
+
 ims.push(
-im
-?im.value.trim()
-:''
+im?
+im.value.trim():
+''
 );
 
 }
 
 });
+
 
 x.groups.push({
 
@@ -4793,8 +5585,8 @@ images:ims
 
 });
 
-}
-);
+});
+
 
 if(!x.groups.length){
 
@@ -4806,16 +5598,19 @@ return;
 
 }
 
+
 routine[d]=x;
 
 normalizeRoutine();
 
 save();
 
+
 if(day===d)
 renderWorkout(
 previousDayLog(d)
 );
+
 
 alert(
 'Rutina guardada correctamente.'
@@ -4823,9 +5618,10 @@ alert(
 
 }
 
-/* =========================================================
-   COPIAS DE SEGURIDAD
-========================================================= */
+
+/* ======================================================
+COPIAS SEGURIDAD
+====================================================== */
 
 function exportData(){
 
@@ -4835,19 +5631,17 @@ app:'Mi Gimnasio Pro',
 
 version:'6.2',
 
-exported:new Date().toISOString(),
+exported:
+new Date().toISOString(),
 
 routine,
 
 logs,
 
-students,
-
-appointments,
-
-accounting
+students
 
 };
+
 
 let b=new Blob(
 [
@@ -4862,18 +5656,20 @@ type:'application/json'
 }
 );
 
-let u=
-URL.createObjectURL(b);
 
-let a=
-document.createElement('a');
+let u=URL.createObjectURL(b);
+
+let a=document.createElement('a');
 
 a.href=u;
 
 a.download=
-'gym_v6.2_backup_'+
-new Date().toISOString().slice(0,10)+
+'gym_v6_backup_'+
+new Date()
+.toISOString()
+.slice(0,10)+
 '.json';
+
 
 document.body.appendChild(a);
 
@@ -4881,17 +5677,24 @@ a.click();
 
 a.remove();
 
+
 setTimeout(
 ()=>URL.revokeObjectURL(u),
 1000
 );
 
+
 document.getElementById(
 'backupStatus'
 ).innerHTML=
-'<span class="backupOk">✓ Copia completa creada correctamente.<br>Alumnos, rutinas, entrenamientos, agenda y contabilidad incluidos.</span>';
+
+'<span class="backupOk">'+
+'✓ Copia completa creada correctamente.'+
+'<br>Guárdala en un lugar seguro.'+
+'</span>';
 
 }
+
 
 function importData(e){
 
@@ -4899,7 +5702,9 @@ let f=e.target.files[0];
 
 if(!f)return;
 
+
 let r=new FileReader();
+
 
 r.onload=()=>{
 
@@ -4909,12 +5714,14 @@ let d=JSON.parse(
 r.result
 );
 
+
 if(
 !d||
 !d.routine||
 !Array.isArray(d.logs)
 )
 throw 0;
+
 
 routine=clone(
 d.routine
@@ -4924,14 +5731,12 @@ logs=clone(
 d.logs
 );
 
+
 if(Array.isArray(d.students))
-students=clone(d.students);
+students=clone(
+d.students
+);
 
-if(Array.isArray(d.appointments))
-appointments=clone(d.appointments);
-
-if(Array.isArray(d.accounting))
-accounting=clone(d.accounting);
 
 normalizeRoutine();
 
@@ -4939,11 +5744,14 @@ save();
 
 saveMonitor();
 
+
 alert(
 '✓ Datos recuperados correctamente.'
 );
 
+
 location.reload();
+
 
 }catch(x){
 
@@ -4953,17 +5761,20 @@ alert(
 
 }
 
+
 e.target.value='';
 
 };
+
 
 r.readAsText(f);
 
 }
 
-/* =========================================================
-   CALENDARIO
-========================================================= */
+
+/* ======================================================
+CALENDARIO
+====================================================== */
 
 function month(n){
 
@@ -4975,30 +5786,34 @@ renderCalendar();
 
 }
 
+
 function renderCalendar(){
 
 let y=monthDate.getFullYear();
+
 let m=monthDate.getMonth();
 
+
 let names=[
-'Enero','Febrero','Marzo','Abril','Mayo','Junio',
-'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'
+'Enero','Febrero','Marzo','Abril',
+'Mayo','Junio','Julio','Agosto',
+'Septiembre','Octubre','Noviembre','Diciembre'
 ];
+
 
 document.getElementById(
 'monthname'
 ).innerText=
 names[m]+' '+y;
 
+
 let first=
 (new Date(y,m,1).getDay()+6)%7;
 
+
 let days=
-new Date(
-y,
-m+1,
-0
-).getDate();
+new Date(y,m+1,0).getDate();
+
 
 let h=[
 'Lu','Ma','Mi','Ju','Vi','Sá','Do'
@@ -5011,8 +5826,12 @@ x+
 )
 .join('');
 
+
 for(let i=0;i<first;i++)
-h+='<div class="cal empty"></div>';
+
+h+=
+'<div class="cal empty"></div>';
+
 
 for(let d=1;d<=days;d++){
 
@@ -5021,37 +5840,41 @@ uniqueSessions(logs)
 .some(
 l=>{
 
-let z=new Date(
-l.date
-);
+let z=new Date(l.date);
 
-return
-z.getFullYear()===y&&
+return z.getFullYear()===y&&
 z.getMonth()===m&&
 z.getDate()===d;
 
-}
-);
+});
+
 
 h+=`
 
 <div
 class="cal ${on?'on':''}"
 onclick="detail(${y},${m},${d})">
+
 ${d}
-</div>`;
+
+</div>
+
+`;
 
 }
+
 
 document.getElementById(
 'calendar'
 ).innerHTML=h;
+
 
 document.getElementById(
 'detail'
 ).innerHTML='';
 
 }
+
 
 function detail(y,m,d){
 
@@ -5060,17 +5883,14 @@ uniqueSessions(logs)
 .filter(
 l=>{
 
-let z=new Date(
-l.date
-);
+let z=new Date(l.date);
 
-return
-z.getFullYear()===y&&
+return z.getFullYear()===y&&
 z.getMonth()===m&&
 z.getDate()===d;
 
-}
-);
+});
+
 
 let h=
 '<div class="group">'+
@@ -5080,6 +5900,7 @@ String(m+1).padStart(2,'0')+
 '/'+
 y+
 '</div>';
+
 
 if(!a.length){
 
@@ -5093,6 +5914,7 @@ return;
 
 }
 
+
 a.forEach(
 l=>{
 
@@ -5100,15 +5922,22 @@ h+=
 '<div class="report">'+
 '<b>Día '+l.day+'</b> ';
 
+
 h+=`
 
 <button
 class="btn danger sm"
 onclick="deleteSession('${l.id}')">
-🗑️ Eliminar
-</button>`;
 
-(l.groups||[]).forEach(
+🗑️ Eliminar
+
+</button>
+
+`;
+
+
+(l.groups||[])
+.forEach(
 g=>{
 
 h+=
@@ -5116,13 +5945,14 @@ h+=
 esc(g.name)+
 '</div>';
 
+
 g.exercises.forEach(
 e=>{
 
-let rs=
-e.sets.filter(
+let rs=e.sets.filter(
 s=>num(s.reps)>0
 );
+
 
 if(rs.length)
 
@@ -5143,21 +5973,22 @@ s.weight+
 .join(' · ')+
 '</div>';
 
-}
-);
+});
 
 });
 
+
 h+='</div>';
 
-}
-);
+});
+
 
 document.getElementById(
 'detail'
 ).innerHTML=h;
 
 }
+
 
 function deleteSession(id){
 
@@ -5166,13 +5997,16 @@ if(!confirm(
 ))
 return;
 
+
 logs=logs.filter(
 l=>String(l.id)!==String(id)
 );
 
+
 save();
 
 renderCalendar();
+
 
 alert(
 'Sesión eliminada.'
@@ -5180,26 +6014,29 @@ alert(
 
 }
 
-/* =========================================================
-   IMAGENES
-========================================================= */
+
+/* ======================================================
+IMAGENES
+====================================================== */
 
 function toggleImage(id){
 
 let e=document.getElementById(id);
 
+
 if(e)
 
 e.style.display=
-e.style.display==='block'
-?'none'
-:'block';
+e.style.display==='block'?
+'none':
+'block';
 
 }
 
-/* =========================================================
-   INFORMES PERSONALES
-========================================================= */
+
+/* ======================================================
+INFORMES PERSONAL
+====================================================== */
 
 function stats(){
 
@@ -5208,20 +6045,26 @@ let sets=0;
 let exercises=0;
 let sessions=new Set();
 
-uniqueSessions(logs).forEach(
+
+uniqueSessions(logs)
+.forEach(
 l=>{
 
 let real=false;
 
-(l.groups||[]).forEach(
+
+(l.groups||[])
+.forEach(
 g=>
-(g.exercises||[]).forEach(
+(g.exercises||[])
+.forEach(
 e=>{
 
-let q=
-(e.sets||[]).filter(
+let q=(e.sets||[])
+.filter(
 s=>num(s.reps)>0
 );
+
 
 if(q.length){
 
@@ -5235,41 +6078,68 @@ real=true;
 })
 );
 
+
 if(real)
 
 sessions.add(
-Number(l.day)+
-'|'+
+Number(l.day)+'|'+
 dateKey(l.date)
 );
 
 });
+
 
 document.getElementById(
 'stats'
 ).innerHTML=`
 
 <div class="stat">
+
 <b>${sessions.size}</b>
-<span>Sesiones realizadas</span>
+
+<span>
+Sesiones realizadas
+</span>
+
 </div>
 
+
 <div class="stat">
+
 <b>${exercises}</b>
-<span>Ejercicios realizados</span>
+
+<span>
+Ejercicios realizados
+</span>
+
 </div>
 
+
 <div class="stat">
+
 <b>${sets}</b>
-<span>Series realizadas</span>
+
+<span>
+Series realizadas
+</span>
+
 </div>
 
+
 <div class="stat">
+
 <b>${Math.round(vol)} kg</b>
-<span>Volumen realizado</span>
-</div>`;
+
+<span>
+Volumen realizado
+</span>
+
+</div>
+
+`;
 
 }
+
 
 function isAbsGroup(n){
 
@@ -5286,11 +6156,13 @@ String(n||'')
 
 }
 
+
 function report(days){
 
 let t=new Date();
 
 let tk=dateKey(t);
+
 
 let s=new Date(
 t.getFullYear(),
@@ -5298,43 +6170,49 @@ t.getMonth(),
 t.getDate()-(days-1)
 );
 
+
 let sk=dateKey(s);
+
 
 let a=
 uniqueSessions(logs)
 .filter(
 l=>{
 
-let k=dateKey(
-l.date
-);
+let k=dateKey(l.date);
 
 return k>=sk&&k<=tk;
 
-}
-);
+});
+
 
 if(!a.length){
 
 document.getElementById(
 'reports'
 ).innerHTML=
-'<div class="empty">Sin entrenamientos realizados en '+
+'<div class="empty">'+
+'Sin entrenamientos realizados en '+
 days+
-' días.</div>';
+' días.'+
+'</div>';
 
 return;
 
 }
 
+
 let g={};
+
 
 a.forEach(
 l=>
-(l.groups||[]).forEach(
+(l.groups||[])
+.forEach(
 x=>{
 
 let k=x.name||'Sin grupo';
+
 
 if(!g[k])
 
@@ -5347,62 +6225,70 @@ sessions:new Set()
 
 };
 
+
 let z=g[k];
+
 let real=false;
 
-(x.exercises||[]).forEach(
+
+(x.exercises||[])
+.forEach(
 e=>{
 
-let q=
-(e.sets||[]).filter(
+let q=(e.sets||[])
+.filter(
 s=>num(s.reps)>0
 );
 
-if(!q.length)
-return;
+
+if(!q.length)return;
+
 
 real=true;
 
-z.exercises.add(
-e.name
-);
+z.exercises.add(e.name);
 
 z.sets+=q.length;
+
 
 if(!isAbsGroup(x.name))
 z.volume+=volume(q);
 
-}
-);
+});
+
 
 if(real)
 
 z.sessions.add(
-Number(l.day)+
-'|'+
+Number(l.day)+'|'+
 dateKey(l.date)
 );
 
 })
 );
 
+
 let h=
-'<div class="report"><b>📊 '+
-(
-days===15
-?'HISTORIAL DE 15 DÍAS'
-:'HISTORIAL MENSUAL (30 DÍAS)'
-)+
-'</b></div>';
+'<div class="report">'+
+'<b>📊 '+
+(days===15?
+'HISTORIAL DE 15 DÍAS':
+'HISTORIAL MENSUAL (30 DÍAS)')+
+'</b>'+
+'</div>';
+
 
 let tv=0;
 let ts=0;
 
-Object.entries(g).forEach(
+
+Object.entries(g)
+.forEach(
 ([n,z])=>{
 
 tv+=z.volume;
 ts+=z.sets;
+
 
 h+=`
 
@@ -5415,29 +6301,59 @@ h+=`
 <div class="muscleStats">
 
 <div class="muscleStat">
-<b>${Math.round(z.volume)} kg</b>
-<span>Volumen</span>
+
+<b>
+${Math.round(z.volume)} kg
+</b>
+
+<span>
+Volumen
+</span>
+
 </div>
+
 
 <div class="muscleStat">
-<b>${z.sets}</b>
-<span>Series</span>
+
+<b>
+${z.sets}
+</b>
+
+<span>
+Series
+</span>
+
 </div>
+
 
 <div class="muscleStat">
-<b>${z.exercises.size}</b>
-<span>Ejercicios</span>
+
+<b>
+${z.exercises.size}
+</b>
+
+<span>
+Ejercicios
+</span>
+
 </div>
 
 </div>
+
 
 <div style="font-size:.65rem;color:var(--sub);margin-top:6px">
-Sesiones: ${z.sessions.size}
+
+Sesiones:
+${z.sessions.size}
+
 </div>
 
-</div>`;
+</div>
+
+`;
 
 });
+
 
 h+=`
 
@@ -5457,7 +6373,10 @@ de volumen
 series
 </div>
 
-</div>`;
+</div>
+
+`;
+
 
 document.getElementById(
 'reports'
@@ -5465,9 +6384,10 @@ document.getElementById(
 
 }
 
-/* =========================================================
-   CRONOMETRO
-========================================================= */
+
+/* ======================================================
+CRONOMETRO
+====================================================== */
 
 function startTimer(){
 
@@ -5475,11 +6395,14 @@ closeTimer();
 
 timerSeconds=120;
 
+
 document.getElementById(
 'timerOverlay'
 ).style.display='flex';
 
+
 updateTimerDisplay();
+
 
 timerInterval=setInterval(
 ()=>{
@@ -5488,11 +6411,10 @@ timerSeconds--;
 
 updateTimerDisplay();
 
+
 if(timerSeconds<=0){
 
-clearInterval(
-timerInterval
-);
+clearInterval(timerInterval);
 
 timerInterval=null;
 
@@ -5511,6 +6433,7 @@ closeTimer,
 
 }
 
+
 function updateTimerDisplay(){
 
 let e=document.getElementById(
@@ -5519,36 +6442,38 @@ let e=document.getElementById(
 
 if(!e)return;
 
+
 let m=Math.floor(
 timerSeconds/60
 );
 
 let s=timerSeconds%60;
 
+
 e.textContent=
 String(m).padStart(2,'0')+
 ':'+
 String(s).padStart(2,'0');
+
 
 e.classList.remove(
 'warning',
 'last'
 );
 
+
 if(
 timerSeconds<=10&&
 timerSeconds>3
 )
 
-e.classList.add(
-'warning'
-);
+e.classList.add('warning');
+
 
 if(timerSeconds<=3)
 
-e.classList.add(
-'last'
-);
+e.classList.add('last');
+
 
 if(
 timerSeconds<=3&&
@@ -5559,23 +6484,24 @@ beep();
 
 }
 
+
 function closeTimer(){
 
 if(timerInterval){
 
-clearInterval(
-timerInterval
-);
+clearInterval(timerInterval);
 
 timerInterval=null;
 
 }
+
 
 document.getElementById(
 'timerOverlay'
 ).style.display='none';
 
 }
+
 
 function beep(){
 
@@ -5587,19 +6513,21 @@ window.AudioContext||
 window.webkitAudioContext
 )();
 
-let o=
-c.createOscillator();
 
-let g=
-c.createGain();
+let o=c.createOscillator();
+
+let g=c.createGain();
+
 
 o.connect(g);
 
 g.connect(c.destination);
 
+
 o.frequency.value=900;
 
 g.gain.value=.7;
+
 
 o.start();
 
@@ -5611,13 +6539,12 @@ c.currentTime+.18
 
 }
 
-/* =========================================================
-   ARRANQUE
-========================================================= */
+
+/* ======================================================
+ARRANQUE
+====================================================== */
 
 save();
-
-saveMonitor();
 
 renderCalendar();
 
