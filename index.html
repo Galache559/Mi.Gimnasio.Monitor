@@ -1,9 +1,10 @@
 <!DOCTYPE html>
+
 <html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Mi Gimnasio Monitor v1.0</title>
+<title>Mi Gimnasio Monitor v1.1</title>
 <meta name="theme-color" content="#121212">
 
 <style>
@@ -630,6 +631,33 @@ color:#fff;
 border:1px solid var(--bor);
 }
 
+.monitorTraining{
+border:1px solid #176b43;
+}
+
+.monitorTrainingTitle{
+display:flex;
+justify-content:space-between;
+align-items:center;
+gap:8px;
+}
+
+.monitorStudentTag{
+background:#07351f;
+border:1px solid #176b43;
+color:var(--a);
+padding:5px 8px;
+border-radius:6px;
+font-size:.68rem;
+}
+
+.monitorNoRoutine{
+text-align:center;
+padding:15px;
+color:var(--sub);
+font-size:.78rem;
+}
+
 @media(max-width:380px){
 
 td input{
@@ -665,6 +693,7 @@ color:#000;
 
 }
 </style>
+
 </head>
 
 <body>
@@ -675,10 +704,6 @@ color:#000;
 
 <div class="container">
 
-<!-- =====================================================
-     ENTRENAR
-===================================================== -->
-
 <section id="tab-entrenar" class="tab active">
 
 <div class="card">
@@ -687,11 +712,7 @@ color:#000;
 
 <div class="days">
 
-<button class="btn out" onclick="selectDay(1)">Día 1</button>
-<button class="btn out" onclick="selectDay(2)">Día 2</button>
-<button class="btn out" onclick="selectDay(3)">Día 3</button>
-<button class="btn out" onclick="selectDay(4)">Día 4</button>
-<button class="btn out" onclick="selectDay(5)">Día 5</button>
+<button class="btn out" onclick="selectDay(1)">Día 1</button> <button class="btn out" onclick="selectDay(2)">Día 2</button> <button class="btn out" onclick="selectDay(3)">Día 3</button> <button class="btn out" onclick="selectDay(4)">Día 4</button> <button class="btn out" onclick="selectDay(5)">Día 5</button>
 
 </div>
 
@@ -705,8 +726,7 @@ color:#000;
 
 <div id="loadedmsg"></div>
 
-<label>Fecha</label>
-<input type="date" id="date">
+<label>Fecha</label> <input type="date" id="date">
 
 <div id="form"></div>
 
@@ -720,11 +740,6 @@ color:#000;
 </div>
 
 </section>
-
-
-<!-- =====================================================
-     RUTINA
-===================================================== -->
 
 <section id="tab-rutina" class="tab">
 
@@ -779,6 +794,7 @@ type="file"
 accept=".json"
 style="display:none"
 onchange="importData(event)"
+
 >
 
 <div id="backupStatus" class="backupBox">
@@ -792,11 +808,6 @@ onchange="importData(event)"
 </div>
 
 </section>
-
-
-<!-- =====================================================
-     CALENDARIO
-===================================================== -->
 
 <section id="tab-calendario" class="tab">
 
@@ -819,11 +830,6 @@ onchange="importData(event)"
 </div>
 
 </section>
-
-
-<!-- =====================================================
-     INFORMES
-===================================================== -->
 
 <section id="tab-informes" class="tab">
 
@@ -863,11 +869,6 @@ Selecciona un periodo.
 
 </section>
 
-
-<!-- =====================================================
-     MONITOR
-===================================================== -->
-
 <section id="tab-monitor" class="tab">
 
 <div class="card">
@@ -890,19 +891,18 @@ que tendrá disponibles.
 id="newStudent"
 placeholder="Nombre del alumno"
 style="margin-bottom:0"
+
 >
 
 <button
 class="btn sm"
 style="width:auto"
 onclick="addStudent()">
-➕ Añadir
-</button>
+➕ Añadir </button>
 
 </div>
 
 </div>
-
 
 <div class="card">
 
@@ -914,7 +914,6 @@ No hay alumnos creados.
 
 </div>
 
-
 <div
 id="studentEditor"
 style="display:none">
@@ -925,8 +924,6 @@ style="display:none">
 💪 Rutina de
 <span id="studentNameTitle"></span>
 </h2>
-
-<!-- NUEVO: SELECCIÓN DEL DÍA -->
 
 <div class="daySelector">
 
@@ -949,18 +946,81 @@ style="display:none">
 <button
 class="btn"
 onclick="saveStudentRoutine()">
-💾 Guardar rutina del alumno
-</button>
-
-<!-- NUEVO: BOTÓN SALIR -->
+💾 Guardar rutina del alumno </button>
 
 <button
 id="studentExitBtn"
 class="btn backButton"
 style="display:none"
 onclick="exitStudentEditor()">
-↩️ SALIR / VOLVER
-</button>
+↩️ SALIR / VOLVER </button>
+
+</div>
+
+</div>
+
+<!-- =====================================================
+     NUEVA ZONA DE ENTRENAMIENTO DEL ALUMNO
+===================================================== -->
+
+<div
+id="monitorTraining"
+style="display:none">
+
+<div class="card monitorTraining">
+
+<h2 class="monitorTrainingTitle">
+
+<span>🏋️ Entrenamiento</span>
+
+<span
+id="monitorStudentTag"
+class="monitorStudentTag">
+Alumno </span>
+
+</h2>
+
+<div class="daySelector">
+
+<label>📅 Día de entrenamiento</label>
+
+<select
+id="monitorDay"
+onchange="changeMonitorDay()">
+
+<option value="1">Día 1</option>
+<option value="2">Día 2</option>
+<option value="3">Día 3</option>
+<option value="4">Día 4</option>
+<option value="5">Día 5</option>
+
+</select>
+
+</div>
+
+<label>Fecha</label>
+
+<input
+type="date"
+id="monitorDate"
+
+>
+
+<div id="monitorLoaded"></div>
+
+<div id="monitorForm"></div>
+
+<button
+class="btn"
+onclick="saveMonitorWorkout()">
+💾 GUARDAR ENTRENAMIENTO </button>
+
+<div id="monitorSummary"></div>
+
+<button
+class="btn backButton"
+onclick="closeMonitorTraining()">
+↩️ VOLVER AL ALUMNO </button>
 
 </div>
 
@@ -970,50 +1030,35 @@ onclick="exitStudentEditor()">
 
 </div>
 
-
-<!-- =====================================================
-     NAVEGACIÓN
-===================================================== -->
-
 <nav>
 
 <button
 id="n-entrenar"
 class="active"
 onclick="tab('entrenar')">
-🏋️<span>Entrenar</span>
-</button>
+🏋️<span>Entrenar</span> </button>
 
 <button
 id="n-rutina"
 onclick="tab('rutina')">
-⚙️<span>Rutina</span>
-</button>
+⚙️<span>Rutina</span> </button>
 
 <button
 id="n-calendario"
 onclick="tab('calendario')">
-📅<span>Calendario</span>
-</button>
+📅<span>Calendario</span> </button>
 
 <button
 id="n-informes"
 onclick="tab('informes')">
-📊<span>Informes</span>
-</button>
+📊<span>Informes</span> </button>
 
 <button
 id="n-monitor"
 onclick="tab('monitor')">
-👤<span>Monitor</span>
-</button>
+👤<span>Monitor</span> </button>
 
 </nav>
-
-
-<!-- =====================================================
-     CRONÓMETRO
-===================================================== -->
 
 <div id="timerOverlay" class="timerOverlay">
 
@@ -1035,16 +1080,11 @@ Cerrar
 
 </div>
 
-
 <script>
 "use strict";
 
 const K='gym_v6_';
 
-
-/* =====================================================
-   RUTINA INICIAL
-===================================================== */
 
 const DEFAULT_ROUTINE={
 
@@ -1252,18 +1292,10 @@ images:['','','','','']
 };
 
 
-/* =====================================================
-   COPIA PROFUNDA
-===================================================== */
-
 function structuredCloneSafe(obj){
 return JSON.parse(JSON.stringify(obj));
 }
 
-
-/* =====================================================
-   CARGA SEGURA
-===================================================== */
 
 function safeParse(value,fallback){
 
@@ -1300,10 +1332,6 @@ routine=structuredCloneSafe(DEFAULT_ROUTINE);
 if(!Array.isArray(logs))
 logs=[];
 
-
-/* =====================================================
-   NORMALIZAR RUTINA
-===================================================== */
 
 function normalizeRoutine(){
 
@@ -1349,10 +1377,6 @@ return result;
 
 }
 
-
-/* =====================================================
-   MIGRACIÓN
-===================================================== */
 
 function migrateOldRoutine(){
 
@@ -1403,19 +1427,11 @@ migrateOldRoutine();
 normalizeRoutine();
 
 
-/* =====================================================
-   VARIABLES
-===================================================== */
-
 let day=null;
 let monthDate=new Date();
 let timerInterval=null;
 let timerSeconds=0;
 
-
-/* =====================================================
-   UTILIDADES
-===================================================== */
 
 const esc=s=>String(s??'').replace(
 /[&<>"']/g,
@@ -1430,10 +1446,6 @@ m=>({
 
 const num=v=>parseFloat(v)||0;
 
-
-/* =====================================================
-   GUARDAR
-===================================================== */
 
 function save(){
 
@@ -1458,10 +1470,6 @@ console.error('Error guardando datos',e);
 }
 
 
-/* =====================================================
-   VOLUMEN
-===================================================== */
-
 function volume(s){
 
 return(s||[]).reduce(
@@ -1471,10 +1479,6 @@ return(s||[]).reduce(
 
 }
 
-
-/* =====================================================
-   1RM
-===================================================== */
 
 function rm(w,r){
 
@@ -1503,10 +1507,6 @@ num(x.reps)
 }
 
 
-/* =====================================================
-   FECHAS
-===================================================== */
-
 function dateKey(value){
 
 if(!value)return '';
@@ -1521,10 +1521,6 @@ String(d.getDate()).padStart(2,'0');
 
 }
 
-
-/* =====================================================
-   SESIONES
-===================================================== */
 
 function uniqueSessions(source){
 
@@ -1545,10 +1541,6 @@ return [...map.values()];
 }
 
 
-/* =====================================================
-   BUSCAR SESIÓN
-===================================================== */
-
 function findSession(d,date){
 
 let key=dateKey(date);
@@ -1560,10 +1552,6 @@ dateKey(l.date)===key
 
 }
 
-
-/* =====================================================
-   PESTAÑAS
-===================================================== */
 
 function tab(x){
 
@@ -1596,18 +1584,12 @@ renderStudents();
 }
 
 
-/* =====================================================
-   HISTORIAL
-===================================================== */
-
 function history(ex){
 
 let a=[];
 
 uniqueSessions(logs).forEach(l=>
-
 (l.groups||[]).forEach(g=>
-
 (g.exercises||[]).forEach(e=>{
 
 if(e.name===ex){
@@ -1620,9 +1602,7 @@ sets:e.sets||[]
 }
 
 })
-
 )
-
 );
 
 return a.sort(
@@ -1631,10 +1611,6 @@ return a.sort(
 
 }
 
-
-/* =====================================================
-   ÚLTIMO ENTRENAMIENTO
-===================================================== */
 
 function previousDayLog(d){
 
@@ -1666,10 +1642,6 @@ return null;
 
 }
 
-
-/* =====================================================
-   SELECCIONAR DÍA
-===================================================== */
 
 function selectDay(d){
 
@@ -1708,10 +1680,6 @@ renderWorkout(previous);
 
 }
 
-
-/* =====================================================
-   RENDER ENTRENAMIENTO
-===================================================== */
 
 function renderWorkout(previous){
 
@@ -1965,10 +1933,6 @@ pr(prefix,ex);
 }
 
 
-/* =====================================================
-   SELECCIONAR CELDA
-===================================================== */
-
 function selectCell(el){
 
 setTimeout(
@@ -1978,10 +1942,6 @@ setTimeout(
 
 }
 
-
-/* =====================================================
-   DATOS ACTUALES
-===================================================== */
 
 function getCurrentExerciseData(prefix,ex){
 
@@ -2031,10 +1991,6 @@ rm:maxSetRM(realSets)
 
 }
 
-
-/* =====================================================
-   CÁLCULOS
-===================================================== */
 
 function calc(prefix){
 
@@ -2098,10 +2054,6 @@ volEl.innerText=
 }
 
 
-/* =====================================================
-   PROPUESTA
-===================================================== */
-
 function suggest(prefix,w){
 
 let e=document.getElementById(
@@ -2124,25 +2076,17 @@ new Event(
 }
 
 
-/* =====================================================
-   PR
-===================================================== */
-
 function maxWeight(ex){
 
 let m=0;
 
 history(ex).forEach(x=>
-
 (x.sets||[]).forEach(s=>
-
 m=Math.max(
 m,
 num(s.weight)
 )
-
 )
-
 );
 
 return m;
@@ -2181,10 +2125,6 @@ v>old&&old>0
 
 }
 
-
-/* =====================================================
-   GUARDAR EJERCICIO
-===================================================== */
 
 function saveExercise(prefix,gi,i,ex){
 
@@ -2298,10 +2238,6 @@ showSavedButton(
 }
 
 
-/* =====================================================
-   LIMPIAR SESIÓN
-===================================================== */
-
 function cleanSession(log){
 
 (log.groups||[]).forEach(g=>{
@@ -2322,10 +2258,6 @@ g=>(g.exercises||[]).length>0
 
 }
 
-
-/* =====================================================
-   BOTÓN GUARDADO
-===================================================== */
 
 function showSavedButton(id){
 
@@ -2349,10 +2281,6 @@ btn.innerText=
 
 }
 
-
-/* =====================================================
-   HISTORIAL
-===================================================== */
 
 function showHistory(ex){
 
@@ -2383,10 +2311,6 @@ s=>`${num(s.reps)}×${num(s.weight)}kg`
 
 }
 
-
-/* =====================================================
-   GUARDAR ENTRENAMIENTO
-===================================================== */
 
 function saveWorkout(){
 
@@ -2553,10 +2477,6 @@ Continuar
 }
 
 
-/* =====================================================
-   LIMPIAR PANTALLA
-===================================================== */
-
 function clearWorkoutInputs(){
 
 let form=document.getElementById('form');
@@ -2588,10 +2508,6 @@ el.innerText=
 }
 
 
-/* =====================================================
-   FINALIZAR
-===================================================== */
-
 function finishSummary(){
 
 document.getElementById(
@@ -2604,10 +2520,6 @@ document.getElementById(
 
 }
 
-
-/* =====================================================
-   CONFIGURACIÓN DE RUTINA
-===================================================== */
 
 function loadConfig(){
 
@@ -2700,10 +2612,6 @@ document.getElementById(
 }
 
 
-/* =====================================================
-   CAMPO EJERCICIO
-===================================================== */
-
 function field(gi,n,img){
 
 return`
@@ -2742,10 +2650,6 @@ onclick="removeExercise(this)">
 }
 
 
-/* =====================================================
-   AÑADIR GRUPO
-===================================================== */
-
 function addGroup(){
 
 let d=
@@ -2763,10 +2667,6 @@ loadConfig();
 
 }
 
-
-/* =====================================================
-   ELIMINAR GRUPO
-===================================================== */
 
 function removeGroup(gi){
 
@@ -2797,10 +2697,6 @@ loadConfig();
 }
 
 
-/* =====================================================
-   AÑADIR EJERCICIO
-===================================================== */
-
 function addExercise(gi){
 
 document
@@ -2812,10 +2708,6 @@ field(gi,'','')
 
 }
 
-
-/* =====================================================
-   ELIMINAR EJERCICIO
-===================================================== */
 
 function removeExercise(btn){
 
@@ -2832,10 +2724,6 @@ box.remove();
 
 }
 
-
-/* =====================================================
-   GUARDAR CONFIGURACIÓN
-===================================================== */
 
 function saveConfig(){
 
@@ -2933,10 +2821,6 @@ alert(
 }
 
 
-/* =====================================================
-   EXPORTAR COPIA
-===================================================== */
-
 function exportData(){
 
 let data={
@@ -2951,7 +2835,9 @@ routine:routine,
 
 logs:logs,
 
-students:students
+students:students,
+
+studentLogs:studentLogs
 
 };
 
@@ -3013,10 +2899,6 @@ Guárdala en un lugar seguro.
 }
 
 
-/* =====================================================
-   IMPORTAR COPIA
-===================================================== */
-
 function importData(e){
 
 let file=e.target.files[0];
@@ -3059,6 +2941,9 @@ structuredCloneSafe(logs);
 let oldStudents=
 structuredCloneSafe(students);
 
+let oldStudentLogs=
+structuredCloneSafe(studentLogs);
+
 try{
 
 routine=
@@ -3075,21 +2960,28 @@ if(Array.isArray(data.students))
 students=
 structuredCloneSafe(data.students);
 
+if(Array.isArray(data.studentLogs))
+studentLogs=
+structuredCloneSafe(data.studentLogs);
+
 normalizeRoutine();
 
 migrateStudentData();
 
 save();
 saveStudents();
+saveStudentLogs();
 
 }catch(err){
 
 routine=oldRoutine;
 logs=oldLogs;
 students=oldStudents;
+studentLogs=oldStudentLogs;
 
 save();
 saveStudents();
+saveStudentLogs();
 
 throw err;
 
@@ -3118,10 +3010,6 @@ reader.readAsText(file);
 
 }
 
-
-/* =====================================================
-   CALENDARIO
-===================================================== */
 
 function month(n){
 
@@ -3208,10 +3096,6 @@ document.getElementById(
 
 }
 
-
-/* =====================================================
-   DETALLE CALENDARIO
-===================================================== */
 
 function detail(y,m,d){
 
@@ -3332,10 +3216,6 @@ document.getElementById(
 }
 
 
-/* =====================================================
-   ELIMINAR SESIÓN
-===================================================== */
-
 function deleteSession(id){
 
 if(!confirm(
@@ -3358,10 +3238,6 @@ alert(
 
 }
 
-
-/* =====================================================
-   EDITAR SESIÓN
-===================================================== */
 
 function editSession(id){
 
@@ -3589,10 +3465,6 @@ tab('entrenar');
 }
 
 
-/* =====================================================
-   IMÁGENES
-===================================================== */
-
 function toggleImage(id){
 
 let e=document.getElementById(id);
@@ -3606,10 +3478,6 @@ e.style.display==='block'
 
 }
 
-
-/* =====================================================
-   ESTADÍSTICAS
-===================================================== */
 
 function stats(){
 
@@ -3625,7 +3493,6 @@ uniqueSessions(logs)
 let realSession=false;
 
 (l.groups||[]).forEach(g=>
-
 (g.exercises||[]).forEach(e=>{
 
 let effective=
@@ -3644,7 +3511,6 @@ vol+=volume(effective);
 realSession=true;
 
 })
-
 );
 
 if(realSession){
@@ -3705,10 +3571,6 @@ Volumen realizado
 
 }
 
-
-/* =====================================================
-   INFORMES
-===================================================== */
 
 function isAbsGroup(name){
 
@@ -3772,7 +3634,6 @@ return;
 let groups={};
 
 a.forEach(l=>
-
 (l.groups||[]).forEach(g=>{
 
 let key=
@@ -4066,10 +3927,6 @@ document.getElementById(
 }
 
 
-/* =====================================================
-   CRONÓMETRO
-===================================================== */
-
 function startTimer(){
 
 closeTimer();
@@ -4214,20 +4071,26 @@ c.currentTime+.18
 
 const STUDENTS_KEY=K+'students';
 
+const STUDENT_LOGS_KEY=K+'studentLogs';
+
 let students=safeParse(
 localStorage.getItem(STUDENTS_KEY),
+[]
+);
+
+let studentLogs=safeParse(
+localStorage.getItem(STUDENT_LOGS_KEY),
 []
 );
 
 if(!Array.isArray(students))
 students=[];
 
+if(!Array.isArray(studentLogs))
+studentLogs=[];
+
 let currentStudent=null;
 
-
-/* =====================================================
-   MIGRAR RUTINAS ANTIGUAS DE ALUMNOS
-===================================================== */
 
 function migrateStudentData(){
 
@@ -4243,11 +4106,6 @@ student.routine={};
 return;
 
 }
-
-/*
-   Si la rutina antigua tiene directamente PECHO,
-   ESPALDA, etc., la pasamos al Día 1.
-*/
 
 let oldKeys=
 Object.keys(student.routine);
@@ -4273,10 +4131,6 @@ student.routine={
 }
 
 
-/* =====================================================
-   GUARDAR ALUMNOS
-===================================================== */
-
 function saveStudents(){
 
 migrateStudentData();
@@ -4289,9 +4143,16 @@ JSON.stringify(students)
 }
 
 
-/* =====================================================
-   LISTA DE ALUMNOS
-===================================================== */
+function saveStudentLogs(){
+
+localStorage.setItem(
+STUDENT_LOGS_KEY,
+JSON.stringify(studentLogs)
+);
+
+
+}
+
 
 function renderStudents(){
 
@@ -4400,10 +4261,6 @@ box.innerHTML=html;
 }
 
 
-/* =====================================================
-   AÑADIR ALUMNO
-===================================================== */
-
 function addStudent(){
 
 let input=
@@ -4427,8 +4284,7 @@ return;
 let exists=
 students.some(
 s=>
-String(s.name||'')
-.toLowerCase()===
+String(s.name||'').toLowerCase()===
 name.toLowerCase()
 );
 
@@ -4465,10 +4321,6 @@ students.length-1
 }
 
 
-/* =====================================================
-   SELECCIONAR ALUMNO
-===================================================== */
-
 function selectStudent(index){
 
 let student=
@@ -4489,10 +4341,6 @@ document.getElementById(
 ).innerText=
 student.name;
 
-/*
-   Siempre comenzamos en el Día 1.
-*/
-
 document.getElementById(
 'studentDay'
 ).value='1';
@@ -4501,14 +4349,30 @@ document.getElementById(
 'studentExitBtn'
 ).style.display='none';
 
+document.getElementById(
+'monitorTraining'
+).style.display='block';
+
+document.getElementById(
+'monitorStudentTag'
+).innerText=
+'👤 '+student.name;
+
+document.getElementById(
+'monitorDay'
+).value='1';
+
+document.getElementById(
+'monitorDate'
+).value=
+new Date().toISOString().slice(0,10);
+
 renderStudentGroups();
+
+renderMonitorWorkout();
 
 }
 
-
-/* =====================================================
-   CAMBIAR DÍA DEL ALUMNO
-===================================================== */
 
 function changeStudentDay(){
 
@@ -4524,16 +4388,16 @@ renderStudentGroups();
 }
 
 
-/* =====================================================
-   SALIR / VOLVER
-===================================================== */
-
 function exitStudentEditor(){
 
 currentStudent=null;
 
 document.getElementById(
 'studentEditor'
+).style.display='none';
+
+document.getElementById(
+'monitorTraining'
 ).style.display='none';
 
 document.getElementById(
@@ -4544,10 +4408,6 @@ renderStudents();
 
 }
 
-
-/* =====================================================
-   ELIMINAR ALUMNO
-===================================================== */
 
 function deleteStudent(index){
 
@@ -4561,15 +4421,23 @@ if(!confirm(
 ))
 return;
 
+let studentId=student.id;
+
 students.splice(
 index,
 1
+);
+
+studentLogs=
+studentLogs.filter(
+l=>String(l.studentId)!==String(studentId)
 );
 
 if(currentStudent===index)
 currentStudent=null;
 
 saveStudents();
+saveStudentLogs();
 
 renderStudents();
 
@@ -4577,12 +4445,12 @@ document.getElementById(
 'studentEditor'
 ).style.display='none';
 
+document.getElementById(
+'monitorTraining'
+).style.display='none';
+
 }
 
-
-/* =====================================================
-   GRUPOS MUSCULARES
-===================================================== */
 
 const MUSCLE_GROUPS=[
 
@@ -4599,10 +4467,6 @@ const MUSCLE_GROUPS=[
 
 ];
 
-
-/* =====================================================
-   BIBLIOTECA DE EJERCICIOS
-===================================================== */
 
 const EXERCISE_LIBRARY={
 
@@ -4709,10 +4573,6 @@ const EXERCISE_LIBRARY={
 };
 
 
-/* =====================================================
-   MOSTRAR GRUPOS DEL ALUMNO
-===================================================== */
-
 function renderStudentGroups(){
 
 if(currentStudent===null)
@@ -4731,10 +4591,6 @@ selectedDay=1;
 
 if(!student.routine)
 student.routine={};
-
-/*
-   AHORA LA RUTINA DEL ALUMNO SE GUARDA POR DÍA
-*/
 
 let saved=
 student.routine[selectedDay]||
@@ -4835,10 +4691,6 @@ document.getElementById(
 }
 
 
-/* =====================================================
-   ACTIVAR / DESACTIVAR GRUPO
-===================================================== */
-
 function toggleStudentGroup(group){
 
 let checkbox=
@@ -4861,10 +4713,6 @@ checkbox.checked
 
 }
 
-
-/* =====================================================
-   GUARDAR RUTINA DEL ALUMNO
-===================================================== */
 
 function saveStudentRoutine(){
 
@@ -4917,10 +4765,6 @@ exercises:exercises
 
 });
 
-/*
-   GUARDAMOS SOLO EL DÍA SELECCIONADO
-*/
-
 if(!student.routine)
 student.routine={};
 
@@ -4931,13 +4775,11 @@ saveStudents();
 
 renderStudents();
 
-/*
-   El botón SALIR aparece solamente después de guardar.
-*/
-
 document.getElementById(
 'studentExitBtn'
 ).style.display='block';
+
+renderMonitorWorkout();
 
 alert(
 `✓ Rutina de ${student.name} guardada correctamente para el Día ${selectedDay}.`
@@ -4947,14 +4789,907 @@ alert(
 
 
 /* =====================================================
-   INICIO
+   ENTRENAMIENTO DEL ALUMNO
 ===================================================== */
+
+function getStudentLog(studentId,day,date){
+
+let key=dateKey(date);
+
+return studentLogs.find(l=>
+String(l.studentId)===String(studentId)&&
+Number(l.day)===Number(day)&&
+dateKey(l.date)===key
+);
+
+}
+
+
+function getPreviousStudentLog(studentId,day,date){
+
+let a=
+studentLogs.filter(l=>
+String(l.studentId)===String(studentId)&&
+Number(l.day)===Number(day)&&
+dateKey(l.date)<dateKey(date)
+);
+
+if(!a.length)
+return null;
+
+a.sort(
+(a,b)=>dateKey(a.date).localeCompare(dateKey(b.date))
+);
+
+return a[a.length-1];
+
+}
+
+
+function getStudentPreviousExercise(log,name){
+
+if(!log)return null;
+
+for(let g of(log.groups||[]))
+for(let e of(g.exercises||[]))
+if(e.name===name)
+return e;
+
+return null;
+
+}
+
+
+function findExerciseImage(name){
+
+for(let d=1;d<=5;d++){
+
+let groups=
+routine[d]&&routine[d].groups
+?routine[d].groups
+:[];
+
+for(let g of groups){
+
+let exercises=g.exercises||[];
+
+for(let i=0;i<exercises.length;i++){
+
+if(exercises[i]===name){
+
+return(g.images||[])[i]||'';
+
+}
+
+}
+
+}
+
+}
+
+return '';
+
+}
+
+
+function renderMonitorWorkout(){
+
+if(currentStudent===null)
+return;
+
+let student=
+students[currentStudent];
+
+if(!student)return;
+
+let d=
+Number(
+document.getElementById('monitorDay').value
+);
+
+if(!d)d=1;
+
+let date=
+document.getElementById('monitorDate').value;
+
+if(!date){
+
+date=
+new Date().toISOString().slice(0,10);
+
+document.getElementById(
+'monitorDate'
+).value=date;
+
+}
+
+let routineDay=
+student.routine&&student.routine[d]
+?student.routine[d]
+:null;
+
+let form=
+document.getElementById('monitorForm');
+
+let loaded=
+document.getElementById('monitorLoaded');
+
+let summary=
+document.getElementById('monitorSummary');
+
+summary.innerHTML='';
+
+if(!routineDay){
+
+loaded.innerHTML='';
+
+form.innerHTML=`
+
+<div class="monitorNoRoutine">
+
+📋 Este alumno todavía no tiene una rutina configurada para el Día ${d}.
+
+<br><br>
+
+Configura primero los grupos y ejercicios de este día.
+
+</div>
+
+`;
+
+return;
+
+}
+
+let groups=
+Object.entries(routineDay)
+.filter(
+([name,g])=>
+g&&
+g.enabled&&
+Array.isArray(g.exercises)&&
+g.exercises.length
+);
+
+if(!groups.length){
+
+loaded.innerHTML='';
+
+form.innerHTML=`
+
+<div class="monitorNoRoutine">
+
+📋 No hay ejercicios asignados al alumno para el Día ${d}.
+
+</div>
+
+`;
+
+return;
+
+}
+
+let current=
+getStudentLog(
+student.id,
+d,
+date
+);
+
+let previous=
+getPreviousStudentLog(
+student.id,
+d,
+date
+);
+
+loaded.innerHTML=
+previous
+?
+`<div class="loaded">
+📋 Último entrenamiento del alumno disponible.
+Las nuevas celdas empiezan vacías.
+</div>`
+:'';
+
+let html='';
+
+groups.forEach(
+([groupName,groupData],gi)=>{
+
+html+=
+`<div class="group">${esc(groupName)}</div>`;
+
+(groupData.exercises||[]).forEach(
+(ex,i)=>{
+
+let old=
+getStudentPreviousExercise(
+previous,
+ex
+);
+
+let previousSets=
+old
+?(old.sets||[]).slice(0,3)
+:[];
+
+while(previousSets.length<3){
+
+previousSets.push({
+reps:'',
+weight:''
+});
+
+}
+
+let img=
+findExerciseImage(ex);
+
+let iid=
+`mimg-${gi}-${i}`;
+
+let prefix=
+`m-g${gi}-e${i}`;
+
+html+=`
+
+<div class="ex">
+
+<div class="exhead">
+
+<span>${esc(ex)}</span>
+
+</div>
+
+${img?`
+
+<button
+class="imgbtn"
+onclick="toggleImage('${iid}')">
+🖼️ Ver imagen
+</button>
+
+<div
+id="${iid}"
+class="imgbox">
+
+<img
+src="${esc(img)}"
+alt="${esc(ex)}"
+onerror="
+this.style.display='none';
+this.nextElementSibling.style.display='block';
+">
+
+<div
+style="display:none;color:var(--red);font-size:.7rem;padding:5px">
+⚠️ No se puede cargar la imagen.
+</div>
+
+<br>
+
+<button
+class="imgbtn"
+onclick="toggleImage('${iid}')">
+✕ Cerrar imagen
+</button>
+
+</div>
+
+`:''}
+
+${old?`
+
+<div class="last">
+
+Último:
+${new Date(previous.date)
+.toLocaleDateString('es-ES')}
+
+${previousSets.map(
+(s,j)=>
+`S${j+1} ${num(s.reps)||''}×${s.weight!==''&&s.weight!=null?s.weight:''}kg`
+).join(' · ')}
+
+</div>
+
+`
+:
+'<div class="last">Sin registro previo</div>'
+}
+
+<table>
+
+<thead>
+
+<tr>
+<th>S</th>
+<th>Reps</th>
+<th>Kg</th>
+<th></th>
+</tr>
+
+</thead>
+
+<tbody>
+`;
+
+for(let j=0;j<3;j++){
+
+let currentSet=
+current
+?getStudentExerciseFromLog(
+current,
+ex
+)
+:null;
+
+let savedSet=
+currentSet&&
+currentSet.sets&&
+currentSet.sets[j]
+?currentSet.sets[j]
+:null;
+
+html+=`
+
+<tr>
+
+<td>${j+1}</td>
+
+<td>
+
+<input
+type="number"
+min="0"
+id="${prefix}-r${j}"
+value="${savedSet?savedSet.reps??'':''}"
+onfocus="selectCell(this)"
+oninput="calc('${prefix}')"
+>
+
+</td>
+
+<td>
+
+<input
+type="number"
+min="0"
+step=".5"
+id="${prefix}-w${j}"
+value="${savedSet?savedSet.weight??'':''}"
+onfocus="selectCell(this)"
+oninput="calc('${prefix}')"
+>
+
+</td>
+
+<td></td>
+
+</tr>
+`;
+
+}
+
+html+=`
+
+</tbody>
+
+</table>
+
+<div
+class="rm"
+id="rm-${prefix}">
+🔥 1RM estimado: --
+</div>
+
+<div
+class="vol"
+id="vol-${prefix}">
+📦 Volumen: 0 kg
+</div>
+
+<button
+class="restbtn"
+onclick="startTimer()">
+⏱️ Descanso 2:00
+</button>
+
+<button
+class="save-ex"
+id="msave-${gi}-${i}"
+onclick="saveMonitorExercise('${prefix}',${gi},'${esc(groupName)}','${esc(ex)}')">
+💾 GUARDAR EJERCICIO
+</button>
+
+</div>
+`;
+
+});
+
+});
+
+form.innerHTML=html;
+
+groups.forEach(
+([groupName,groupData],gi)=>
+(groupData.exercises||[]).forEach(
+(ex,i)=>
+calc(`m-g${gi}-e${i}`)
+)
+);
+
+}
+
+
+function getStudentExerciseFromLog(log,name){
+
+if(!log)return null;
+
+for(let g of(log.groups||[]))
+for(let e of(g.exercises||[]))
+if(e.name===name)
+return e;
+
+return null;
+
+}
+
+
+function getMonitorCurrentExerciseData(prefix,ex){
+
+let sets=[];
+
+for(let j=0;j<3;j++){
+
+let r=
+document.getElementById(
+`${prefix}-r${j}`
+);
+
+let w=
+document.getElementById(
+`${prefix}-w${j}`
+);
+
+sets.push({
+
+reps:r&&r.value!==''?num(r.value):0,
+
+weight:w&&w.value!==''?num(w.value):0
+
+});
+
+}
+
+let realSets=
+sets.filter(
+s=>num(s.reps)>0
+);
+
+return{
+
+name:ex,
+
+sets:sets,
+
+realSets:realSets,
+
+volume:volume(realSets),
+
+rm:maxSetRM(realSets)
+
+};
+
+}
+
+
+function saveMonitorExercise(prefix,gi,groupName,ex){
+
+if(currentStudent===null)
+return;
+
+let student=
+students[currentStudent];
+
+let d=
+Number(
+document.getElementById('monitorDay').value
+);
+
+let date=
+document.getElementById('monitorDate').value;
+
+if(!date){
+
+alert('Selecciona una fecha.');
+
+return;
+
+}
+
+let data=
+getMonitorCurrentExerciseData(
+prefix,
+ex
+);
+
+if(!data.realSets.length){
+
+alert(
+'No hay repeticiones introducidas en este ejercicio.'
+);
+
+return;
+
+}
+
+let log=
+getStudentLog(
+student.id,
+d,
+date
+);
+
+if(!log){
+
+log={
+
+id:Date.now(),
+
+studentId:student.id,
+
+studentName:student.name,
+
+day:d,
+
+date:new Date(
+date+'T12:00:00'
+).toISOString(),
+
+groups:[]
+
+};
+
+studentLogs.push(log);
+
+}
+
+let group=
+(log.groups||[]).find(
+g=>g.name===groupName
+);
+
+if(!group){
+
+group={
+
+name:groupName,
+
+exercises:[]
+
+};
+
+log.groups.push(group);
+
+}
+
+let old=
+group.exercises.find(
+e=>e.name===ex
+);
+
+let cleanSets=
+data.sets.map(
+s=>({
+
+reps:num(s.reps),
+
+weight:num(s.weight)
+
+})
+);
+
+if(old){
+
+old.sets=cleanSets;
+
+old.volume=data.volume;
+
+old.rm=data.rm;
+
+}else{
+
+group.exercises.push({
+
+name:ex,
+
+sets:cleanSets,
+
+volume:data.volume,
+
+rm:data.rm
+
+});
+
+}
+
+cleanStudentSession(log);
+
+saveStudentLogs();
+
+showSavedButton(
+`msave-${gi}-${(
+students[currentStudent].routine[d][groupName].exercises||[]
+).indexOf(ex)}`
+);
+
+}
+
+
+function cleanStudentSession(log){
+
+(log.groups||[]).forEach(g=>{
+
+g.exercises=
+(g.exercises||[]).filter(
+e=>
+(e.sets||[]).some(
+s=>num(s.reps)>0
+)
+);
+
+});
+
+log.groups=
+(log.groups||[]).filter(
+g=>(g.exercises||[]).length>0
+);
+
+}
+
+
+function saveMonitorWorkout(){
+
+if(currentStudent===null)
+return;
+
+let student=
+students[currentStudent];
+
+let d=
+Number(
+document.getElementById('monitorDay').value
+);
+
+let date=
+document.getElementById('monitorDate').value;
+
+if(!date){
+
+alert('Selecciona una fecha.');
+
+return;
+
+}
+
+let routineDay=
+student.routine&&student.routine[d]
+?student.routine[d]
+:null;
+
+if(!routineDay){
+
+alert(
+'Este alumno no tiene rutina configurada para este día.'
+);
+
+return;
+
+}
+
+let log=
+getStudentLog(
+student.id,
+d,
+date
+);
+
+if(!log){
+
+log={
+
+id:Date.now(),
+
+studentId:student.id,
+
+studentName:student.name,
+
+day:d,
+
+date:new Date(
+date+'T12:00:00'
+).toISOString(),
+
+groups:[]
+
+};
+
+studentLogs.push(log);
+
+}
+
+let totalEx=0;
+let totalSets=0;
+let totalVol=0;
+
+Object.entries(routineDay)
+.filter(
+([name,g])=>
+g&&
+g.enabled&&
+Array.isArray(g.exercises)&&
+g.exercises.length
+)
+.forEach(
+([groupName,groupData],gi)=>{
+
+let logGroup=
+(log.groups||[]).find(
+g=>g.name===groupName
+);
+
+if(!logGroup){
+
+logGroup={
+name:groupName,
+exercises:[]
+};
+
+log.groups.push(logGroup);
+
+}
+
+(groupData.exercises||[]).forEach(
+(ex,i)=>{
+
+let prefix=
+`m-g${gi}-e${i}`;
+
+let data=
+getMonitorCurrentExerciseData(
+prefix,
+ex
+);
+
+if(!data.realSets.length)
+return;
+
+let cleanSets=
+data.sets.map(
+s=>({
+
+reps:num(s.reps),
+
+weight:num(s.weight)
+
+})
+);
+
+let exerciseData={
+
+name:ex,
+
+sets:cleanSets,
+
+volume:data.volume,
+
+rm:data.rm
+
+};
+
+let old=
+logGroup.exercises.find(
+e=>e.name===ex
+);
+
+if(old){
+
+old.sets=exerciseData.sets;
+
+old.volume=exerciseData.volume;
+
+old.rm=exerciseData.rm;
+
+}else{
+
+logGroup.exercises.push(
+exerciseData
+);
+
+}
+
+totalEx++;
+
+totalSets+=data.realSets.length;
+
+totalVol+=data.volume;
+
+}
+);
+
+});
+
+cleanStudentSession(log);
+
+saveStudentLogs();
+
+document.getElementById(
+'monitorSummary'
+).innerHTML=`
+
+<div class="summary">
+
+<h3>🎉 ENTRENAMIENTO GUARDADO</h3>
+
+<div class="big">
+${esc(student.name)} · Día ${d}
+</div>
+
+<div>
+💪 <b>${totalEx}</b> ejercicios realizados
+</div>
+
+<div>
+🔢 <b>${totalSets}</b> series realizadas
+</div>
+
+<div>
+📦 <b>${Math.round(totalVol)}</b> kg de volumen
+</div>
+
+<br>
+
+<button
+class="btn"
+onclick="document.getElementById('monitorSummary').innerHTML=''">
+Continuar
+</button>
+
+</div>
+`;
+
+}
+
+
+function changeMonitorDay(){
+
+document.getElementById(
+'monitorSummary'
+).innerHTML='';
+
+renderMonitorWorkout();
+
+}
+
+
+function closeMonitorTraining(){
+
+document.getElementById(
+'monitorTraining'
+).style.display='none';
+
+}
+
 
 migrateStudentData();
 
 save();
 
 saveStudents();
+
+saveStudentLogs();
 
 renderCalendar();
 
