@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Mi Gimnasio Pro v6.2</title>
+<title>Mi Gimnasio Pro v6.3</title>
 <meta name="theme-color" content="#121212">
 <style>
 :root{--bg:#121212;--card:#1e1e1e;--item:#252525;--input:#2a2a2a;--a:#00e676;--txt:#fff;--sub:#aaa;--bor:#333;--red:#ff5252;--gold:#ffd700;--blue:#29b6f6}
@@ -98,17 +98,23 @@ label{font-size:.73rem;color:var(--sub)}
 .money{color:var(--a);font-weight:bold}
 .phone{color:var(--blue)}
 .place{color:var(--gold)}
+.exitOverlay{display:none;position:fixed;inset:0;z-index:1000;background:var(--bg);align-items:center;justify-content:center;padding:20px}
+.exitBox{width:100%;max-width:420px;background:var(--card);border:1px solid var(--bor);border-radius:15px;padding:25px;text-align:center;box-shadow:0 10px 40px #000}
+.exitBox h2{color:var(--a);font-size:1.25rem;margin-bottom:12px}
+.exitBox p{color:var(--sub);font-size:.8rem;line-height:1.5;margin-bottom:12px}
+.exitTime{color:var(--a);font-weight:bold;font-size:.8rem;margin:12px 0 20px}
+.monitorExitBtn{position:fixed;right:8px;bottom:72px;z-index:25;width:auto;padding:7px 9px;font-size:.65rem;background:transparent;color:var(--red);border:1px solid var(--red);border-radius:7px;font-weight:bold}
 @media(max-width:380px){
-td input{font-size:.7rem;padding:5px 1px}.muscleStats{grid-template-columns:1fr 1fr}
+td input{font-size:.7rem;padding:5px 1px}.muscleStats{grid-template-columns:1fr 1fr}.monitorExitBtn{font-size:.6rem;padding:6px 7px}
 }
 @media print{
-nav,header,button,input,select,.timerOverlay,canvas{display:none!important}
+nav,header,button,input,select,.timerOverlay,.exitOverlay,canvas,.monitorExitBtn{display:none!important}
 body{background:#fff;color:#000}.card{border:0;background:#fff}.report{color:#000}
 }
 </style>
 </head>
 <body>
-<header><h1>MI GIMNASIO PRO v6.2</h1></header>
+<header><h1>MI GIMNASIO PRO v6.3</h1></header>
 <div class="container">
 <section id="tab-entrenar" class="tab active">
 <div class="card">
@@ -145,12 +151,12 @@ body{background:#fff;color:#000}.card{border:0;background:#fff}.report{color:#00
 </div>
 <div class="card">
 <h2>💾 Seguridad de datos</h2>
-<div style="font-size:.72rem;color:var(--sub);line-height:1.5;margin-bottom:10px">La rutina, entrenamientos, alumnos, citas y contabilidad se guardan en el navegador. Utiliza regularmente la copia JSON.</div>
+<div style="font-size:.72rem;color:var(--sub);line-height:1.5;margin-bottom:10px">La rutina, entrenamientos, alumnos, citas y contabilidad se guardan en el navegador. La aplicación crea copias automáticas de seguridad.</div>
 <button class="btn out" onclick="exportData()">📦 Crear copia de seguridad</button>
 <br><br>
 <button class="btn out" onclick="document.getElementById('file').click()">📥 Recuperar copia de seguridad</button>
 <input id="file" type="file" accept=".json" style="display:none" onchange="importData(event)">
-<div id="backupStatus" class="backupBox"><span class="backupWarn">⚠️ Todavía no se ha comprobado una copia externa.</span></div>
+<div id="backupStatus" class="backupBox"><span class="backupWarn">⚠️ Todavía no se ha creado una copia automática.</span></div>
 </div>
 </section>
 <section id="tab-calendario" class="tab">
@@ -188,10 +194,14 @@ body{background:#fff;color:#000}.card{border:0;background:#fff}.report{color:#00
 <button class="btn blue" onclick="showAppointments()">📅 CITAS</button>
 <button class="btn out" onclick="showAccounting()">💶 CONTABILIDAD</button>
 </div>
+<br>
+<button class="btn danger" onclick="exitMonitorApp()">🚪 SALIR Y GUARDAR</button>
+<div id="monitorBackupStatus" class="backupBox"></div>
 </div>
 <div id="monitorList"></div>
 </div>
 <div id="monitorEditor" style="display:none"></div>
+<button id="monitorExitBtn" class="monitorExitBtn" onclick="exitMonitorApp()">🚪 SALIR Y GUARDAR</button>
 </section>
 </div>
 <nav>
@@ -208,10 +218,19 @@ body{background:#fff;color:#000}.card{border:0;background:#fff}.report{color:#00
 <button class="timerClose" onclick="closeTimer()">Cerrar</button>
 </div>
 </div>
+<div id="exitOverlay" class="exitOverlay">
+<div class="exitBox">
+<h2 id="exitTitle">💾 DATOS GUARDADOS</h2>
+<p id="exitText">Los datos se han guardado correctamente.</p>
+<div id="exitTime" class="exitTime"></div>
+<button class="btn" onclick="reopenMonitorApp()">↩️ VOLVER AL MONITOR</button>
+</div>
+</div>
 <script>
 "use strict";
-const K='gym_v6_';
-const MK='gym_monitor_v2_';
+const K='gym_v6_',MK='gym_monitor_v2_';
+const AUTO_BACKUP=K+'auto_backup',PREV_BACKUP=K+'auto_backup_previous',BACKUP_DATE=K+'auto_backup_date';
+const MONITOR_AUTO_BACKUP=MK+'auto_backup',MONITOR_PREV_BACKUP=MK+'auto_backup_previous',MONITOR_BACKUP_DATE=MK+'auto_backup_date';
 const DEFAULT_ROUTINE={
 1:{groups:[
 {name:'PECHO',exercises:['Press de banca plano','Press inclinado con mancuernas','Aperturas con mancuernas','Cruce de poleas a la altura del pecho','Cruce de poleas de arriba hacia abajo'],images:['','','','','']},
@@ -266,6 +285,31 @@ localStorage.setItem(K+'routine',JSON.stringify(routine));
 localStorage.setItem(K+'logs',JSON.stringify(logs));
 }catch(e){}
 }
+function createAutoBackup(){
+try{
+let old=localStorage.getItem(AUTO_BACKUP);
+if(old)localStorage.setItem(PREV_BACKUP,old);
+save();
+let d={app:'Mi Gimnasio Pro',version:'6.3',backupType:'automatic',created:new Date().toISOString(),routine:clone(routine),logs:clone(logs)};
+localStorage.setItem(AUTO_BACKUP,JSON.stringify(d));
+localStorage.setItem(BACKUP_DATE,d.created);
+updateBackupStatus();
+}catch(e){}
+}
+function restoreAutoBackupIfNeeded(){
+try{
+let r=safeParse(localStorage.getItem(K+'routine'),null),l=safeParse(localStorage.getItem(K+'logs'),null),b=safeParse(localStorage.getItem(AUTO_BACKUP),null);
+if(!b)return;
+let changed=false;
+if(!r&&b.routine){routine=clone(b.routine);changed=true}
+if(!Array.isArray(l)&&Array.isArray(b.logs)){logs=clone(b.logs);changed=true}
+if(changed){normalizeRoutine();save()}
+}catch(e){}
+}
+function updateBackupStatus(){
+let e=document.getElementById('backupStatus'),v=localStorage.getItem(BACKUP_DATE);
+if(e)e.innerHTML=v?'<span class="backupOk">✓ Última copia automática: '+new Date(v).toLocaleString('es-ES')+'</span>':'<span class="backupWarn">⚠️ Todavía no se ha creado una copia automática.</span>';
+}
 function volume(s){return(s||[]).reduce((a,x)=>a+num(x.weight)*num(x.reps),0)}
 function rm(w,r){return w&&r?w*(1+r/30):0}
 function maxSetRM(s){return Math.round(Math.max(0,...(s||[]).map(x=>rm(num(x.weight),num(x.reps))))*10)/10}
@@ -277,10 +321,7 @@ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.g
 }
 function uniqueSessions(a){
 let m=new Map();
-(a||[]).forEach(l=>{
-let k=Number(l.day)+'|'+dateKey(l.date);
-if(!m.has(k))m.set(k,l);
-});
+(a||[]).forEach(l=>{let k=Number(l.day)+'|'+dateKey(l.date);if(!m.has(k))m.set(k,l)});
 return[...m.values()];
 }
 function findSession(d,date){
@@ -294,7 +335,7 @@ if(t)t.classList.add('active');
 document.querySelectorAll('nav button').forEach(e=>e.classList.remove('active'));
 let n=document.getElementById('n-'+x);
 if(n)n.classList.add('active');
-if(x==='rutina')loadConfig();
+if(x==='rutina'){loadConfig();updateBackupStatus()}
 if(x==='calendario')renderCalendar();
 if(x==='informes')stats();
 if(x==='monitor')showMonitorHome();
@@ -307,15 +348,54 @@ if(!Array.isArray(appointments))appointments=[];
 if(!Array.isArray(accounting))accounting=[];
 let monitorStudentId=null;
 function saveMonitor(){
+try{
 localStorage.setItem(MK+'students',JSON.stringify(students));
 localStorage.setItem(MK+'appointments',JSON.stringify(appointments));
 localStorage.setItem(MK+'accounting',JSON.stringify(accounting));
+}catch(e){}
 }
+function createMonitorAutoBackup(){
+try{
+let old=localStorage.getItem(MONITOR_AUTO_BACKUP);
+if(old)localStorage.setItem(MONITOR_PREV_BACKUP,old);
+saveMonitor();
+let d={app:'Mi Gimnasio Pro - Monitor',version:'6.3',backupType:'automatic',created:new Date().toISOString(),students:clone(students),appointments:clone(appointments),accounting:clone(accounting)};
+localStorage.setItem(MONITOR_AUTO_BACKUP,JSON.stringify(d));
+localStorage.setItem(MONITOR_BACKUP_DATE,d.created);
+updateMonitorBackupStatus();
+}catch(e){}
+}
+function restoreMonitorAutoBackupIfNeeded(){
+try{
+let sr=safeParse(localStorage.getItem(MK+'students'),null),ar=safeParse(localStorage.getItem(MK+'appointments'),null),cr=safeParse(localStorage.getItem(MK+'accounting'),null),b=safeParse(localStorage.getItem(MONITOR_AUTO_BACKUP),null);
+if(!b)return;
+let changed=false;
+if(!Array.isArray(sr)&&Array.isArray(b.students)){students=clone(b.students);changed=true}
+if(!Array.isArray(ar)&&Array.isArray(b.appointments)){appointments=clone(b.appointments);changed=true}
+if(!Array.isArray(cr)&&Array.isArray(b.accounting)){accounting=clone(b.accounting);changed=true}
+if(changed)saveMonitor();
+}catch(e){}
+}
+function updateMonitorBackupStatus(){
+let e=document.getElementById('monitorBackupStatus'),v=localStorage.getItem(MONITOR_BACKUP_DATE);
+if(e)e.innerHTML=v?'<span class="backupOk">✓ Última copia automática del Monitor: '+new Date(v).toLocaleString('es-ES')+'</span>':'<span class="backupWarn">⚠️ El Monitor todavía no tiene copia automática.</span>';
+}
+function exitMonitorApp(){
+saveMonitor();
+createMonitorAutoBackup();
+let now=new Date().toLocaleString('es-ES');
+document.getElementById('exitTitle').innerText='💾 DATOS DEL MONITOR GUARDADOS';
+document.getElementById('exitText').innerText='Alumnos, entrenamientos, citas y contabilidad han sido guardados correctamente.';
+document.getElementById('exitTime').innerText='Última copia: '+now;
+document.getElementById('exitOverlay').style.display='flex';
+}
+function reopenMonitorApp(){document.getElementById('exitOverlay').style.display='none'}
 function showMonitorHome(){
 monitorStudentId=null;
 document.getElementById('monitorHome').style.display='block';
 document.getElementById('monitorEditor').style.display='none';
 renderStudents();
+updateMonitorBackupStatus();
 }
 function backToMonitor(){showMonitorHome()}
 function newStudent(){
@@ -323,23 +403,7 @@ monitorStudentId=null;
 document.getElementById('monitorHome').style.display='none';
 let e=document.getElementById('monitorEditor');
 e.style.display='block';
-e.innerHTML=`
-<div class="monitorBack"><button class="btn out" onclick="backToMonitor()">← VOLVER A MONITOR</button></div>
-<div class="card">
-<h2>➕ Nuevo alumno</h2>
-<label>Nombre del alumno</label>
-<input id="studentName" placeholder="Nombre y apellidos">
-<label>Teléfono</label>
-<input id="studentPhone" type="tel" placeholder="Teléfono">
-<label>Lugar del entrenamiento</label>
-<select id="studentPlace">
-<option value="Gimnasio">Gimnasio</option>
-<option value="Domicilio">Domicilio</option>
-</select>
-<button class="btn" onclick="saveStudent()">💾 Guardar alumno</button>
-<br><br>
-<button class="btn out" onclick="backToMonitor()">Salir</button>
-</div>`;
+e.innerHTML=`<div class="monitorBack"><button class="btn out" onclick="backToMonitor()">← VOLVER A MONITOR</button></div><div class="card"><h2>➕ Nuevo alumno</h2><label>Nombre del alumno</label><input id="studentName" placeholder="Nombre y apellidos"><label>Teléfono</label><input id="studentPhone" type="tel" placeholder="Teléfono"><label>Lugar del entrenamiento</label><select id="studentPlace"><option value="Gimnasio">Gimnasio</option><option value="Domicilio">Domicilio</option></select><button class="btn" onclick="saveStudent()">💾 Guardar alumno</button><br><br><button class="btn out" onclick="backToMonitor()">Salir</button></div>`;
 }
 function openStudent(id){
 let s=students.find(x=>x.id===id);
@@ -348,32 +412,7 @@ monitorStudentId=id;
 document.getElementById('monitorHome').style.display='none';
 let e=document.getElementById('monitorEditor');
 e.style.display='block';
-let h=`
-<div class="monitorBack"><button class="btn out" onclick="backToMonitor()">← VOLVER A MONITOR</button></div>
-<div class="card">
-<h2>👤 ${esc(s.name)}</h2>
-<div style="font-size:.78rem;margin-bottom:8px">
-${s.phone?`📞 <span class="phone">${esc(s.phone)}</span>`:'📞 Sin teléfono'}<br>
-📍 <span class="place">${esc(s.place||'Gimnasio')}</span>
-</div>
-<div class="monitorMenu">
-<button class="btn" onclick="studentTraining()">🏋️ ENTRENAR</button>
-<button class="btn blue" onclick="studentReports()">📊 INFORMES</button>
-<button class="btn out" onclick="studentRoutine()">⚙️ RUTINA</button>
-</div>
-</div>
-<div class="card">
-<label>Nombre del alumno</label>
-<input id="studentName" value="${esc(s.name)}">
-<label>Teléfono</label>
-<input id="studentPhone" type="tel" value="${esc(s.phone||'')}">
-${s.phone?`<button class="btn blue" onclick="callStudent('${esc(s.phone)}')">📞 LLAMAR AL ALUMNO</button><br><br>`:''}
-<label>Lugar del entrenamiento</label>
-<select id="studentPlace">
-<option value="Gimnasio" ${(s.place||'Gimnasio')==='Gimnasio'?'selected':''}>Gimnasio</option>
-<option value="Domicilio" ${(s.place||'')==='Domicilio'?'selected':''}>Domicilio</option>
-</select>
-<h2 style="margin-top:8px">📅 Ejercicios asignados</h2>`;
+let h=`<div class="monitorBack"><button class="btn out" onclick="backToMonitor()">← VOLVER A MONITOR</button></div><div class="card"><h2>👤 ${esc(s.name)}</h2><div style="font-size:.78rem;margin-bottom:8px">${s.phone?`📞 <span class="phone">${esc(s.phone)}</span>`:'📞 Sin teléfono'}<br>📍 <span class="place">${esc(s.place||'Gimnasio')}</span></div><div class="monitorMenu"><button class="btn" onclick="studentTraining()">🏋️ ENTRENAR</button><button class="btn blue" onclick="studentReports()">📊 INFORMES</button><button class="btn out" onclick="studentRoutine()">⚙️ RUTINA</button></div></div><div class="card"><label>Nombre del alumno</label><input id="studentName" value="${esc(s.name)}"><label>Teléfono</label><input id="studentPhone" type="tel" value="${esc(s.phone||'')}">${s.phone?`<button class="btn blue" onclick="callStudent('${esc(s.phone)}')">📞 LLAMAR AL ALUMNO</button><br><br>`:''}<label>Lugar del entrenamiento</label><select id="studentPlace"><option value="Gimnasio" ${(s.place||'Gimnasio')==='Gimnasio'?'selected':''}>Gimnasio</option><option value="Domicilio" ${(s.place||'')==='Domicilio'?'selected':''}>Domicilio</option></select><h2 style="margin-top:8px">📅 Ejercicios asignados</h2>`;
 for(let d=1;d<=5;d++){
 h+=`<div class="daybox"><h3>📅 Día ${d}</h3>`;
 (routine[d].groups||[]).forEach((g,gi)=>{
@@ -385,11 +424,7 @@ h+=`<label class="check"><input type="checkbox" data-d="${d}" data-g="${gi}" dat
 });
 h+=`</div>`;
 }
-h+=`
-<button class="btn" onclick="saveStudent()">💾 Guardar configuración</button>
-<br><br>
-<button class="btn danger" onclick="deleteStudent()">🗑️ Eliminar alumno</button>
-</div>`;
+h+=`<button class="btn" onclick="saveStudent()">💾 Guardar configuración</button><br><br><button class="btn danger" onclick="deleteStudent()">🗑️ Eliminar alumno</button></div>`;
 e.innerHTML=h;
 }
 function callStudent(phone){
@@ -397,30 +432,14 @@ let p=String(phone||'').replace(/[^\d+]/g,'');
 if(p)window.location.href='tel:'+p;
 }
 function saveStudent(){
-let name=document.getElementById('studentName').value.trim();
-let phone=document.getElementById('studentPhone').value.trim();
-let place=document.getElementById('studentPlace').value;
+let name=document.getElementById('studentName').value.trim(),phone=document.getElementById('studentPhone').value.trim(),place=document.getElementById('studentPlace').value;
 if(!name){alert('Escribe el nombre del alumno.');return}
 let s=monitorStudentId?students.find(x=>x.id===monitorStudentId):null;
-if(!s){
-s={id:Date.now(),name:'',phone:'',place:'Gimnasio',routine:{},logs:[]};
-students.push(s);
-monitorStudentId=s.id;
-}
+if(!s){s={id:Date.now(),name:'',phone:'',place:'Gimnasio',routine:{},logs:[]};students.push(s);monitorStudentId=s.id}
 if(!Array.isArray(s.logs))s.logs=[];
-s.name=name;
-s.phone=phone;
-s.place=place;
-s.routine={};
-document.querySelectorAll('#monitorEditor input[type="checkbox"]').forEach(c=>{
-if(c.checked){
-let d=Number(c.dataset.d);
-if(!s.routine[d])s.routine[d]=[];
-s.routine[d].push({g:Number(c.dataset.g),i:Number(c.dataset.i)});
-}});
-saveMonitor();
-alert('Alumno guardado correctamente.');
-backToMonitor();
+s.name=name;s.phone=phone;s.place=place;s.routine={};
+document.querySelectorAll('#monitorEditor input[type="checkbox"]').forEach(c=>{if(c.checked){let d=Number(c.dataset.d);if(!s.routine[d])s.routine[d]=[];s.routine[d].push({g:Number(c.dataset.g),i:Number(c.dataset.i)})}});
+saveMonitor();alert('Alumno guardado correctamente.');backToMonitor();
 }
 function deleteStudent(){
 if(!monitorStudentId)return;
@@ -428,35 +447,21 @@ if(!confirm('¿Eliminar este alumno y toda su configuración?'))return;
 students=students.filter(x=>x.id!==monitorStudentId);
 appointments=appointments.filter(x=>x.studentId!==monitorStudentId);
 accounting=accounting.filter(x=>x.studentId!==monitorStudentId);
-saveMonitor();
-backToMonitor();
+saveMonitor();backToMonitor();
 }
 function quickDeleteStudent(id){
 if(!confirm('¿Eliminar este alumno?'))return;
 students=students.filter(x=>x.id!==id);
 appointments=appointments.filter(x=>x.studentId!==id);
 accounting=accounting.filter(x=>x.studentId!==id);
-saveMonitor();
-renderStudents();
+saveMonitor();renderStudents();
 }
 function renderStudents(){
 let box=document.getElementById('monitorList');
-if(!students.length){
-box.innerHTML='<div class="card empty">Todavía no hay alumnos.</div>';
-return;
-}
+if(!students.length){box.innerHTML='<div class="card empty">Todavía no hay alumnos.</div>';return}
 box.innerHTML=students.map(s=>{
 let days=Object.keys(s.routine||{}).length;
-return`
-<div class="monitorStudent">
-<strong>👤 ${esc(s.name)}</strong><br>
-<small>${s.phone?`📞 ${esc(s.phone)} `:'📞 Sin teléfono '} · 📍 ${esc(s.place||'Gimnasio')} · ${days} día(s)</small>
-<div class="row">
-<button class="btn sm" onclick="openStudent(${s.id})">Abrir ficha</button>
-${s.phone?`<button class="btn blue sm" onclick="callStudent('${esc(s.phone)}')">📞</button>`:''}
-<button class="btn danger sm" onclick="quickDeleteStudent(${s.id})">Eliminar</button>
-</div>
-</div>`;
+return`<div class="monitorStudent"><strong>👤 ${esc(s.name)}</strong><br><small>${s.phone?`📞 ${esc(s.phone)} `:'📞 Sin teléfono '} · 📍 ${esc(s.place||'Gimnasio')} · ${days} día(s)</small><div class="row"><button class="btn sm" onclick="openStudent(${s.id})">Abrir ficha</button>${s.phone?`<button class="btn blue sm" onclick="callStudent('${esc(s.phone)}')">📞</button>`:''}<button class="btn danger sm" onclick="quickDeleteStudent(${s.id})">Eliminar</button></div></div>`;
 }).join('');
 }
 function getMonitorStudent(){return students.find(x=>x.id===monitorStudentId)}
@@ -465,42 +470,16 @@ let s=getMonitorStudent();
 if(!s)return;
 if(!Array.isArray(s.logs))s.logs=[];
 let e=document.getElementById('monitorEditor');
-e.innerHTML=`
-<div class="monitorBack"><button class="btn out" onclick="backToMonitor()">← VOLVER A MONITOR</button></div>
-<div class="monitorTitle">🏋️ ENTRENAMIENTO — ${esc(s.name)}</div>
-<div class="card"><div class="days">
-<button class="btn out" onclick="studentSelectDay(1)">Día 1</button>
-<button class="btn out" onclick="studentSelectDay(2)">Día 2</button>
-<button class="btn out" onclick="studentSelectDay(3)">Día 3</button>
-<button class="btn out" onclick="studentSelectDay(4)">Día 4</button>
-<button class="btn out" onclick="studentSelectDay(5)">Día 5</button>
-</div></div>
-<div id="studentWork"></div>`;
+e.innerHTML=`<div class="monitorBack"><button class="btn out" onclick="backToMonitor()">← VOLVER A MONITOR</button></div><div class="monitorTitle">🏋️ ENTRENAMIENTO — ${esc(s.name)}</div><div class="card"><div class="days"><button class="btn out" onclick="studentSelectDay(1)">Día 1</button><button class="btn out" onclick="studentSelectDay(2)">Día 2</button><button class="btn out" onclick="studentSelectDay(3)">Día 3</button><button class="btn out" onclick="studentSelectDay(4)">Día 4</button><button class="btn out" onclick="studentSelectDay(5)">Día 5</button></div></div><div id="studentWork"></div>`;
 }
 function studentSelectDay(d){
 let s=getMonitorStudent();
 if(!s)return;
 let selected=s.routine&&s.routine[d]?s.routine[d]:[];
-if(!selected.length){
-document.getElementById('studentWork').innerHTML=`<div class="card"><div class="empty">Este alumno no tiene ejercicios asignados para el Día ${d}.</div></div>`;
-return;
-}
-let previous=null;
-let a=s.logs.filter(l=>Number(l.day)===d);
-if(a.length){
-a.sort((x,y)=>new Date(x.date)-new Date(y.date));
-previous=a[a.length-1];
-}
-let h=`
-<div class="card">
-<h2>🏋️ ${esc(s.name)} — Día ${d}</h2>
-<div class="monitorBack"><button class="btn out" onclick="backToMonitor()">← VOLVER A MONITOR</button></div>
-<label>Fecha</label>
-<input type="date" id="studentDate" value="${new Date().toISOString().slice(0,10)}">
-<div id="studentForm"></div>
-<button class="btn" onclick="saveStudentWorkout(${d})">💾 GUARDAR ENTRENAMIENTO</button>
-<div id="studentSummary"></div>
-</div>`;
+if(!selected.length){document.getElementById('studentWork').innerHTML=`<div class="card"><div class="empty">Este alumno no tiene ejercicios asignados para el Día ${d}.</div></div>`;return}
+let previous=null,a=s.logs.filter(l=>Number(l.day)===d);
+if(a.length){a.sort((x,y)=>new Date(x.date)-new Date(y.date));previous=a[a.length-1]}
+let h=`<div class="card"><h2>🏋️ ${esc(s.name)} — Día ${d}</h2><div class="monitorBack"><button class="btn out" onclick="backToMonitor()">← VOLVER A MONITOR</button></div><label>Fecha</label><input type="date" id="studentDate" value="${new Date().toISOString().slice(0,10)}"><div id="studentForm"></div><button class="btn" onclick="saveStudentWorkout(${d})">💾 GUARDAR ENTRENAMIENTO</button><div id="studentSummary"></div></div>`;
 document.getElementById('studentWork').innerHTML=h;
 renderStudentWorkout(d,selected,previous);
 }
@@ -511,9 +490,7 @@ let g=routine[d].groups[item.g];
 if(!g)return;
 let ex=g.exercises[item.i];
 if(!ex)return;
-let img=(g.images||[])[item.i]||'';
-let old=previous?getStudentPreviousExercise(previous,ex):null;
-let ps=old?(old.sets||[]).slice(0,3):[];
+let img=(g.images||[])[item.i]||'',old=previous?getStudentPreviousExercise(previous,ex):null,ps=old?(old.sets||[]).slice(0,3):[];
 while(ps.length<3)ps.push({reps:'',weight:''});
 let prefix='sg'+index+'e'+index,iid='simg-'+index;
 html+=`<div class="group">${esc(g.name)}</div><div class="ex"><div class="exhead"><span>${esc(ex)}</span></div>`;
@@ -549,10 +526,7 @@ let cd=document.getElementById('studentDate').value;
 if(!cd){alert('Selecciona una fecha.');return}
 if(!Array.isArray(s.logs))s.logs=[];
 let log=s.logs.find(l=>Number(l.day)===d&&dateKey(l.date)===cd);
-if(!log){
-log={id:Date.now(),date:new Date(cd+'T12:00:00').toISOString(),day:d,groups:[]};
-s.logs.push(log);
-}
+if(!log){log={id:Date.now(),date:new Date(cd+'T12:00:00').toISOString(),day:d,groups:[]};s.logs.push(log)}
 let selected=s.routine&&s.routine[d]?s.routine[d]:[],totalVolume=0,totalSets=0,totalExercises=0;
 selected.forEach((item,index)=>{
 let g=routine[d].groups[item.g];
@@ -833,7 +807,7 @@ if(day===d)renderWorkout(previousDayLog(d));
 alert('Rutina guardada correctamente.');
 }
 function exportData(){
-let data={app:'Mi Gimnasio Pro',version:'6.2',exported:new Date().toISOString(),routine,logs,students,appointments,accounting};
+let data={app:'Mi Gimnasio Pro',version:'6.3',exported:new Date().toISOString(),routine,logs,students,appointments,accounting};
 let b=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),u=URL.createObjectURL(b),a=document.createElement('a');
 a.href=u;a.download='gym_v6_backup_'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);
 document.getElementById('backupStatus').innerHTML='<span class="backupOk">✓ Copia completa creada correctamente.<br>Incluye alumnos, citas y contabilidad.</span>';
@@ -850,7 +824,7 @@ routine=clone(d.routine);logs=clone(d.logs);
 if(Array.isArray(d.students))students=clone(d.students);
 if(Array.isArray(d.appointments))appointments=clone(d.appointments);
 if(Array.isArray(d.accounting))accounting=clone(d.accounting);
-normalizeRoutine();save();saveMonitor();alert('✓ Datos recuperados correctamente.');location.reload();
+normalizeRoutine();save();saveMonitor();createAutoBackup();createMonitorAutoBackup();alert('✓ Datos recuperados correctamente.');location.reload();
 }catch(x){alert('⚠️ El archivo no es una copia válida de Mi Gimnasio.')}
 e.target.value='';
 };
@@ -956,9 +930,6 @@ let c=new(window.AudioContext||window.webkitAudioContext)(),o=c.createOscillator
 o.connect(g);g.connect(c.destination);o.frequency.value=900;g.gain.value=.7;o.start();o.stop(c.currentTime+.18);
 }catch(e){}
 }
-/* =========================================================
-   AGENDA DE CITAS
-========================================================= */
 function showAppointments(){
 document.getElementById('monitorHome').style.display='none';
 let e=document.getElementById('monitorEditor');
@@ -995,9 +966,6 @@ if(!v)return'';
 let d=new Date(v+'T12:00:00');
 return d.toLocaleDateString('es-ES');
 }
-/* =========================================================
-   CONTABILIDAD
-========================================================= */
 function showAccounting(){
 document.getElementById('monitorHome').style.display='none';
 let e=document.getElementById('monitorEditor');
@@ -1063,11 +1031,21 @@ h+=`</tbody></table></div><div class="accountTotal"><span>TOTAL ANUAL ${year}</s
 document.getElementById('annualBox').innerHTML=h;
 }
 function monthName(m){return['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'][m-1]}
+restoreAutoBackupIfNeeded();
+restoreMonitorAutoBackupIfNeeded();
 save();
 saveMonitor();
+createAutoBackup();
+createMonitorAutoBackup();
 renderCalendar();
 loadConfig();
 renderStudents();
+updateBackupStatus();
+updateMonitorBackupStatus();
+window.addEventListener('pagehide',()=>{
+try{createAutoBackup()}catch(e){}
+try{createMonitorAutoBackup()}catch(e){}
+});
 </script>
 </body>
 </html>
