@@ -5406,7 +5406,7 @@ let old=previous?getStudentPreviousExercise(previous,ex):null,ps=old?(old.sets||
 while(ps.length<3)ps.push({reps:'',weight:''});
 let prefix='sg'+index+'e'+index;
 html+=`<div class="group">${esc(groupName)}</div><div class="ex"><div class="exhead"><span>${esc(ex)}</span>${equipment?`<span class="badge">${esc(equipment)}</span>`:''}</div>`;
-if(img)html+=`<div class="imgbox" style="display:block"><img src="${esc(img)}" alt="${esc(ex)}" onerror="this.style.display='none'"></div>`;
+if(img)html+=`<div class="imgbox" style="display:block"><img src="${esc(img)}" alt="${esc(ex)}" onerror=&quot;this.style.display=none&quot;></div>`;
 if(p.mode==='REPS_KG'){
  html+=`<div class="targetBox"><b>🎯 OBJETIVO DEL MONITOR</b><table class="workTable"><thead><tr><th>SERIE</th><th>REPS</th><th>KG</th></tr></thead><tbody>`;
  for(let j=0;j<3;j++)html+=`<tr><td>${j+1}</td><td>${p.sets[j].reps||'—'}</td><td>${p.sets[j].weight||'—'}</td></tr>`;
@@ -5490,7 +5490,7 @@ h+=`<div class="card"><h2>📅 Día ${d}</h2>`;
 assigned.forEach(item=>{
  const p=monitorPrescriptionFromItem(item);
  let target=p.mode==='REPS_KG'?p.sets.map((x,i)=>`S${i+1}: ${x.reps||'—'} reps · ${x.weight||'—'} kg`).join(' | '):p.mode==='TIEMPO'?`⏱️ ${p.times.filter(Boolean).join(' · ')||'—'} s`:`🔥 ${p.tabata.work}s / ${p.tabata.rest}s · ${p.tabata.rounds} rondas`;
- h+=`<div class="ex"><div class="exhead"><span>${esc(item.name)}</span>${item.equipment?`<span class="badge">${esc(item.equipment)}</span>`:''}</div><div style="font-size:.72rem;color:var(--sub)">${esc(item.group)}</div>${item.image?`<div class="imgbox" style="display:block"><img src="${esc(item.image)}" alt="${esc(item.name)}" onerror="this.style.display='none'"></div>`:''}<div class="targetBox"><b>🎯 ${target}</b></div></div>`;
+ h+=`<div class="ex"><div class="exhead"><span>${esc(item.name)}</span>${item.equipment?`<span class="badge">${esc(item.equipment)}</span>`:''}</div><div style="font-size:.72rem;color:var(--sub)">${esc(item.group)}</div>${item.image?`<div class="imgbox" style="display:block"><img src="${esc(item.image)}" alt="${esc(item.name)}" onerror=&quot;this.style.display=none&quot;></div>`:''}<div class="targetBox"><b>🎯 ${target}</b></div></div>`;
 });
 h+='</div>';
 }
@@ -6100,30 +6100,159 @@ renderStudents();
 
   window.studentRoutine=function(){
     const s=getMonitorStudent();if(!s)return;v108NormalizeRoutine(s);
-    let e=document.getElementById('monitorEditor'),h=`<div class="monitorBack"><button class="btn out" onclick="openStudent(${s.id})">← VOLVER A FICHA</button></div><div class="monitorTitle">⚙️ RUTINA PRIVADA — ${esc(s.name)}</div><div class="backupBox" style="margin-bottom:10px">👁️ <b>Modo solo lectura.</b> Aquí se muestra exactamente la rutina que has asignado, incluidos sus GIF.</div>`,any=false;
+    let e=document.getElementById('monitorEditor'),h=`<div class="monitorBack"><button class="btn out" onclick="openStudent(${s.id})">← VOLVER A FICHA</button></div><div class="monitorTitle">🏋️ ENTRENAMIENTO DEL ALUMNO — ${esc(s.name)}</div><div class="backupBox" style="margin-bottom:10px">📤 Aquí se genera el <b>ENTRENAMIENTO COMPLETO</b> que recibirá el alumno: ejercicios, GIF, objetivos, espacio para resultados y envío de vuelta al Monitor.</div>`,any=false;
     for(let d=1;d<=5;d++){
       const assigned=s.routine[d]||[];if(!assigned.length)continue;any=true;
       h+=`<div class="card"><h2>📅 Día ${d}</h2>`;
-      assigned.forEach(item=>{h+=`<div class="ex"><div class="exhead"><span>${esc(item.name)}</span>${item.equipment?`<span class="badge">${esc(item.equipment)}</span>`:''}</div><div style="font-size:.68rem;color:var(--sub);margin-bottom:5px">${esc(item.group)}</div>${item.image?`<img class="gifPreview" src="${esc(item.image)}" alt="${esc(item.name)}" loading="lazy" onerror="this.style.display='none'">`:''}</div>`});
+      assigned.forEach(item=>{
+        const p=monitorPrescriptionFromItem(item);
+        let target=p.mode==='REPS_KG'?p.sets.map((x,i)=>`S${i+1}: ${x.reps||'—'} reps · ${x.weight||'—'} kg`).join(' | '):p.mode==='TIEMPO'?`⏱️ ${p.times.filter(Boolean).join(' · ')||'—'} s`:`🔥 ${p.tabata.work}s / ${p.tabata.rest}s · ${p.tabata.rounds} rondas`;
+        h+=`<div class="ex"><div class="exhead"><span>${esc(item.name)}</span>${item.equipment?`<span class="badge">${esc(item.equipment)}</span>`:''}</div><div style="font-size:.68rem;color:var(--sub);margin-bottom:5px">${esc(item.group)}</div>${item.image?`<img class="gifPreview" src="${esc(item.image)}" alt="${esc(item.name)}" loading="lazy" onerror=&quot;this.style.display=none&quot;>`:''}<div class="targetBox"><b>🎯 ${target}</b></div></div>`;
+      });
       h+='</div>';
     }
     if(!any)h+=`<div class="card empty">Este alumno todavía no tiene rutina privada asignada.</div>`;
-    h+=`<div class="card"><button class="btn" onclick="shareStudentRoutine()">📤 ENVIAR RUTINA AL ALUMNO</button><br><br><button class="btn out" onclick="openStudent(${s.id})">⚙️ EDITAR RUTINA PRIVADA</button></div>`;
+    h+=`<div class="card"><div class="backupBox"><b>📤 ENVÍO AL ALUMNO</b><br>El archivo que se genera ahora ya no es una rutina de solo lectura. Es el <b>entrenamiento interactivo</b> que el alumno abrirá para entrenar, introducir resultados y devolver al Monitor.</div><button class="btn" onclick="shareStudentTraining()">📤 ENVIAR ENTRENAMIENTO AL ALUMNO</button><br><br><button class="btn out" onclick="openStudent(${s.id})">⚙️ EDITAR RUTINA PRIVADA</button></div>`;
     e.innerHTML=h;
   };
 
-  window.shareStudentRoutine=async function(){
+  window.shareStudentTraining=async function(){
     const s=getMonitorStudent();if(!s)return;v108NormalizeRoutine(s);
-    const selectedDays=Object.keys(s.routine).filter(d=>(s.routine[d]||[]).length);
+    const selectedDays=Object.keys(s.routine||{}).filter(d=>(s.routine[d]||[]).length).map(Number).sort((a,b)=>a-b);
     if(!selectedDays.length){alert('Este alumno no tiene ejercicios asignados.');return}
-    const daysHtml=selectedDays.map(d=>`<section><h2>Día ${d}</h2>${s.routine[d].map(x=>`<article><h3>${esc(x.name)}</h3><div class="group">${esc(x.group)}${x.equipment?' · '+esc(x.equipment):''}</div>${x.image?`<img src="${esc(x.image)}" alt="${esc(x.name)}">`:''}</article>`).join('')}</section>`).join('');
-    const html=`<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Rutina · ${esc(s.name)}</title><style>body{font-family:Arial,sans-serif;background:#121212;color:#fff;margin:0;padding:16px}main{max-width:720px;margin:auto}h1{color:#00e676}h2{color:#29b6f6;border-bottom:1px solid #333;padding-bottom:6px}article{background:#1e1e1e;border:1px solid #333;border-radius:10px;padding:10px;margin:10px 0}h3{margin:0 0 5px}.group{color:#aaa;font-size:12px}img{width:100%;max-height:300px;object-fit:contain;background:#0b0b0b;border-radius:8px;margin-top:8px}.note{color:#aaa;font-size:12px}</style></head><body><main><h1>🏋️ Rutina de ${esc(s.name)}</h1><p class="note">Rutina enviada por el monitor · SOLO LECTURA</p>${daysHtml}</main></body></html>`;
-    const blob=new Blob([html],{type:'text/html'}),file=new File([blob],`Rutina_${String(s.name).replace(/[^a-z0-9áéíóúüñ _-]/gi,'').trim()||'alumno'}.html`,{type:'text/html'});
+
+    const history={};
+    selectedDays.forEach(d=>{
+      const logs=(s.logs||[]).filter(l=>Number(l.day)===Number(d));
+      logs.sort((a,b)=>new Date(a.date)-new Date(b.date));
+      if(logs.length)history[d]=clone(logs[logs.length-1]);
+    });
+
+    const trainingData={
+      type:'MI_GIMNASIO_ENTRENAMIENTO_ALUMNO',
+      version:'10.24',
+      generatedAt:new Date().toISOString(),
+      student:{id:s.id,name:s.name,phone:s.phone||'',place:s.place||'Gimnasio'},
+      routine:clone(s.routine),
+      history
+    };
+
+    const safeName=String(s.name||'alumno').replace(/[^a-z0-9áéíóúüñ _-]/gi,'').trim()||'alumno';
+    const dataJson=JSON.stringify(trainingData);
+    const studentScript=JSON.stringify(`
+(function(){
+  const DATA=${dataJson};
+  const state={day:Number(Object.keys(DATA.routine||{}).find(d=>(DATA.routine[d]||[]).length)||1),date:new Date().toISOString().slice(0,10),results:{},tabata:{},savedLog:null};
+  const $=id=>document.getElementById(id);
+  function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
+  function num(v){const n=Number(String(v??'').replace(',','.'));return Number.isFinite(n)?n:0}
+  function dateKey(v){const d=new Date(v);return isNaN(d.getTime())?String(v||''):d.toISOString().slice(0,10)}
+  function prescription(item){
+    const p=item&&item.prescription&&typeof item.prescription==='object'?item.prescription:{};
+    const sets=Array.isArray(p.sets)?p.sets.slice(0,3):[];while(sets.length<3)sets.push({reps:'',weight:''});
+    const times=Array.isArray(p.times)?p.times.slice(0,3):[];while(times.length<3)times.push('');
+    const mode=['REPS_KG','TIEMPO','TABATA'].includes(String(p.mode||'REPS_KG'))?String(p.mode||'REPS_KG'):'REPS_KG';
+    const t=p.tabata&&typeof p.tabata==='object'?p.tabata:{};
+    return {mode,sets,times,tabata:{work:Number(t.work)||20,rest:Number(t.rest)||10,rounds:Number(t.rounds)||8}};
+  }
+  function previousExercise(log,name){if(!log)return null;for(const g of(log.groups||[]))for(const e of(g.exercises||[]))if(e.name===name)return e;return null}
+  function renderDays(){
+    $('days').innerHTML=(Object.keys(DATA.routine||{}).map(Number).filter(d=>(DATA.routine[d]||[]).length).sort((a,b)=>a-b).map(d=>'<button class="dayBtn '+(d===state.day?'on':'')+'" onclick="selectDay('+d+')">Día '+d+'</button>').join(''));
+  }
+  window.selectDay=function(d){captureCurrentDay();state.day=Number(d);renderDays();renderWorkout();}
+  function renderWorkout(){
+  function captureCurrentDay(){
+    const selected=DATA.routine[state.day]||[];
+    const out={};
+    selected.forEach((item,index)=>{
+      const p=prescription(item),key='e'+index,sets=[],times=[];
+      if(p.mode==='REPS_KG'){for(let j=0;j<3;j++)sets.push({reps:num($(key+'r'+j)?.value),weight:num($(key+'w'+j)?.value)})}
+      else if(p.mode==='TIEMPO'){for(let j=0;j<3;j++)times.push(num($(key+'t'+j)?.value))}
+      out[index]={mode:p.mode,sets,times,tabataCompleted:!!state.tabata[key]};
+    });
+    state.results[state.day]=out;
+  }
+    const selected=Array.isArray(DATA.routine[state.day])?DATA.routine[state.day]:[];
+    const last=DATA.history&&DATA.history[state.day]?DATA.history[state.day]:null;
+    $('date').value=state.date;
+    let html='<div class="workHead"><div><h2>🏋️ Día '+state.day+'</h2><div class="sub">'+esc(DATA.student.name)+' · '+selected.length+' ejercicios</div></div></div>';
+    selected.forEach((item,index)=>{
+      const p=prescription(item),old=previousExercise(last,item.name),ps=old&&Array.isArray(old.sets)?old.sets.slice(0,3):[];while(ps.length<3)ps.push({reps:'',weight:''});
+      const saved=state.results[state.day]&&state.results[state.day][index]||{};
+      const curSets=Array.isArray(saved.sets)?saved.sets.slice(0,3):[];while(curSets.length<3)curSets.push({reps:'',weight:''});
+      const curTimes=Array.isArray(saved.times)?saved.times.slice(0,3):[];while(curTimes.length<3)curTimes.push('');
+      const key='e'+index;
+      html+='<article class="exercise"><div class="exTitle"><span><b>'+(index+1)+'. '+esc(item.name)+'</b><small>'+esc(item.group)+(item.equipment?' · '+esc(item.equipment):'')+'</small></span></div>';
+      if(item.image)html+='<img class="gif" src="'+esc(item.image)+'" alt="'+esc(item.name)+'" loading="lazy" onerror=&quot;this.style.display=none&quot;>';
+      if(p.mode==='REPS_KG'){
+        html+='<div class="target"><b>🎯 OBJETIVO</b><table><tr><th>SERIE</th><th>REPS</th><th>KG</th></tr>';
+        p.sets.forEach((x,j)=>html+='<tr><td>'+(j+1)+'</td><td>'+(x.reps||'—')+'</td><td>'+(x.weight||'—')+'</td></tr>');
+        html+='</table></div><table class="results"><tr><th colspan="2">HOY</th><th colspan="2">ÚLTIMO</th></tr><tr><th>REPS</th><th>KG</th><th>REPS</th><th>KG</th></tr>';
+        for(let j=0;j<3;j++)html+='<tr><td><input type="number" min="0" id="'+key+'r'+j+'" data-key="'+key+'" value="'+esc(curSets[j].reps??'')+'" placeholder="—" oninput="calc(this.dataset.key)"></td><td><input type="number" min="0" step=".5" id="'+key+'w'+j+'" data-key="'+key+'" value="'+esc(curSets[j].weight??'')+'" placeholder="—" oninput="calc(this.dataset.key)"></td><td><input readonly value="'+esc(ps[j].reps??'')+'"></td><td><input readonly value="'+esc(ps[j].weight??'')+'"></td></tr>';
+        html+='</table><div class="calc" id="calc-'+key+'">📦 Volumen: 0 kg</div>';
+      }else if(p.mode==='TIEMPO'){
+        html+='<div class="target"><b>🎯 TIEMPO INDICADO</b><div class="targetBig">'+(p.times.filter(Boolean).join(' · ')||'Sin tiempo indicado')+' s</div></div><div class="actual"><b>⏱️ TIEMPO REALIZADO</b><div class="timeGrid">';
+        for(let j=0;j<3;j++)html+='<input type="number" min="0" id="'+key+'t'+j+'" value="'+esc(curTimes[j]??'')+'" placeholder="Serie '+(j+1)+' (seg)">';
+        html+='</div></div>';
+      }else{
+        html+='<div class="target"><b>🎯 TABATA INDICADO</b><div class="targetBig">'+p.tabata.work+'s trabajo · '+p.tabata.rest+'s descanso · '+p.tabata.rounds+' rondas</div></div><button class="tabata" data-key="'+key+'" data-name="'+esc(item.name)+'" onclick="runTabata(this.dataset.key,'+p.tabata.work+','+p.tabata.rest+','+p.tabata.rounds+',this.dataset.name)">🔥 INICIAR TABATA</button><div id="tabata-'+key+'" class="tabataState">No realizado</div>';
+      }
+      html+='<button class="rest" onclick="restTimer()">⏱️ DESCANSO 2:00</button></article>';
+    });
+    html+='<div class="actions"><button class="save" onclick="saveTraining()">💾 GUARDAR ENTRENAMIENTO</button><button class="send" onclick="sendToMonitor()">📤 ENVIAR ENTRENAMIENTO AL MONITOR</button></div>';
+    $('workout').innerHTML=html;
+    $('date').value=state.date;
+  }
+  window.stateDate=function(v){state.date=v||new Date().toISOString().slice(0,10)}
+  window.calc=function(key){let vol=0;for(let j=0;j<3;j++){vol+=num($(key+'r'+j)?.value)*num($(key+'w'+j)?.value)};const e=$('calc-'+key);if(e)e.textContent='📦 Volumen: '+Math.round(vol*10)/10+' kg';}
+  function buildLog(){
+    const groups=[];let total=0,any=false;
+    const selected=DATA.routine[state.day]||[];
+    selected.forEach((item,index)=>{
+      const p=prescription(item),key='e'+index;let sets=[],times=[],tabataCompleted=false;
+      if(p.mode==='REPS_KG'){for(let j=0;j<3;j++){sets.push({reps:num($(key+'r'+j)?.value),weight:num($(key+'w'+j)?.value)})}any=any||sets.some(x=>x.reps>0)}
+      else if(p.mode==='TIEMPO'){for(let j=0;j<3;j++)times.push(num($(key+'t'+j)?.value));any=any||times.some(x=>x>0)}
+      else{tabataCompleted=!!state.tabata[key];any=any||tabataCompleted}
+      if(!any && p.mode!=='REPS_KG'){}
+      const real=sets.filter(x=>x.reps>0);total+=real.reduce((sum,x)=>sum+x.reps*x.weight,0);
+      if((p.mode==='REPS_KG'&&sets.some(x=>x.reps>0))||(p.mode==='TIEMPO'&&times.some(x=>x>0))||(p.mode==='TABATA'&&tabataCompleted)){
+        let g=groups.find(x=>x.name===item.group);if(!g){g={name:item.group,exercises:[]};groups.push(g)}
+        g.exercises.push({name:item.name,group:item.group,prescription:p,sets,times,tabataCompleted,volume:real.reduce((sum,x)=>sum+x.reps*x.weight,0),rm:0});
+      }
+    });
+    return {id:Date.now(),date:new Date(state.date+'T12:00:00').toISOString(),day:Number(state.day),groups};
+  }
+  window.saveTraining=function(){const log=buildLog();if(!log.groups.length){alert('No hay resultados anotados.');return}state.savedLog=log;alert('✓ Entrenamiento guardado. Ya puedes enviarlo al Monitor.');}
+  window.sendToMonitor=function(){
+    captureCurrentDay();
+    const log=buildLog();state.savedLog=log;
+    if(!log.groups.length){alert('Primero anota al menos un resultado y pulsa GUARDAR ENTRENAMIENTO.');return}
+    const payload={type:'MI_GIMNASIO_ALUMNO_ENTRENAMIENTO',version:'10.24',sentAt:new Date().toISOString(),student:DATA.student,day:Number(state.day),date:log.date,routine:JSON.parse(JSON.stringify(DATA.routine[state.day]||[])),log};
+    const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+    const name=String(DATA.student.name||'alumno').replace(/[^a-z0-9áéíóúüñ _-]/gi,'').trim()||'alumno';
+    const file=new File([blob],'Entrenamiento_'+name+'_Día_'+state.day+'_'+dateKey(log.date)+'.json',{type:'application/json'});
+    if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){navigator.share({title:'Entrenamiento de '+DATA.student.name,text:'Entrenamiento realizado · Día '+state.day,files:[file]}).catch(e=>{if(e&&e.name!=='AbortError')download(blob,file.name)});return}
+    download(blob,file.name);
+  }
+  function download(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000);alert('✓ Archivo preparado. Envíalo al Monitor mediante RECIBIR ENTRENAMIENTO.')}
+  window.restTimer=function(){let s=120;const overlay=document.createElement('div');overlay.className='overlay';overlay.innerHTML='<div class="timer"><b>⏱️ DESCANSO</b><strong id="restCount">02:00</strong><button onclick="this.parentNode.parentNode.remove()">Cerrar</button></div>';document.body.appendChild(overlay);const i=setInterval(()=>{s--;if(!document.body.contains(overlay)){clearInterval(i);return}if(s<=0){clearInterval(i);overlay.querySelector('#restCount').textContent='00:00';return}overlay.querySelector('#restCount').textContent=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')},1000)}
+  window.runTabata=function(key,work,rest,rounds,name){let r=0,working=true,s=work;state.tabata[key]=false;const box=$('tabata-'+key);if(state.tabata[key]){if(box)box.textContent='✓ TABATA COMPLETADO';return}function tick(){if(!box)return;if(s<=0){if(working){working=false;s=rest;box.textContent='DESCANSO · '+s+' s'}else{r++;if(r>=rounds){clearInterval(timer);state.tabata[key]=true;box.textContent='✓ TABATA COMPLETADO';return}working=true;s=work;box.textContent='TRABAJO · RONDA '+(r+1)+'/'+rounds+' · '+s+' s'} }else{box.textContent=(working?'TRABAJO':'DESCANSO')+' · '+s+' s';s--}};box.textContent='TRABAJO · '+name;const timer=setInterval(tick,1000);tick()}
+  $('studentName').textContent=DATA.student.name;
+  $('studentPlace').textContent=DATA.student.place||'Gimnasio';
+  $('date').value=state.date;
+  renderDays();renderWorkout();
+})();
+`);
+
+    const html=`<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Entrenamiento · ${esc(s.name)}</title><style>
+:root{--bg:#121212;--card:#1e1e1e;--item:#252525;--a:#00e676;--blue:#29b6f6;--sub:#aaa;--bor:#333;--gold:#ffd700;--red:#ff5252}*{box-sizing:border-box;font-family:Arial,sans-serif}body{margin:0;background:var(--bg);color:#fff;padding:12px 12px 35px}main{max-width:760px;margin:auto}header{background:var(--card);border:1px solid var(--bor);border-radius:12px;padding:14px;text-align:center;margin-bottom:10px}h1{color:var(--a);font-size:1.15rem;margin:0}header .sub{color:var(--sub);font-size:.72rem;margin-top:5px}.days{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:10px}.dayBtn{background:transparent;color:#fff;border:1px solid var(--bor);border-radius:7px;padding:9px 4px;font-weight:bold}.dayBtn.on{background:var(--a);color:#000}.card,.exercise{background:var(--card);border:1px solid var(--bor);border-radius:11px;padding:10px;margin-bottom:10px}.workHead{display:flex;justify-content:space-between;gap:10px;align-items:center}.workHead h2{margin:0;color:var(--blue);font-size:1rem}.sub{color:var(--sub);font-size:.7rem}.workHead input{background:#292929;color:#fff;border:1px solid var(--bor);padding:7px;border-radius:6px}.workHead label{display:block;color:var(--sub);font-size:.6rem;margin-bottom:3px}.exTitle{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px}.exTitle b{font-size:.82rem}.exTitle small{display:block;color:var(--sub);font-size:.63rem;margin-top:3px}.gif{width:100%;max-height:240px;object-fit:contain;background:#0d0d0d;border-radius:8px;border:1px solid var(--bor);margin:4px 0 8px}.target{background:#062d3c;border:1px solid #17607c;border-radius:8px;padding:8px;margin:7px 0;font-size:.72rem}.target table,.results{width:100%;border-collapse:separate;border-spacing:3px}.target th,.results th{font-size:.6rem;color:var(--sub)}.target td,.results td{text-align:center;font-size:.7rem;padding:4px}.results th[colspan]{color:var(--a);font-size:.7rem;background:#07351f;border-radius:5px}.results input,.timeGrid input{width:100%;background:#292929;color:#fff;border:1px solid var(--bor);border-radius:5px;padding:7px;text-align:center}.results input[readonly]{background:#092632;color:var(--blue)}.calc{color:var(--a);font-size:.68rem;margin-top:5px}.actual{background:#191919;border:1px solid var(--bor);border-radius:8px;padding:8px;font-size:.7rem}.timeGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:6px}.targetBig{text-align:center;font-size:1rem;font-weight:bold;margin-top:5px}.tabata{width:100%;background:#4a1730;color:#ff80ab;border:1px solid #9b315f;border-radius:7px;padding:9px;font-weight:bold}.tabataState{text-align:center;color:var(--sub);font-size:.7rem;margin-top:6px}.rest{width:100%;background:#333;color:#fff;border:1px solid var(--bor);border-radius:7px;padding:8px;margin-top:7px}.actions{display:grid;gap:7px}.save,.send{border:0;border-radius:8px;padding:11px;font-weight:bold}.save{background:var(--a);color:#000}.send{background:#062d3c;color:var(--blue);border:1px solid #17607c}.overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;z-index:50}.timer{background:var(--card);border:1px solid var(--bor);border-radius:14px;padding:25px;text-align:center;width:90%;max-width:320px}.timer b{display:block;color:var(--a)}.timer strong{display:block;font-size:4rem;margin:15px}.timer button{background:#333;color:#fff;border:1px solid var(--bor);padding:8px 15px;border-radius:7px}@media(max-width:600px){.days{grid-template-columns:repeat(3,1fr)}.workHead{display:block}.workHead>div:last-child{margin-top:8px}.gif{max-height:220px}}</style></head><body><main><header><h1>🏋️ MI GIMNASIO · ENTRENAMIENTO</h1><div class="sub" id="studentName"></div><div class="sub" id="studentPlace"></div></header><div id="days" class="days"></div><div class="card"><label style="color:var(--sub);font-size:.65rem">FECHA DEL ENTRENAMIENTO</label><input id="date" type="date" onchange="stateDate(this.value)" style="margin-top:4px;background:#292929;color:#fff;border:1px solid var(--bor);border-radius:6px;padding:8px"></div><div id="workout"></div></main><script>${studentScript}<\/script></body></html>`;
+
+    const blob=new Blob([html],{type:'text/html'}),file=new File([blob],`Entrenamiento_${safeName}.html`,{type:'text/html'});
     try{
-      if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){await navigator.share({title:`Rutina de ${s.name}`,text:`Rutina de ${s.name} · solo lectura`,files:[file]});return}
+      if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){await navigator.share({title:`Entrenamiento de ${s.name}`,text:`Entrenamiento interactivo de ${s.name}`,files:[file]});return}
     }catch(e){if(e?.name==='AbortError')return}
-    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=file.name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
-    alert('✓ Se ha generado la rutina en modo solo lectura. Puedes enviar el archivo descargado al alumno.');
+    const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=file.name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+    alert('✓ Entrenamiento interactivo generado. Envía este archivo al alumno.');
   };
 
   /* ===== v10.11 · ENVÍO DEL ENTRENAMIENTO REALIZADO AL MONITOR ===== */
