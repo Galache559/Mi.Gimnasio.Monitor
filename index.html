@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>MI GIMNASIO PRO MONITOR v10.10</title>
+<title>MI GIMNASIO PRO MONITOR v10.15</title>
 <meta name="theme-color" content="#121212">
 
 <style>
@@ -1128,7 +1128,7 @@ td input{font-size:.7rem;padding:5px 1px}.muscleStats{grid-template-columns:1fr 
 <body>
 
 <header>
-<h1>MI GIMNASIO PRO MONITOR v10.10</h1>
+<h1>MI GIMNASIO PRO MONITOR v10.15</h1>
 </header>
 
 <div class="container">
@@ -6156,6 +6156,27 @@ renderStudents();
     }).join('');
   };
 })();
+
+/* ===== v10.15 · CORRECCIÓN DEFINITIVA MONITOR =====
+   Se añade el adaptador que faltaba para localizar ejercicios maestros.
+   Las funciones antiguas esperan un array [nombre,gif,equipamiento].
+   La ausencia de esta función provocaba un ReferenceError al abrir un alumno,
+   dejando el botón aparentemente inactivo.
+*/
+function monitorFindMasterExercise(group,name){
+  const g=String(group||'').trim().toUpperCase();
+  const n=String(name||'').trim().toLowerCase();
+  const master=Array.isArray(EXERCISE_DB[g])
+    ? EXERCISE_DB[g].find(x=>String(x?.[0]||'').trim().toLowerCase()===n)
+    : null;
+  if(master)return [master[0],master[1]||'',master[2]||''];
+  const personal=(personalExerciseBase||[]).find(x=>
+    String(x?.group||'').trim().toUpperCase()===g &&
+    String(x?.name||'').trim().toLowerCase()===n
+  );
+  if(personal)return [personal.name,personal.image||'',personal.equipment||''];
+  return null;
+}
 
 /* ===== v10.14 · MONITOR ESTABLE / FLUJO ALUMNO ===== */
 (function(){
