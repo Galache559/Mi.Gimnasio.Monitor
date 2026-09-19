@@ -1042,7 +1042,7 @@ td input{font-size:.7rem;padding:5px 1px}.muscleStats{grid-template-columns:1fr 
 .remoteSearchBox label{display:block;color:var(--a);font-weight:800;font-size:.75rem;margin-bottom:5px}
 .remoteSearchBox select{margin-bottom:0}
 
-/* ===== v10.10 · TABATA POR EJERCICIO ===== */
+/* ===== v10.16 · TABATA POR EJERCICIO ===== */
 .tabataBtn{
   width:100%;
   margin-top:7px;
@@ -3747,7 +3747,7 @@ function saveConfig(){
 function exportData(){
 let data={app:'Mi Gimnasio Pro Monitor',version:'10.11',exported:new Date().toISOString(),routine,logs,personalExerciseBase,students,appointments,accounting};
 let b=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),u=URL.createObjectURL(b),a=document.createElement('a');
-a.href=u;a.download='gym_v10.10_monitor_backup_'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);
+a.href=u;a.download='gym_v10.16_monitor_backup_'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);
 let e=document.getElementById('backupStatus');if(e)e.innerHTML='<span class="backupOk">✓ Copia completa creada correctamente.<br>Incluye rutina, entrenamientos, alumnos, citas y contabilidad.</span>';
 }
 
@@ -4909,7 +4909,7 @@ renderCalendar();
 loadConfig();
 
 
-/* ===== MONITOR PRIVADO ENLAZADO A v10.10 ===== */
+/* ===== MONITOR PRIVADO ENLAZADO A v10.16 ===== */
 let students=safeParse(localStorage.getItem(MK+'students'),[]);
 let appointments=safeParse(localStorage.getItem(MK+'appointments'),[]);
 let accounting=safeParse(localStorage.getItem(MK+'accounting'),[]);
@@ -5695,7 +5695,7 @@ renderMonitorSummary();
 renderStudents();
 
 
-/* ===== v10.10 · HISTORIAL PAGOS + PENDIENTES + RUTINAS PRIVADAS REFORZADAS ===== */
+/* ===== v10.16 · HISTORIAL PAGOS + PENDIENTES + RUTINAS PRIVADAS REFORZADAS ===== */
 (function(){
   function v108DateKey(d){
     const x=new Date(String(d||'')+'T12:00:00');
@@ -6046,7 +6046,7 @@ renderStudents();
 
 /* ===== v10.13 · REVISION PROFUNDA MONITOR / ALUMNOS =====
    Corrige el flujo de alta + rutina privada y evita que la compatibilidad
-   antigua de v10.8 sobrescriba las prescripciones de v10.10+. */
+   antigua de v10.8 sobrescriba las prescripciones de v10.16+. */
 (function(){
   function monitorRoutineKey(d,group,idx){
     return 'd'+d+'g'+String(group||'').replace(/[^a-zA-Z0-9]/g,'')+'x'+idx;
