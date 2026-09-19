@@ -1,10 +1,10 @@
--<!DOCTYPE html>
+<!DOCTYPE html>
 
 <html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>MI GIMNASIO PRO MONITOR v10.8</title>
+<title>MI GIMNASIO PRO MONITOR v10.9</title>
 <meta name="theme-color" content="#121212">
 
 <style>
@@ -1041,6 +1041,86 @@ td input{font-size:.7rem;padding:5px 1px}.muscleStats{grid-template-columns:1fr 
 }
 .remoteSearchBox label{display:block;color:var(--a);font-weight:800;font-size:.75rem;margin-bottom:5px}
 .remoteSearchBox select{margin-bottom:0}
+
+/* ===== v10.9 · TABATA POR EJERCICIO ===== */
+.tabataBtn{
+  width:100%;
+  margin-top:7px;
+  background:#4a1730;
+  color:#ff80ab;
+  border:1px solid #9b315f;
+  padding:8px;
+  border-radius:7px;
+  font-size:.72rem;
+  font-weight:bold;
+}
+.tabataBtn:hover{background:#5a1d3a}
+.tabataOverlay{
+  display:none;
+  position:fixed;
+  inset:0;
+  z-index:150;
+  background:rgba(0,0,0,.84);
+  align-items:center;
+  justify-content:center;
+  padding:18px;
+}
+.tabataBox{
+  width:100%;
+  max-width:360px;
+  background:var(--card);
+  border:1px solid #9b315f;
+  border-radius:15px;
+  padding:18px;
+  text-align:center;
+  box-shadow:0 12px 45px #000;
+}
+.tabataTitle{
+  color:#ff80ab;
+  font-size:1rem;
+  font-weight:800;
+  margin-bottom:4px;
+}
+.tabataExercise{
+  color:var(--sub);
+  font-size:.7rem;
+  margin-bottom:12px;
+}
+.tabataSettings{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:6px;
+  text-align:left;
+}
+.tabataSettings label{font-size:.62rem}
+.tabataSettings input{margin-top:3px;text-align:center}
+.tabataPhase{
+  font-size:.82rem;
+  font-weight:800;
+  color:#ff80ab;
+  margin-top:12px;
+}
+.tabataRound{
+  color:var(--sub);
+  font-size:.68rem;
+  margin-top:3px;
+}
+.tabataDisplay{
+  font-size:4.2rem;
+  font-weight:900;
+  letter-spacing:2px;
+  margin:5px 0;
+}
+.tabataDisplay.work{color:#ff80ab}
+.tabataDisplay.rest{color:var(--a)}
+.tabataActions{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}
+.tabataStart{background:#ff80ab;color:#000;border:0;border-radius:7px;padding:9px;font-weight:800}
+.tabataClose{background:#333;color:#fff;border:1px solid var(--bor);border-radius:7px;padding:9px}
+@media(max-width:380px){
+  .tabataSettings{grid-template-columns:1fr 1fr 1fr}
+  .tabataDisplay{font-size:3.5rem}
+}
+
 </style>
 
 </head>
@@ -1048,7 +1128,7 @@ td input{font-size:.7rem;padding:5px 1px}.muscleStats{grid-template-columns:1fr 
 <body>
 
 <header>
-<h1>MI GIMNASIO PRO MONITOR v10.8</h1>
+<h1>MI GIMNASIO PRO MONITOR v10.9</h1>
 </header>
 
 <div class="container">
@@ -1303,6 +1383,26 @@ Cerrar
 
 </div>
 
+</div>
+
+
+<div id="tabataOverlay" class="tabataOverlay">
+  <div class="tabataBox">
+    <div class="tabataTitle">🔥 TABATA</div>
+    <div id="tabataExercise" class="tabataExercise">Ejercicio</div>
+    <div class="tabataSettings">
+      <div><label>TRABAJO (seg)</label><input id="tabataWork" type="number" min="1" max="600" value="20"></div>
+      <div><label>DESCANSO (seg)</label><input id="tabataRest" type="number" min="0" max="600" value="10"></div>
+      <div><label>RONDA</label><input id="tabataRounds" type="number" min="1" max="99" value="8"></div>
+    </div>
+    <div id="tabataPhase" class="tabataPhase">LISTO</div>
+    <div id="tabataRound" class="tabataRound">0 / 8</div>
+    <div id="tabataDisplay" class="tabataDisplay work">00:20</div>
+    <div class="tabataActions">
+      <button class="tabataStart" onclick="startTabata()">▶ INICIAR</button>
+      <button class="tabataClose" onclick="closeTabata()">Cerrar</button>
+    </div>
+  </div>
 </div>
 
 <div id="closeScreen" class="closeScreen">
@@ -2496,6 +2596,12 @@ onclick="startTimer()">
 </button>
 
 <button
+class="tabataBtn"
+onclick="openTabata('${esc(ex)}','${esc(group.name)}')">
+🔥 TABATA · 20s / 10s · 8 rondas
+</button>
+
+<button
 class="save-ex"
 id="save-${prefix}"
 onclick="saveExercise('${prefix}',${gi},${i},'${esc(ex)}')">
@@ -3637,7 +3743,7 @@ function saveConfig(){
 function exportData(){
 let data={app:'Mi Gimnasio Pro Monitor',version:'10.8',exported:new Date().toISOString(),routine,logs,personalExerciseBase,students,appointments,accounting};
 let b=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),u=URL.createObjectURL(b),a=document.createElement('a');
-a.href=u;a.download='gym_v10.5_monitor_backup_'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);
+a.href=u;a.download='gym_v10.9_monitor_backup_'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);
 let e=document.getElementById('backupStatus');if(e)e.innerHTML='<span class="backupOk">✓ Copia completa creada correctamente.<br>Incluye rutina, entrenamientos, alumnos, citas y contabilidad.</span>';
 }
 
@@ -4604,6 +4710,112 @@ document.getElementById(
 
 }
 
+
+/* ===== TABATA POR EJERCICIO ===== */
+const TABATA_CONFIG_KEY=MK+'tabataConfigs';
+let tabataConfigs=safeParse(localStorage.getItem(TABATA_CONFIG_KEY),{});
+if(!tabataConfigs || typeof tabataConfigs!=='object' || Array.isArray(tabataConfigs))tabataConfigs={};
+let tabataInterval=null;
+let tabataSeconds=0;
+let tabataRoundNo=0;
+let tabataPhase='work';
+let tabataExerciseKey='';
+let tabataCurrent={work:20,rest:10,rounds:8};
+
+function saveTabataConfigs(){
+  try{localStorage.setItem(TABATA_CONFIG_KEY,JSON.stringify(tabataConfigs))}catch(e){}
+}
+function tabataKey(group,name){
+  return String(group||'').trim().toUpperCase()+'::'+String(name||'').trim().toLowerCase();
+}
+function openTabata(name,group){
+  closeTabata();
+  const key=tabataKey(group,name),cfg=tabataConfigs[key]||{work:20,rest:10,rounds:8};
+  tabataExerciseKey=key;
+  tabataCurrent={work:Math.max(1,Number(cfg.work)||20),rest:Math.max(0,Number(cfg.rest)||10),rounds:Math.max(1,Number(cfg.rounds)||8)};
+  const ov=document.getElementById('tabataOverlay');
+  if(!ov)return;
+  document.getElementById('tabataExercise').innerText=String(name||'Ejercicio');
+  document.getElementById('tabataWork').value=tabataCurrent.work;
+  document.getElementById('tabataRest').value=tabataCurrent.rest;
+  document.getElementById('tabataRounds').value=tabataCurrent.rounds;
+  document.getElementById('tabataPhase').innerText='LISTO';
+  document.getElementById('tabataRound').innerText='0 / '+tabataCurrent.rounds;
+  document.getElementById('tabataDisplay').innerText=formatTabataTime(tabataCurrent.work);
+  document.getElementById('tabataDisplay').className='tabataDisplay work';
+  ov.style.display='flex';
+}
+function readTabataSettings(){
+  const work=Math.max(1,Math.min(600,Number(document.getElementById('tabataWork')?.value)||20));
+  const rest=Math.max(0,Math.min(600,Number(document.getElementById('tabataRest')?.value)||10));
+  const rounds=Math.max(1,Math.min(99,Number(document.getElementById('tabataRounds')?.value)||8));
+  tabataCurrent={work,rest,rounds};
+  if(tabataExerciseKey){tabataConfigs[tabataExerciseKey]={work,rest,rounds};saveTabataConfigs();}
+  return tabataCurrent;
+}
+function formatTabataTime(sec){
+  sec=Math.max(0,Math.floor(Number(sec)||0));
+  return String(Math.floor(sec/60)).padStart(2,'0')+':'+String(sec%60).padStart(2,'0');
+}
+function renderTabata(){
+  const d=document.getElementById('tabataDisplay'),p=document.getElementById('tabataPhase'),r=document.getElementById('tabataRound');
+  if(!d)return;
+  d.innerText=formatTabataTime(tabataSeconds);
+  d.className='tabataDisplay '+(tabataPhase==='work'?'work':'rest');
+  p.innerText=tabataPhase==='work'?'💪 TRABAJO':'🟢 DESCANSO';
+  r.innerText=tabataRoundNo+' / '+tabataCurrent.rounds;
+}
+function startTabata(){
+  if(tabataInterval){clearInterval(tabataInterval);tabataInterval=null;}
+  readTabataSettings();
+  tabataRoundNo=1;
+  tabataPhase='work';
+  tabataSeconds=tabataCurrent.work;
+  renderTabata();
+  tabataInterval=setInterval(()=>{
+    tabataSeconds--;
+    if(tabataSeconds<=0){
+      beep();
+      if(tabataPhase==='work'){
+        if(tabataCurrent.rest>0){
+          tabataPhase='rest';
+          tabataSeconds=tabataCurrent.rest;
+        }else if(tabataRoundNo<tabataCurrent.rounds){
+          tabataRoundNo++;
+          tabataPhase='work';
+          tabataSeconds=tabataCurrent.work;
+        }else{
+          clearInterval(tabataInterval);tabataInterval=null;
+          tabataPhase='done';tabataSeconds=0;
+          const p=document.getElementById('tabataPhase');if(p)p.innerText='🎉 TABATA COMPLETADO';
+          renderTabata();
+          setTimeout(closeTabata,900);
+          return;
+        }
+      }else{
+        if(tabataRoundNo<tabataCurrent.rounds){
+          tabataRoundNo++;
+          tabataPhase='work';
+          tabataSeconds=tabataCurrent.work;
+        }else{
+          clearInterval(tabataInterval);tabataInterval=null;
+          tabataPhase='done';tabataSeconds=0;
+          const p=document.getElementById('tabataPhase');if(p)p.innerText='🎉 TABATA COMPLETADO';
+          renderTabata();
+          setTimeout(closeTabata,900);
+          return;
+        }
+      }
+    }
+    renderTabata();
+  },1000);
+}
+function closeTabata(){
+  if(tabataInterval){clearInterval(tabataInterval);tabataInterval=null;}
+  const ov=document.getElementById('tabataOverlay');
+  if(ov)ov.style.display='none';
+}
+
 function startTimer(){
 
 closeTimer();
@@ -4749,7 +4961,7 @@ renderCalendar();
 loadConfig();
 
 
-/* ===== MONITOR PRIVADO ENLAZADO A v10.7 ===== */
+/* ===== MONITOR PRIVADO ENLAZADO A v10.9 ===== */
 let students=safeParse(localStorage.getItem(MK+'students'),[]);
 let appointments=safeParse(localStorage.getItem(MK+'appointments'),[]);
 let accounting=safeParse(localStorage.getItem(MK+'accounting'),[]);
@@ -5016,7 +5228,7 @@ html+=`<div class="group">${esc(groupName)}</div><div class="ex"><div class="exh
 if(img)html+=`<div class="imgbox" style="display:block"><img src="${esc(img)}" alt="${esc(ex)}" onerror="this.style.display='none'"></div>`;
 html+=`<table><thead><tr><th colspan="2" style="color:var(--a)">HOY</th><th colspan="2" style="color:var(--gold)">ÚLTIMO</th></tr><tr><th>REPS</th><th>KG</th><th>REPS</th><th>KG</th></tr></thead><tbody>`;
 for(let j=0;j<3;j++)html+=`<tr><td><input type="number" min="0" id="${prefix}-r${j}" placeholder="—" onfocus="selectCell(this)" oninput="studentCalc('${prefix}')"></td><td><input type="number" min="0" step=".5" id="${prefix}-w${j}" placeholder="—" onfocus="selectCell(this)" oninput="studentCalc('${prefix}')"></td><td><input type="number" value="${ps[j].reps??''}" readonly tabindex="-1"></td><td><input type="number" value="${ps[j].weight??''}" readonly tabindex="-1"></td></tr>`;
-html+=`</tbody></table><div class="rm" id="rm-${prefix}">🔥 1RM estimado: --</div><div class="vol" id="vol-${prefix}">📦 Volumen: 0 kg</div><button class="restbtn" onclick="startTimer()">⏱️ Descanso 2:00</button></div>`;
+html+=`</tbody></table><div class="rm" id="rm-${prefix}">🔥 1RM estimado: --</div><div class="vol" id="vol-${prefix}">📦 Volumen: 0 kg</div><button class="restbtn" onclick="startTimer()">⏱️ Descanso 2:00</button><button class="tabataBtn" onclick="openTabata('${esc(ex)}','${esc(groupName)}')">🔥 TABATA · 20s / 10s · 8 rondas</button></div>`;
 });
 document.getElementById('studentForm').innerHTML=html;
 }
@@ -5448,7 +5660,7 @@ renderMonitorSummary();
 renderStudents();
 
 
-/* ===== v10.8 · HISTORIAL PAGOS + PENDIENTES + RUTINAS PRIVADAS REFORZADAS ===== */
+/* ===== v10.9 · HISTORIAL PAGOS + PENDIENTES + RUTINAS PRIVADAS REFORZADAS ===== */
 (function(){
   function v108DateKey(d){
     const x=new Date(String(d||'')+'T12:00:00');
