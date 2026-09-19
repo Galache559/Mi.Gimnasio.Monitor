@@ -1086,6 +1086,7 @@ td input{font-size:.7rem;padding:5px 1px}.muscleStats{grid-template-columns:1fr 
 .tabataClose{background:#333;color:#fff;border:1px solid var(--bor);border-radius:7px;padding:9px}
 @media(max-width:380px){.tabataDisplay{font-size:3.5rem}.timedDisplay{font-size:3.7rem}.tabataPresGrid{grid-template-columns:1fr 1fr 1fr}}
 
+textarea{width:100%;box-sizing:border-box;resize:vertical}
 </style>
 
 </head>
@@ -4869,7 +4870,7 @@ try{
 let old=localStorage.getItem(MONITOR_AUTO_BACKUP);
 if(old)localStorage.setItem(MONITOR_PREV_BACKUP,old);
 saveMonitor();
-let d={app:'Mi Gimnasio Pro - Monitor',version:'10.8',backupType:'automatic',created:new Date().toISOString(),students:clone(students),appointments:clone(appointments),accounting:clone(accounting),remoteAssignments:clone(remoteAssignments),personalExerciseBase:clone(personalExerciseBase)};
+let d={app:'Mi Gimnasio Pro - Monitor',version:'10.9',backupType:'automatic',created:new Date().toISOString(),students:clone(students),appointments:clone(appointments),accounting:clone(accounting),remoteAssignments:clone(remoteAssignments),personalExerciseBase:clone(personalExerciseBase)};
 localStorage.setItem(MONITOR_AUTO_BACKUP,JSON.stringify(d));
 localStorage.setItem(MONITOR_BACKUP_DATE,d.created);
 updateMonitorBackupStatus();
@@ -4916,16 +4917,23 @@ monitorStudentId=null;
 document.getElementById('monitorHome').style.display='none';
 let e=document.getElementById('monitorEditor');
 e.style.display='block';
-e.innerHTML=`<div class="monitorBack"><button class="btn out" onclick="backToMonitor()">← VOLVER A MONITOR</button></div><div class="card"><h2>➕ Nuevo alumno</h2><label>Nombre del alumno</label><input id="studentName" placeholder="Nombre y apellidos"><label>Teléfono</label><input id="studentPhone" type="tel" placeholder="Teléfono"><label>Lugar del entrenamiento</label><select id="studentPlace"><option value="Gimnasio">Gimnasio</option><option value="Domicilio">Domicilio</option></select><button class="btn" onclick="saveStudent()">💾 Guardar alumno</button><br><br><button class="btn out" onclick="backToMonitor()">Salir</button></div>`;
+e.innerHTML=`<div class="monitorBack"><button class="btn out" onclick="backToMonitor()">← VOLVER A MONITOR</button></div><div class="card"><h2>➕ Nuevo alumno</h2><label>Nombre del alumno</label><input id="studentName" placeholder="Nombre y apellidos"><label>Teléfono</label><input id="studentPhone" type="tel" placeholder="Teléfono"><label>Email</label><input id="studentEmail" type="email" placeholder="correo electrónico"><label>Fecha de nacimiento</label><input id="studentBirth" type="date"><label>Lugar del entrenamiento</label><select id="studentPlace"><option value="Gimnasio">Gimnasio</option><option value="Domicilio">Domicilio</option></select><label>Notas</label><textarea id="studentNotes" rows="3" placeholder="Observaciones del alumno..."></textarea><button class="btn" onclick="saveStudent()">💾 Guardar alumno</button><br><br><button class="btn out" onclick="backToMonitor()">Salir</button></div>`;
 }
 function openStudent(id){
 let s=students.find(x=>x.id===id);if(!s)return;
 normalizeStudentPrivateRoutine(s);monitorStudentId=id;
 document.getElementById('monitorHome').style.display='none';
 let e=document.getElementById('monitorEditor');e.style.display='block';
+const next=getNextAppointmentForStudent(s.id), fin=getStudentFinance(s.id), stats=getStudentStatsData(s), last=getLastStudentTraining(s);
 let h=`<div class="monitorBack"><button class="btn out" onclick="backToMonitor()">← VOLVER A MONITOR</button></div>
-<div class="card"><h2>👤 ${esc(s.name)}</h2><div style="font-size:.78rem;margin-bottom:8px">${s.phone?`📞 <span class="phone">${esc(s.phone)}</span>`:'📞 Sin teléfono'}<br>📍 <span class="place">${esc(s.place||'Gimnasio')}</span></div><div class="monitorMenu"><button class="btn" onclick="studentTraining()">🏋️ ENTRENAR</button><button class="btn blue" onclick="studentReports()">📊 INFORMES</button><button class="btn out" onclick="studentRoutine()">⚙️ RUTINA</button></div></div>
-<div class="card"><label>Nombre del alumno</label><input id="studentName" value="${esc(s.name)}"><label>Teléfono</label><input id="studentPhone" type="tel" value="${esc(s.phone||'')}"><label>Lugar del entrenamiento</label><select id="studentPlace"><option value="Gimnasio" ${(s.place||'Gimnasio')==='Gimnasio'?'selected':''}>Gimnasio</option><option value="Domicilio" ${(s.place||'')==='Domicilio'?'selected':''}>Domicilio</option></select></div>`;
+<div class="card"><h2>👤 FICHA DEL ALUMNO</h2><div style="font-size:1.05rem;font-weight:900;margin-bottom:6px">${esc(s.name)}</div><div style="font-size:.78rem;line-height:1.8">${s.phone?`📞 ${esc(s.phone)}`:'📞 Sin teléfono'} · ${s.email?`✉️ ${esc(s.email)}`:'✉️ Sin email'}<br>📍 ${esc(s.place||'Gimnasio')} ${s.birth?`· 🎂 ${esc(formatMonitorDate(s.birth))}`:''}</div></div>
+<div class="card"><h3>📌 CENTRO DEL ALUMNO</h3><div class="monitorMenu">
+<button class="btn" onclick="studentTraining()">🏋️ RUTINA / ENTRENAR</button><button class="btn blue" onclick="studentHistory()">📊 HISTORIAL</button><button class="btn out" onclick="studentEvolution()">📈 EVOLUCIÓN</button><button class="btn blue" onclick="studentAppointments()">📅 CITAS</button><button class="btn out" onclick="studentFinance()">💶 ECONOMÍA</button></div>
+<div class="statgrid" style="margin-top:10px"><div class="stat"><b>${stats.sessions}</b><span>Sesiones</span></div><div class="stat"><b>${Math.round(stats.volume)} kg</b><span>Volumen</span></div><div class="stat"><b>${fin.pending.toFixed(2)} €</b><span>Pendiente</span></div><div class="stat"><b>${next?esc(next.date.split('-').reverse().join('/')+' · '+next.time):'—'}</b><span>Próxima cita</span></div></div></div>
+<div class="card"><h3>📅 PRÓXIMA CITA</h3>${next?`<div><b>${esc(formatMonitorDate(next.date))} · ${esc(next.time)}</b>${next.note?`<div style="font-size:.72rem;color:var(--sub)">${esc(next.note)}</div>`:''}</div>`:'<div class="empty">No hay próxima cita.</div>'}</div>
+<div class="card"><h3>💶 SITUACIÓN ECONÓMICA</h3><div class="statgrid"><div class="stat"><b>${fin.paid.toFixed(2)} €</b><span>Total cobrado</span></div><div class="stat"><b>${fin.pending.toFixed(2)} €</b><span>Total pendiente</span></div></div><div style="margin-top:7px">${fin.last?`Último movimiento: <b>${esc(fin.last.concept)}</b> · ${num(fin.last.amount).toFixed(2)} € · ${String(fin.last.status).toUpperCase()==='PAGADO'?'✓ PAGADO':'⚠️ PENDIENTE'}`:'Sin movimientos económicos.'}</div></div>
+<div class="card"><h3>📊 ÚLTIMO ENTRENAMIENTO</h3>${last?`<b>${esc(formatMonitorDate(last.date))}</b> · Día ${last.day||'—'} · ${last.exerciseCount||0} ejercicios`:'<div class="empty">Sin entrenamientos registrados.</div>'}</div>
+<div class="card"><label>Nombre del alumno</label><input id="studentName" value="${esc(s.name)}"><label>Teléfono</label><input id="studentPhone" type="tel" value="${esc(s.phone||'')}"><label>Email</label><input id="studentEmail" type="email" value="${esc(s.email||'')}"><label>Fecha de nacimiento</label><input id="studentBirth" type="date" value="${esc(s.birth||'')}"><label>Lugar del entrenamiento</label><select id="studentPlace"><option value="Gimnasio" ${(s.place||'Gimnasio')==='Gimnasio'?'selected':''}>Gimnasio</option><option value="Domicilio" ${(s.place||'')==='Domicilio'?'selected':''}>Domicilio</option></select><label>Notas</label><textarea id="studentNotes" rows="3">${esc(s.notes||'')}</textarea><button class="btn" onclick="saveStudent()">💾 GUARDAR DATOS DEL ALUMNO</button></div>`;
 for(let d=1;d<=5;d++){
 h+=`<div class="card"><h2>📅 Día ${d}</h2>`;
 (MONITOR_DAY_GROUPS[d]||[]).forEach(groupName=>{
@@ -4944,12 +4952,12 @@ let p=String(phone||'').replace(/[^\d+]/g,'');
 if(p)window.location.href='tel:'+p;
 }
 function saveStudent(){
-let name=(document.getElementById('studentName')||{}).value?.trim()||'',phone=(document.getElementById('studentPhone')||{}).value?.trim()||'',place=(document.getElementById('studentPlace')||{}).value||'Gimnasio';
+let name=(document.getElementById('studentName')||{}).value?.trim()||'',phone=(document.getElementById('studentPhone')||{}).value?.trim()||'',email=(document.getElementById('studentEmail')||{}).value?.trim()||'',birth=(document.getElementById('studentBirth')||{}).value||'',place=(document.getElementById('studentPlace')||{}).value||'Gimnasio',notes=(document.getElementById('studentNotes')||{}).value?.trim()||'';
 if(!name){alert('Escribe el nombre del alumno.');return}
 let s=monitorStudentId?students.find(x=>x.id===monitorStudentId):null;
-if(!s){s={id:Date.now(),name:'',phone:'',place:'Gimnasio',routine:{},logs:[]};students.push(s)}
+if(!s){s={id:Date.now(),name:'',phone:'',email:'',birth:'',place:'Gimnasio',notes:'',routine:{},logs:[]};students.push(s)}
 if(!Array.isArray(s.logs))s.logs=[];
-s.name=name;s.phone=phone;s.place=place;
+s.name=name;s.phone=phone;s.email=email;s.birth=birth;s.place=place;s.notes=notes;
 const checks=document.querySelectorAll('#monitorEditor .studentExercise');
 if(checks.length){
 const r={};
@@ -4980,10 +4988,14 @@ saveMonitor();renderStudents();
 }
 function renderStudents(){
 let box=document.getElementById('monitorList');
-if(!students.length){box.innerHTML='<div class="card empty">Todavía no hay alumnos.</div>';return}
-box.innerHTML=students.map(s=>{
+const today=dateKey(new Date());
+const pendingStudents=(students||[]).map(s=>({s,fin:getStudentFinance(s.id),next:getNextAppointmentForStudent(s.id)}));
+const pendingTotal=pendingStudents.reduce((a,x)=>a+x.fin.pending,0),pendingCount=pendingStudents.filter(x=>x.fin.pending>0).length;
+let top=`<div class="card" style="margin-bottom:10px"><h3>📊 RESUMEN DEL MONITOR</h3><div class="statgrid"><div class="stat"><b>${students.length}</b><span>Alumnos</span></div><div class="stat"><b>${pendingCount}</b><span>Con pagos pendientes</span></div><div class="stat"><b>${pendingTotal.toFixed(2)} €</b><span>Total pendiente</span></div><div class="stat"><b>${(appointments||[]).filter(a=>String(a.date)>=today).length}</b><span>Próximas citas</span></div></div>${pendingCount?`<button class="btn danger" style="margin-top:8px" onclick="showPendingPayments()">⚠️ ${pendingCount} alumnos tienen pagos pendientes — ${pendingTotal.toFixed(2)} €</button>`:''}</div>`;
+if(!students.length){box.innerHTML=top+'<div class="card empty">Todavía no hay alumnos.</div>';return}
+box.innerHTML=top+pendingStudents.map(({s,fin,next})=>{
 let days=Object.keys(s.routine||{}).length;
-return`<div class="monitorStudent"><strong>👤 ${esc(s.name)}</strong><br><small>${s.phone?`📞 ${esc(s.phone)} `:'📞 Sin teléfono '} · 📍 ${esc(s.place||'Gimnasio')} · ${days} día(s)</small><div class="row"><button class="btn sm" onclick="openStudent(${s.id})">Abrir ficha</button>${s.phone?`<button class="btn blue sm" onclick="callStudent('${esc(s.phone)}')">📞</button>`:''}<button class="btn danger sm" onclick="quickDeleteStudent(${s.id})">Eliminar</button></div></div>`;
+return`<div class="monitorStudent"><strong>👤 ${esc(s.name)}</strong><br><small>${s.phone?`📞 ${esc(s.phone)} `:'📞 Sin teléfono '} · 📍 ${esc(s.place||'Gimnasio')} · 🏋️ ${days} día(s)}<br><small>📅 Próxima cita: ${next?`${esc(formatMonitorDate(next.date))} · ${esc(next.time)}`:'—'} · 💶 ${fin.pending>0?`⚠️ ${fin.pending.toFixed(2)} € pendiente`:'✓ AL DÍA'}</small><div class="row"><button class="btn sm" onclick="openStudent(${s.id})">Abrir ficha</button>${s.phone?`<button class="btn blue sm" onclick="callStudent('${esc(s.phone)}')">📞</button>`:''}<button class="btn danger sm" onclick="quickDeleteStudent(${s.id})">Eliminar</button></div></div>`;
 }).join('');
 }
 
@@ -5154,7 +5166,7 @@ function exportRoutineAssignment(d){
  const s=getMonitorStudent();if(!s)return;normalizeStudentPrivateRoutine(s);const routineDay=Array.isArray(s.routine&&s.routine[d])?s.routine[d]:[];
  if(!routineDay.length){alert('Este alumno no tiene rutina asignada para el Día '+d+'.');return}
  const transferId=makeTransferId(),date=(document.getElementById('studentDate')||{}).value||new Date().toISOString().slice(0,10);
- const data={app:'Mi Gimnasio Monitor',exchangeType:'ROUTINE_ASSIGNMENT',version:'10.8',transferId,created:new Date().toISOString(),studentId:s.id,studentName:s.name,day:d,date,routine:clone(routineDay)};
+ const data={app:'Mi Gimnasio Monitor',exchangeType:'ROUTINE_ASSIGNMENT',version:'10.9',transferId,created:new Date().toISOString(),studentId:s.id,studentName:s.name,day:d,date,routine:clone(routineDay)};
  exchangeDownload(data,`RUTINA_${String(s.name).replace(/[^a-z0-9áéíóúüñ]+/gi,'_')}_DIA_${d}.json`);
  alert('✓ Rutina preparada. Envía este archivo al alumno.');
 }
@@ -5194,6 +5206,55 @@ function importRoutineReturn(){
   const a=remoteAssignments.find(x=>x.transferId===data.transferId);if(a){a.returned=true;a.incorporated=true;a.incorporatedAt=new Date().toISOString();saveRemoteAssignments()}
   alert('✓ Devolución recibida e incorporada a la ficha de '+s.name+'.');openStudent(s.id);
  });
+}
+
+function getNextAppointmentForStudent(id){
+ const now=new Date();
+ return (appointments||[]).filter(a=>String(a.studentId)===String(id)).map(a=>({...a,_d:new Date(`${a.date}T${a.time||'00:00'}`)})).filter(a=>!isNaN(a._d.getTime())&&a._d>=now).sort((a,b)=>a._d-b._d)[0]||null;
+}
+function getStudentFinance(id){
+ const data=(accounting||[]).filter(x=>String(x.studentId)===String(id));
+ const paid=data.filter(x=>String(x.status).toUpperCase()==='PAGADO').reduce((a,x)=>a+num(x.amount),0);
+ const pending=data.filter(x=>String(x.status).toUpperCase()!=='PAGADO').reduce((a,x)=>a+num(x.amount),0);
+ return {paid,pending,total:paid+pending,last:data.slice().sort((a,b)=>String(b.date).localeCompare(String(a.date)))[0]||null,items:data.slice().sort((a,b)=>String(b.date).localeCompare(String(a.date)))};
+}
+function getStudentStatsData(s){
+ let volumeTotal=0,sessions=0,exercises=0,sets=0;
+ (s.logs||[]).forEach(l=>{let real=false;(l.groups||[]).forEach(g=>(g.exercises||[]).forEach(e=>{let q=(e.sets||[]).filter(x=>num(x.reps)>0&&num(x.weight)>0);if(q.length||e.completed){real=true;exercises++;sets+=q.length;volumeTotal+=volume(q)}}));if(real)sessions++});
+ return {volume:volumeTotal,sessions,exercises,sets};
+}
+function getLastStudentTraining(s){
+ const logs=(s.logs||[]).slice().sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+ for(const l of logs){let count=0;(l.groups||[]).forEach(g=>(g.exercises||[]).forEach(e=>{if((e.sets||[]).some(x=>num(x.reps)>0)||e.completed)count++}));if(count)return {...l,exerciseCount:count};}
+ return null;
+}
+function studentHistory(){
+ const s=getMonitorStudent();if(!s)return;const e=document.getElementById('monitorEditor');e.innerHTML=`<div class="monitorBack"><button class="btn out" onclick="openStudent(${s.id})">← VOLVER A FICHA</button></div><div class="monitorTitle">📊 HISTORIAL — ${esc(s.name)}</div><div class="card"><div id="studentHistoryBox"></div></div>`;
+ const logs=(s.logs||[]).slice().sort((a,b)=>String(b.date).localeCompare(String(a.date)));if(!logs.length){document.getElementById('studentHistoryBox').innerHTML='<div class="empty">No hay entrenamientos registrados.</div>';return}
+ document.getElementById('studentHistoryBox').innerHTML=logs.map(l=>{const st=getLogSummary(l);return `<div class="monitorStudent"><b>📅 ${esc(formatMonitorDate(l.date))} · Día ${l.day||'—'}</b><br><small>🏋️ ${st.exercises} ejercicios · 🔢 ${st.sets} series · 📦 ${Math.round(st.volume)} kg${l.returnedFromStudent?' · 📥 DEVUELTO POR ALUMNO':''}</small></div>`}).join('');
+}
+function getLogSummary(l){let exercises=0,sets=0,volumeTotal=0;(l.groups||[]).forEach(g=>(g.exercises||[]).forEach(e=>{let q=(e.sets||[]).filter(x=>num(x.reps)>0);if(q.length||e.completed){exercises++;sets+=q.length;volumeTotal+=volume(q)}}));return {exercises,sets,volume:volumeTotal}}
+function studentAppointments(){
+ const s=getMonitorStudent();if(!s)return;const e=document.getElementById('monitorEditor');e.innerHTML=`<div class="monitorBack"><button class="btn out" onclick="openStudent(${s.id})">← VOLVER A FICHA</button></div><div class="monitorTitle">📅 CITAS — ${esc(s.name)}</div><div class="card"><button class="btn blue" onclick="showAppointments();setTimeout(()=>{const x=document.getElementById('appointmentStudent');if(x)x.value='${s.id}'},50)">➕ NUEVA CITA</button></div><div class="card"><div id="studentAppointmentsBox"></div></div>`;
+ const arr=(appointments||[]).filter(a=>String(a.studentId)===String(s.id)).sort((a,b)=>String(a.date+' '+a.time).localeCompare(String(b.date+' '+b.time)));document.getElementById('studentAppointmentsBox').innerHTML=arr.length?arr.map(a=>`<div class="monitorStudent"><b>📅 ${esc(formatMonitorDate(a.date))} · ${esc(a.time)}</b>${a.note?`<br><small>📝 ${esc(a.note)}</small>`:''}</div>`).join(''):'<div class="empty">No hay citas.</div>';
+}
+function studentFinance(){
+ const s=getMonitorStudent();if(!s)return;const f=getStudentFinance(s.id),e=document.getElementById('monitorEditor');e.innerHTML=`<div class="monitorBack"><button class="btn out" onclick="openStudent(${s.id})">← VOLVER A FICHA</button></div><div class="monitorTitle">💶 ECONOMÍA — ${esc(s.name)}</div><div class="card"><div class="statgrid"><div class="stat"><b>${f.paid.toFixed(2)} €</b><span>Total cobrado</span></div><div class="stat"><b>${f.pending.toFixed(2)} €</b><span>Total pendiente</span></div><div class="stat"><b>${f.total.toFixed(2)} €</b><span>Total movimientos</span></div></div></div><div class="card"><h3>📋 HISTORIAL DE PAGOS</h3>${f.items.length?f.items.map(x=>`<div class="monitorStudent"><b>${esc(x.concept)}</b> · ${num(x.amount).toFixed(2)} €<br><small>${esc(formatMonitorDate(x.date))} · ${String(x.status).toUpperCase()==='PAGADO'?'✓ PAGADO'+(x.paidDate?' · pago '+esc(formatMonitorDate(x.paidDate)):''):'⚠️ PENDIENTE'}</small></div>`).join(''):'<div class="empty">Sin movimientos.</div>'}</div>`;
+}
+function showPendingPayments(){
+ const e=document.getElementById('monitorEditor');document.getElementById('monitorHome').style.display='none';e.style.display='block';const data=(students||[]).map(s=>({s,f:getStudentFinance(s.id)})).filter(x=>x.f.pending>0).sort((a,b)=>b.f.pending-a.f.pending);const total=data.reduce((a,x)=>a+x.f.pending,0);e.innerHTML=`<div class="monitorBack"><button class="btn out" onclick="backToMonitor()">← VOLVER A MONITOR</button></div><div class="monitorTitle">⚠️ PAGOS PENDIENTES</div><div class="card"><h3>Total pendiente: ${total.toFixed(2)} €</h3></div>${data.map(x=>`<div class="monitorStudent"><strong>👤 ${esc(x.s.name)}</strong><br><small>⚠️ Pendiente: <b>${x.f.pending.toFixed(2)} €</b></small><div class="row"><button class="btn sm" onclick="openStudent(${x.s.id})">Abrir ficha</button><button class="btn out sm" onclick="monitorStudentId=${x.s.id};studentFinance()">Ver economía</button></div></div>`).join('')}`;
+}
+function studentEvolution(){
+ const s=getMonitorStudent();if(!s)return;const e=document.getElementById('monitorEditor');e.innerHTML=`<div class="monitorBack"><button class="btn out" onclick="openStudent(${s.id})">← VOLVER A FICHA</button></div><div class="monitorTitle">📈 EVOLUCIÓN — ${esc(s.name)}</div><div class="card"><div class="backupBox">Elige un ejercicio para ver la evolución del peso utilizado y del 1RM estimado.</div><select id="evolutionExercise" onchange="renderStudentEvolutionChart()"><option value="">Selecciona ejercicio</option>${getStudentExerciseNames(s).map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join('')}</select><div id="evolutionChart" style="margin-top:10px"></div></div>`;
+}
+function getStudentExerciseNames(s){const set=new Set();(s.logs||[]).forEach(l=>(l.groups||[]).forEach(g=>(g.exercises||[]).forEach(e=>{if(e.name)set.add(e.name)})));return [...set].sort((a,b)=>a.localeCompare(b,'es'));}
+function estimate1RM(weight,reps){weight=num(weight);reps=num(reps);if(weight<=0||reps<=0)return 0;return reps===1?weight:weight*(1+reps/30)}
+function renderStudentEvolutionChart(){
+ const s=getMonitorStudent(),name=document.getElementById('evolutionExercise')?.value,box=document.getElementById('evolutionChart');if(!s||!box)return;if(!name){box.innerHTML='<div class="empty">Selecciona un ejercicio.</div>';return}
+ const pts=[];(s.logs||[]).slice().sort((a,b)=>String(a.date).localeCompare(String(b.date))).forEach(l=>{(l.groups||[]).forEach(g=>{(g.exercises||[]).forEach(e=>{if(e.name!==name)return;(e.sets||[]).forEach(set=>{const w=num(set.weight),r=num(set.reps);if(w>0&&r>0)pts.push({date:l.date,w,rm:estimate1RM(w,r)})})})})});
+ if(!pts.length){box.innerHTML='<div class="empty">No hay datos de peso/repeticiones para este ejercicio.</div>';return}
+ const W=760,H=300,pad=42,max=Math.max(...pts.map(x=>Math.max(x.w,x.rm))),min=Math.min(...pts.map(x=>Math.min(x.w,x.rm)));const span=max-min||1;const x=i=>pad+i*((W-2*pad)/Math.max(1,pts.length-1)),y=v=>H-pad-(v-min)*((H-2*pad)/span);const poly=a=>a.map((v,i)=>`${x(i)},${y(v)}`).join(' ');
+ box.innerHTML=`<div style="overflow:auto"><svg viewBox="0 0 ${W} ${H}" width="100%" height="300" role="img"><line x1="${pad}" y1="${H-pad}" x2="${W-pad}" y2="${H-pad}" stroke="currentColor" opacity=".35"/><line x1="${pad}" y1="${pad}" x2="${pad}" y2="${H-pad}" stroke="currentColor" opacity=".35"/><polyline fill="none" stroke="currentColor" stroke-width="3" points="${poly(pts.map(p=>p.w))}"/><polyline fill="none" stroke="currentColor" stroke-width="3" stroke-dasharray="7 5" opacity=".65" points="${poly(pts.map(p=>p.rm))}"/>${pts.map((p,i)=>`<circle cx="${x(i)}" cy="${y(p.w)}" r="4" fill="currentColor"/><circle cx="${x(i)}" cy="${y(p.rm)}" r="3" fill="currentColor" opacity=".6"/>`).join('')}</svg></div><div style="font-size:.68rem;line-height:1.8">━━ Peso utilizado &nbsp;&nbsp; <span style="opacity:.65">┅┅</span> 1RM estimado · ${pts.length} registros</div>`;
 }
 function studentReports(){
 let s=getMonitorStudent();
@@ -5249,7 +5310,7 @@ updateMonitorBackupStatus();
 renderStudents();
 window.addEventListener('pagehide',()=>{try{createMonitorAutoBackup()}catch(e){}});
 
-/* ===== v10.5 · CITAS + CONTABILIDAD + COMPATIBILIDAD ===== */
+/* ===== v10.9 · FICHA COMPLETA + PAGOS + EVOLUCIÓN ===== */
 
 function clone(obj){
   return JSON.parse(JSON.stringify(obj));
@@ -5441,6 +5502,7 @@ function showAccounting(){
               <th>Concepto</th>
               <th>Importe</th>
               <th>Estado</th>
+              <th>Fecha pago</th>
               <th></th>
             </tr>
           </thead>
@@ -5473,6 +5535,7 @@ function saveAccounting(){
     concept,
     amount,
     status,
+    paidDate:status==='PAGADO'?new Date().toISOString().slice(0,10):'',
     created:new Date().toISOString()
   });
 
@@ -5503,7 +5566,7 @@ function toggleAccountingPaid(id){
     item.status='PENDIENTE';
   }else{
     item.status='PAGADO';
-    item.paidDate=new Date().toISOString();
+    item.paidDate=new Date().toISOString().slice(0,10);
   }
 
   saveMonitor();
@@ -5538,7 +5601,7 @@ function renderAccounting(){
   }
 
   if(!data.length){
-    rows.innerHTML='<tr><td colspan="6" class="empty">No hay movimientos registrados.</td></tr>';
+    rows.innerHTML='<tr><td colspan="7" class="empty">No hay movimientos registrados.</td></tr>';
     return;
   }
 
@@ -5556,6 +5619,7 @@ function renderAccounting(){
             :'💶 MARCAR PAGADO'}
         </button>
       </td>
+      <td>${String(x.status).toUpperCase()==='PAGADO'&&x.paidDate?esc(formatMonitorDate(x.paidDate)):'—'}</td>
       <td>
         <button class="btn danger sm" onclick="deleteAccounting(${x.id})">🗑️</button>
       </td>
