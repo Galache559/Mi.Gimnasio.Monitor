@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>MI GIMNASIO PRO MONITOR v10.18</title>
+<title>MI GIMNASIO PRO MONITOR v10.19</title>
 <meta name="theme-color" content="#121212">
 
 <style>
@@ -1094,6 +1094,27 @@ textarea{width:100%;box-sizing:border-box;resize:vertical}
 .accountingQuickLegend{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0;font-size:.82rem;font-weight:800}
 .accountPaid{display:inline-block;padding:5px 8px;border-radius:8px;font-weight:900;background:rgba(0,230,118,.14);color:#00e676}
 .accountPending{display:inline-block;padding:5px 8px;border-radius:8px;font-weight:900;background:rgba(255,82,82,.14);color:#ff5252}
+.accountVisualGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0 14px}
+.accountVisualCard{background:var(--item);border:1px solid var(--bor);border-radius:10px;padding:12px;text-align:center}
+.accountVisualCard b{display:block;font-size:1.08rem;color:var(--a);margin-bottom:4px}
+.accountVisualCard span{font-size:.67rem;color:var(--sub)}
+.accountVisualCard.pending b{color:var(--red)}
+.accountVisualCard.total b{color:var(--gold)}
+.accountVisualCard.rate b{color:var(--blue)}
+.accountStudentGrid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px}
+.accountStudentCard{background:var(--item);border:1px solid var(--bor);border-radius:10px;padding:10px}
+.accountStudentHead{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:7px}
+.accountStudentName{font-weight:900;font-size:.82rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.accountStudentAmounts{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin:7px 0}
+.accountStudentAmounts div{background:#1b1b1b;border-radius:7px;padding:6px;text-align:center}
+.accountStudentAmounts b{display:block;font-size:.72rem}
+.accountStudentAmounts span{font-size:.57rem;color:var(--sub)}
+.accountProgress{height:7px;background:#111;border-radius:8px;overflow:hidden;margin:7px 0}
+.accountProgress>span{display:block;height:100%;background:var(--a);border-radius:8px}
+.accountStudentFooter{display:flex;justify-content:space-between;align-items:center;gap:5px;font-size:.62rem;color:var(--sub)}
+.accountPeriodNav{display:flex;gap:6px;align-items:center;margin:5px 0 10px}
+.accountPeriodNav .btn{flex:1}
+@media(max-width:650px){.accountVisualGrid{grid-template-columns:1fr 1fr}.accountStudentGrid{grid-template-columns:1fr}}
 .pendingMoney{font-weight:900}
 @media(max-width:650px){.accountingPeriodTools{grid-template-columns:1fr}}
 
@@ -1145,7 +1166,7 @@ textarea{width:100%;box-sizing:border-box;resize:vertical}
 <body>
 
 <header>
-<h1>MI GIMNASIO PRO MONITOR v10.18</h1>
+<h1>MI GIMNASIO PRO MONITOR v10.19</h1>
 </header>
 
 <div class="container">
@@ -6008,6 +6029,7 @@ function showAccounting(){
         <button class="btn" type="button" id="btnExportMonthlyExcel" onclick="exportMonthlyAccountingExcel()">📥 COPIA EXCEL DEL MES</button>
       </div>
       <div id="accountingSummary"></div>
+      <div id="accountingVisual"></div>
       <div id="accountingPeriodBox"></div>
     </div>
 
@@ -6166,6 +6188,8 @@ function exportMonthlyAccountingExcel(){
   const anchor=input?.value||accountingDateISO(new Date());
   const {range,data}=accountingPeriodData('MONTH',anchor);
 
+  renderAccountingVisual(type,anchor,range,data);
+
   const by={};
   data.forEach(x=>{
     const key=String(x.studentId);
@@ -6274,6 +6298,45 @@ function exportMonthlyAccountingExcel(){
   a.remove();
   setTimeout(()=>URL.revokeObjectURL(url),1000);
   alert('✓ Copia Excel mensual preparada correctamente.');
+}
+
+function renderAccountingVisual(type, anchor, range, data){
+  const box=document.getElementById('accountingVisual');
+  if(!box)return;
+  const paid=data.filter(x=>String(x.status).toUpperCase()==='PAGADO').reduce((a,x)=>a+num(x.amount),0);
+  const pending=data.filter(x=>String(x.status).toUpperCase()!=='PAGADO').reduce((a,x)=>a+num(x.amount),0);
+  const total=paid+pending;
+  const rate=total>0?(paid/total*100):0;
+  const by={};
+  data.forEach(x=>{
+    const key=String(x.studentId);
+    if(!by[key])by[key]={id:x.studentId,name:monitorStudentName(x.studentId),paid:0,pending:0,total:0};
+    const amount=num(x.amount);by[key].total+=amount;
+    if(String(x.status).toUpperCase()==='PAGADO')by[key].paid+=amount;else by[key].pending+=amount;
+  });
+  const list=Object.values(by).sort((a,b)=>b.pending-a.pending || a.name.localeCompare(b.name,'es'));
+  box.innerHTML=`
+    <div class="accountingPeriodTitle">💶 RESUMEN VISUAL — ${esc(accountingPeriodLabel(type,range))}</div>
+    <div class="accountVisualGrid">
+      <div class="accountVisualCard total"><b>${total.toFixed(2)} €</b><span>FACTURADO</span></div>
+      <div class="accountVisualCard"><b>${paid.toFixed(2)} €</b><span>COBRADO</span></div>
+      <div class="accountVisualCard pending"><b>${pending.toFixed(2)} €</b><span>PENDIENTE</span></div>
+      <div class="accountVisualCard rate"><b>${rate.toFixed(0)} %</b><span>COBRADO</span></div>
+    </div>
+    ${list.length?`<div class="accountStudentGrid">${list.map(x=>{
+      const pct=x.total>0?(x.paid/x.total*100):0;
+      return `<div class="accountStudentCard">
+        <div class="accountStudentHead"><div class="accountStudentName">👤 ${esc(x.name)}</div>${x.pending>0?'<span class="accountPending">DEBE</span>':'<span class="accountPaid">PAGADO</span>'}</div>
+        <div class="accountStudentAmounts">
+          <div><b>${x.paid.toFixed(2)} €</b><span>COBRADO</span></div>
+          <div><b>${x.pending.toFixed(2)} €</b><span>PENDIENTE</span></div>
+          <div><b>${x.total.toFixed(2)} €</b><span>TOTAL</span></div>
+        </div>
+        <div class="accountProgress"><span style="width:${Math.max(0,Math.min(100,pct)).toFixed(1)}%"></span></div>
+        <div class="accountStudentFooter"><span>${pct.toFixed(0)}% cobrado</span><button class="btn sm" type="button" onclick="openStudent(${Number(x.id)})">👤 FICHA</button></div>
+      </div>`;
+    }).join('')}</div>`:'<div class="empty">No hay movimientos económicos en este periodo.</div>'}
+  `;
 }
 
 function renderAccountingPeriod(){
@@ -6448,14 +6511,10 @@ window.backToMonitor = backToMonitor;
 })();
 
 
-/* ===== v10.18: CALENDARIO DE CITAS + ABRIR MONITOR AUTOMÁTICAMENTE AL CARGAR ===== */
+/* ===== v10.19: CONTABILIDAD VISUAL + ABRIR MONITOR AUTOMÁTICAMENTE AL CARGAR ===== */
 document.addEventListener('DOMContentLoaded',()=>{
   try{
-    if(typeof openMonitor==='function'){
-      openMonitor();
-    }else if(typeof showMonitor==='function'){
-      showMonitor();
-    }
+    if(typeof tab==='function') tab('monitor');
   }catch(e){
     console.error('No se pudo abrir Monitor automáticamente',e);
   }
