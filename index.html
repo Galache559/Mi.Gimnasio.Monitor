@@ -1287,6 +1287,7 @@ Selecciona un periodo.
 <button class="btn" onclick="newStudent()">➕ NUEVO ALUMNO</button>
 <button id="btnMonitorAppointments" class="btn blue" type="button">📅 CITAS</button>
 <button id="btnMonitorAccounting" class="btn out" type="button">💶 CONTABILIDAD</button>
+<button class="btn" type="button" onclick="studentExchangePortal()">🎓 INTERCAMBIO CON ALUMNO</button>
 </div>
 <br>
 <button class="btn danger" onclick="exitMonitorApp()">🚪 SALIR Y GUARDAR</button>
@@ -4852,6 +4853,10 @@ if(!Array.isArray(students))students=[];
 if(!Array.isArray(appointments))appointments=[];
 if(!Array.isArray(accounting))accounting=[];
 let monitorStudentId=null;
+let remoteAssignments=safeParse(localStorage.getItem(MK+'remoteAssignments'),[]);
+if(!Array.isArray(remoteAssignments))remoteAssignments=[];
+let remoteAssignmentActive=null;
+function saveRemoteAssignments(){try{localStorage.setItem(MK+'remoteAssignments',JSON.stringify(remoteAssignments))}catch(e){}}
 function saveMonitor(){
 try{
 localStorage.setItem(MK+'students',JSON.stringify(students));
@@ -4864,7 +4869,7 @@ try{
 let old=localStorage.getItem(MONITOR_AUTO_BACKUP);
 if(old)localStorage.setItem(MONITOR_PREV_BACKUP,old);
 saveMonitor();
-let d={app:'Mi Gimnasio Pro - Monitor',version:'10.7',backupType:'automatic',created:new Date().toISOString(),students:clone(students),appointments:clone(appointments),accounting:clone(accounting),personalExerciseBase:clone(personalExerciseBase)};
+let d={app:'Mi Gimnasio Pro - Monitor',version:'10.8',backupType:'automatic',created:new Date().toISOString(),students:clone(students),appointments:clone(appointments),accounting:clone(accounting),remoteAssignments:clone(remoteAssignments),personalExerciseBase:clone(personalExerciseBase)};
 localStorage.setItem(MONITOR_AUTO_BACKUP,JSON.stringify(d));
 localStorage.setItem(MONITOR_BACKUP_DATE,d.created);
 updateMonitorBackupStatus();
@@ -4872,13 +4877,14 @@ updateMonitorBackupStatus();
 }
 function restoreMonitorAutoBackupIfNeeded(){
 try{
-let sr=safeParse(localStorage.getItem(MK+'students'),null),ar=safeParse(localStorage.getItem(MK+'appointments'),null),cr=safeParse(localStorage.getItem(MK+'accounting'),null),b=safeParse(localStorage.getItem(MONITOR_AUTO_BACKUP),null);
+let sr=safeParse(localStorage.getItem(MK+'students'),null),ar=safeParse(localStorage.getItem(MK+'appointments'),null),cr=safeParse(localStorage.getItem(MK+'accounting'),null),rr=safeParse(localStorage.getItem(MK+'remoteAssignments'),null),b=safeParse(localStorage.getItem(MONITOR_AUTO_BACKUP),null);
 let monitorPersonalRaw=localStorage.getItem(K+'personal_exercise_base');
 if(!b)return;
 let changed=false;
 if(!Array.isArray(sr)&&Array.isArray(b.students)){students=clone(b.students);changed=true}
 if(!Array.isArray(ar)&&Array.isArray(b.appointments)){appointments=clone(b.appointments);changed=true}
 if(!Array.isArray(cr)&&Array.isArray(b.accounting)){accounting=clone(b.accounting);changed=true}
+if(!Array.isArray(rr)&&Array.isArray(b.remoteAssignments)){remoteAssignments=clone(b.remoteAssignments);changed=true}
 if(!monitorPersonalRaw&&Array.isArray(b.personalExerciseBase)){personalExerciseBase=clone(b.personalExerciseBase);changed=true}
 if(changed)saveMonitor();
 }catch(e){}
@@ -5055,7 +5061,8 @@ if(!s)return;
 normalizeStudentPrivateRoutine(s);
 if(!Array.isArray(s.logs))s.logs=[];
 let e=document.getElementById('monitorEditor');
-e.innerHTML=`<div class="monitorBack"><button class="btn out" onclick="backToMonitor()">← VOLVER A MONITOR</button></div><div class="monitorTitle">🏋️ ENTRENAMIENTO — ${esc(s.name)}</div><div class="card"><div class="days"><button class="btn out" onclick="studentSelectDay(1)">Día 1</button><button class="btn out" onclick="studentSelectDay(2)">Día 2</button><button class="btn out" onclick="studentSelectDay(3)">Día 3</button><button class="btn out" onclick="studentSelectDay(4)">Día 4</button><button class="btn out" onclick="studentSelectDay(5)">Día 5</button></div></div><div id="studentWork"></div>`;
+let remoteBanner=remoteAssignmentActive?`<div class="card"><div class="backupBox">📥 <b>Rutina recibida del monitor.</b><br>${esc(remoteAssignmentActive.studentName||s.name)} · Día ${remoteAssignmentActive.day} · ${esc(remoteAssignmentActive.date||'')}<br><span style="font-size:.68rem">Cuando termines, podrás devolverla al monitor con el botón de devolución.</span></div></div>`:'';
+e.innerHTML=`<div class="monitorBack"><button class="btn out" onclick="backToMonitor()">← VOLVER A MONITOR</button></div><div class="monitorTitle">🏋️ ENTRENAMIENTO — ${esc(s.name)}</div>${remoteBanner}<div class="card"><div class="days"><button class="btn out" onclick="studentSelectDay(1)">Día 1</button><button class="btn out" onclick="studentSelectDay(2)">Día 2</button><button class="btn out" onclick="studentSelectDay(3)">Día 3</button><button class="btn out" onclick="studentSelectDay(4)">Día 4</button><button class="btn out" onclick="studentSelectDay(5)">Día 5</button></div></div><div id="studentWork"></div>`;
 }
 function studentSelectDay(d){
 let s=getMonitorStudent();if(!s)return;normalizeStudentPrivateRoutine(s);
@@ -5063,7 +5070,7 @@ let selected=Array.isArray(s.routine&&s.routine[d])?s.routine[d]:[];
 if(!selected.length){document.getElementById('studentWork').innerHTML=`<div class="card"><div class="empty">Este alumno no tiene ejercicios asignados para el Día ${d}.</div></div>`;return}
 let previous=null,a=(s.logs||[]).filter(l=>Number(l.day)===d);
 if(a.length){a.sort((x,y)=>new Date(x.date)-new Date(y.date));previous=a[a.length-1]}
-let h=`<div class="card"><h2>🏋️ ${esc(s.name)} — Día ${d}</h2><div class="monitorBack"><button class="btn out" onclick="openStudent(${s.id})">← VOLVER A FICHA</button></div><label>Fecha</label><input type="date" id="studentDate" value="${new Date().toISOString().slice(0,10)}"><div id="studentForm"></div><button class="btn" onclick="saveStudentWorkout(${d})">💾 GUARDAR ENTRENAMIENTO</button><div id="studentSummary"></div></div>`;
+let h=`<div class="card"><h2>🏋️ ${esc(s.name)} — Día ${d}</h2><div class="monitorBack"><button class="btn out" onclick="openStudent(${s.id})">← VOLVER A FICHA</button></div><label>Fecha</label><input type="date" id="studentDate" value="${remoteAssignmentActive&&Number(remoteAssignmentActive.day)===d?esc(remoteAssignmentActive.date||new Date().toISOString().slice(0,10)):new Date().toISOString().slice(0,10)}">${remoteAssignmentActive&&Number(remoteAssignmentActive.day)===d?'':`<button class="btn blue" style="margin:7px 0" onclick="exportRoutineAssignment(${d})">📤 ENVIAR ESTA RUTINA AL ALUMNO</button>`}<div id="studentForm"></div><button class="btn" onclick="saveStudentWorkout(${d})">💾 GUARDAR ENTRENAMIENTO</button><div id="studentSummary"></div></div>`;
 document.getElementById('studentWork').innerHTML=h;renderStudentWorkout(d,selected,previous);
 }
 function renderStudentWorkout(d,selected,previous){
@@ -5116,7 +5123,7 @@ else if(prescription.mode==='TIEMPO'){for(let j=0;j<3;j++){let t=document.getEle
 else if(prescription.mode==='TABATA'){const done=document.getElementById(pfx+'-tabataDone');completed=done&&done.value==='1'}
 else {const done=document.getElementById(pfx+'-routineDone');completed=done&&done.value==='1'}
 if(!completed)return;let real=sets.filter(x=>x.reps>0);let data={name:ex,group:item.group||'Sin grupo',prescription:monitorPrescriptionFromItem(item),sets,times,timeCompleted,tabataCompleted:prescription.mode==='TABATA'&&completed,routineTimeCompleted:prescription.mode==='RUTINA_TIEMPO'&&completed,completed:true,volume:volume(real),rm:maxSetRM(real)};let g=log.groups.find(x=>x.name===data.group);if(!g){g={name:data.group,exercises:[]};log.groups.push(g)}let old=g.exercises.find(x=>x.name===ex);if(old)Object.assign(old,data);else g.exercises.push(data);totalVolume+=data.volume;totalSets+=real.length;totalExercises++});
-log.groups=(log.groups||[]).filter(g=>{g.exercises=(g.exercises||[]).filter(e=>e.completed||((e.sets||[]).some(x=>num(x.reps)>0)));return g.exercises.length});saveMonitor();document.getElementById('studentSummary').innerHTML=`<div class="summary"><h3>🎉 ENTRENAMIENTO GUARDADO</h3><div class="big">${esc(s.name)}</div><div>💪 <b>${totalExercises}</b> ejercicios realizados</div><div>🔢 <b>${totalSets}</b> series realizadas</div><div>📦 <b>${Math.round(totalVolume)}</b> kg de volumen</div><br><button class="btn" onclick="studentSelectDay(${d})">Seguir entrenando</button><br><br><button class="btn out" onclick="backToMonitor()">Volver a Monitor</button></div>`;
+log.groups=(log.groups||[]).filter(g=>{g.exercises=(g.exercises||[]).filter(e=>e.completed||((e.sets||[]).some(x=>num(x.reps)>0)));return g.exercises.length});saveMonitor();let returnBtn=remoteAssignmentActive&&Number(remoteAssignmentActive.day)===d?`<br><br><button class="btn blue" onclick="exportRoutineReturn(${d})">📤 DEVOLVER RUTINA AL MONITOR</button>`:'';document.getElementById('studentSummary').innerHTML=`<div class="summary"><h3>🎉 ENTRENAMIENTO GUARDADO</h3><div class="big">${esc(s.name)}</div><div>💪 <b>${totalExercises}</b> ejercicios realizados</div><div>🔢 <b>${totalSets}</b> series realizadas</div><div>📦 <b>${Math.round(totalVolume)}</b> kg de volumen</div><br><button class="btn" onclick="studentSelectDay(${d})">Seguir entrenando</button>${returnBtn}<br><br><button class="btn out" onclick="backToMonitor()">Volver a Monitor</button></div>`;
 }
 function studentRoutine(){
 let s=getMonitorStudent();if(!s)return;normalizeStudentPrivateRoutine(s);
@@ -5130,6 +5137,63 @@ h+='</div>';
 if(!any)h+=`<div class="card empty">Este alumno todavía no tiene rutina privada asignada.</div>`;
 h+=`<div class="card"><div class="backupBox">🔒 Esta rutina es exclusiva de ${esc(s.name)}.</div><button class="btn" onclick="openStudent(${s.id})">⚙️ EDITAR RUTINA PRIVADA</button></div>`;
 e.innerHTML=h;
+}
+/* ===== INTERCAMBIO DE RUTINAS MONITOR ↔ ALUMNO ===== */
+function exchangeDownload(data,filename){
+ const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+ const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=filename;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
+function exchangeFileInput(onload){
+ const old=document.getElementById('exchangeFileInput');if(old)old.remove();
+ const input=document.createElement('input');input.type='file';input.accept='.json,application/json';input.id='exchangeFileInput';input.style.display='none';
+ input.onchange=()=>{const f=input.files&&input.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{onload(JSON.parse(r.result))}catch(e){alert('⚠️ El archivo no es válido.')}};r.readAsText(f)};
+ document.body.appendChild(input);input.click();
+}
+function makeTransferId(){return Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,10)}
+function exportRoutineAssignment(d){
+ const s=getMonitorStudent();if(!s)return;normalizeStudentPrivateRoutine(s);const routineDay=Array.isArray(s.routine&&s.routine[d])?s.routine[d]:[];
+ if(!routineDay.length){alert('Este alumno no tiene rutina asignada para el Día '+d+'.');return}
+ const transferId=makeTransferId(),date=(document.getElementById('studentDate')||{}).value||new Date().toISOString().slice(0,10);
+ const data={app:'Mi Gimnasio Monitor',exchangeType:'ROUTINE_ASSIGNMENT',version:'10.8',transferId,created:new Date().toISOString(),studentId:s.id,studentName:s.name,day:d,date,routine:clone(routineDay)};
+ exchangeDownload(data,`RUTINA_${String(s.name).replace(/[^a-z0-9áéíóúüñ]+/gi,'_')}_DIA_${d}.json`);
+ alert('✓ Rutina preparada. Envía este archivo al alumno.');
+}
+function studentExchangePortal(){
+ const e=document.getElementById('monitorEditor');document.getElementById('monitorHome').style.display='none';e.style.display='block';
+ const pending=remoteAssignments.filter(x=>x&&x.type==='ROUTINE_ASSIGNMENT'&&!x.returned);
+ e.innerHTML=`<div class="monitorBack"><button class="btn out" onclick="backToMonitor()">← VOLVER A MONITOR</button></div><div class="monitorTitle">🎓 INTERCAMBIO CON ALUMNO</div><div class="card"><h2>📥 Recibir rutina del monitor</h2><div class="backupBox">El alumno importa aquí el archivo que le ha enviado el monitor. Después realiza la rutina y podrá devolver otro archivo con los resultados.</div><button class="btn blue" onclick="importRoutineAssignment()">📥 IMPORTAR RUTINA RECIBIDA</button></div><div class="card"><h2>📋 Rutinas recibidas</h2><div id="remoteAssignmentList">${pending.length?pending.map((x,i)=>`<div class="monitorStudent"><strong>👤 ${esc(x.studentName)}</strong><br><small>📅 Día ${x.day} · ${esc(x.date||'')} · ${x.routine.length} ejercicio(s)</small><br><button class="btn sm" onclick="startRemoteAssignment(${remoteAssignments.indexOf(x)})">🏋️ REALIZAR RUTINA</button></div>`).join(''):'<div class="empty">No hay rutinas pendientes.</div>'}</div></div><div class="card"><h2>📤 Devolución</h2><div class="backupBox">Cuando el alumno termine, usa <b>DEVOLVER RUTINA AL MONITOR</b> para generar el archivo que el monitor importará.</div><button class="btn out" onclick="importRoutineReturn()">📥 MONITOR: IMPORTAR DEVOLUCIÓN</button></div>`;
+}
+function importRoutineAssignment(){
+ exchangeFileInput(data=>{
+  if(!data||data.app!=='Mi Gimnasio Monitor'||data.exchangeType!=='ROUTINE_ASSIGNMENT'||!data.studentName||!Array.isArray(data.routine)||!data.routine.length){alert('⚠️ No es una rutina válida del Monitor.');return}
+  const exists=remoteAssignments.find(x=>x.transferId===data.transferId);if(exists){alert('Esta rutina ya fue importada.');return}
+  const a={type:'ROUTINE_ASSIGNMENT',...data,returned:false};remoteAssignments.push(a);saveRemoteAssignments();alert('✓ Rutina recibida correctamente para '+data.studentName+'.');studentExchangePortal();
+ });
+}
+function startRemoteAssignment(index){
+ const a=remoteAssignments[index];if(!a)return;
+ const id=Number(a.studentId)||Date.now();let s=students.find(x=>x.id===id);
+ if(!s){s={id,name:a.studentName,phone:'',place:'Remoto',routine:{},logs:[]};students.push(s)}
+ s.name=a.studentName;s.routine={};s.routine[a.day]=clone(a.routine);if(!Array.isArray(s.logs))s.logs=[];normalizeStudentPrivateRoutine(s);monitorStudentId=s.id;remoteAssignmentActive=a;saveMonitor();studentTraining();studentSelectDay(Number(a.day));
+}
+function exportRoutineReturn(d){
+ const s=getMonitorStudent(),a=remoteAssignmentActive;if(!s||!a)return;
+ const cd=(document.getElementById('studentDate')||{}).value||a.date||new Date().toISOString().slice(0,10);const log=(s.logs||[]).find(l=>Number(l.day)===d&&dateKey(l.date)===cd);
+ if(!log||!(log.groups||[]).some(g=>(g.exercises||[]).some(x=>x.completed))){alert('Primero guarda al menos un ejercicio realizado.');return}
+ const data={app:'Mi Gimnasio Monitor',exchangeType:'ROUTINE_RETURN',version:'10.8',transferId:a.transferId,created:new Date().toISOString(),studentId:a.studentId,studentName:a.studentName,day:d,date:cd,sourceAssignmentCreated:a.created,log:clone(log)};
+ exchangeDownload(data,`DEVOLUCION_${String(a.studentName).replace(/[^a-z0-9áéíóúüñ]+/gi,'_')}_DIA_${d}.json`);
+ a.returned=true;a.returnCreated=data.created;saveRemoteAssignments();alert('✓ Rutina devuelta. Envía este archivo al monitor.');
+}
+function importRoutineReturn(){
+ exchangeFileInput(data=>{
+  if(!data||data.app!=='Mi Gimnasio Monitor'||data.exchangeType!=='ROUTINE_RETURN'||!data.studentName||!data.log){alert('⚠️ No es una devolución válida.');return}
+  let s=students.find(x=>x.id===data.studentId)||students.find(x=>String(x.name||'').trim().toLowerCase()===String(data.studentName||'').trim().toLowerCase());
+  if(!s){alert('⚠️ No se ha encontrado en este Monitor el alumno '+data.studentName+'.');return}
+  if(!Array.isArray(s.logs))s.logs=[];const exists=s.logs.some(l=>l.transferId===data.transferId&&Number(l.day)===Number(data.day));if(exists){alert('Esta devolución ya está incorporada.');return}
+  const log=clone(data.log);log.transferId=data.transferId;log.receivedAt=new Date().toISOString();log.returnedFromStudent=true;const same=s.logs.findIndex(l=>dateKey(l.date)===dateKey(log.date)&&Number(l.day)===Number(log.day));if(same>=0)s.logs[same]=log;else s.logs.push(log);saveMonitor();
+  const a=remoteAssignments.find(x=>x.transferId===data.transferId);if(a){a.returned=true;a.incorporated=true;a.incorporatedAt=new Date().toISOString();saveRemoteAssignments()}
+  alert('✓ Devolución recibida e incorporada a la ficha de '+s.name+'.');openStudent(s.id);
+ });
 }
 function studentReports(){
 let s=getMonitorStudent();
