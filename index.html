@@ -1,10 +1,10 @@
-<!DOCTYPE html>
+-<!DOCTYPE html>
 
 <html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>MI GIMNASIO PRO MONITOR v10.5</title>
+<title>MI GIMNASIO PRO MONITOR v10.8</title>
 <meta name="theme-color" content="#121212">
 
 <style>
@@ -1048,7 +1048,7 @@ td input{font-size:.7rem;padding:5px 1px}.muscleStats{grid-template-columns:1fr 
 <body>
 
 <header>
-<h1>MI GIMNASIO PRO MONITOR v10.5</h1>
+<h1>MI GIMNASIO PRO MONITOR v10.8</h1>
 </header>
 
 <div class="container">
@@ -1237,7 +1237,16 @@ Selecciona un periodo.
 <section id="tab-monitor" class="tab">
 <div id="monitorHome">
 <div class="card">
-<h2>👥 Monitor</h2>
+<h2>👥 Monitor <span style="font-size:.68rem;color:var(--sub)">RESUMEN</span></h2>
+<div id="monitorDashboard" class="statgrid"></div>
+</div>
+
+<div class="card">
+<h2>🔎 Alumnos</h2>
+<input id="studentSearch" type="search" placeholder="Buscar alumno por nombre o teléfono..." oninput="renderStudents(this.value)">
+</div>
+
+<div class="card">
 <div class="monitorMenu">
 <button class="btn" onclick="newStudent()">➕ NUEVO ALUMNO</button>
 <button class="btn blue" onclick="showAppointments()">📅 CITAS</button>
@@ -1247,6 +1256,7 @@ Selecciona un periodo.
 <button class="btn danger" onclick="exitMonitorApp()">🚪 SALIR Y GUARDAR</button>
 <div id="monitorBackupStatus" class="backupBox"></div>
 </div>
+
 <div id="monitorList"></div>
 </div>
 <div id="monitorEditor" style="display:none"></div>
@@ -3625,7 +3635,7 @@ function saveConfig(){
 }
 
 function exportData(){
-let data={app:'Mi Gimnasio Pro Monitor',version:'10.5',exported:new Date().toISOString(),routine,logs,personalExerciseBase,students,appointments,accounting};
+let data={app:'Mi Gimnasio Pro Monitor',version:'10.8',exported:new Date().toISOString(),routine,logs,personalExerciseBase,students,appointments,accounting};
 let b=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),u=URL.createObjectURL(b),a=document.createElement('a');
 a.href=u;a.download='gym_v10.5_monitor_backup_'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);
 let e=document.getElementById('backupStatus');if(e)e.innerHTML='<span class="backupOk">✓ Copia completa creada correctamente.<br>Incluye rutina, entrenamientos, alumnos, citas y contabilidad.</span>';
@@ -4739,7 +4749,7 @@ renderCalendar();
 loadConfig();
 
 
-/* ===== MONITOR PRIVADO ENLAZADO A v10.6 ===== */
+/* ===== MONITOR PRIVADO ENLAZADO A v10.7 ===== */
 let students=safeParse(localStorage.getItem(MK+'students'),[]);
 let appointments=safeParse(localStorage.getItem(MK+'appointments'),[]);
 let accounting=safeParse(localStorage.getItem(MK+'accounting'),[]);
@@ -4759,7 +4769,7 @@ try{
 let old=localStorage.getItem(MONITOR_AUTO_BACKUP);
 if(old)localStorage.setItem(MONITOR_PREV_BACKUP,old);
 saveMonitor();
-let d={app:'Mi Gimnasio Pro - Monitor',version:'10.5',backupType:'automatic',created:new Date().toISOString(),students:clone(students),appointments:clone(appointments),accounting:clone(accounting),personalExerciseBase:clone(personalExerciseBase)};
+let d={app:'Mi Gimnasio Pro - Monitor',version:'10.8',backupType:'automatic',created:new Date().toISOString(),students:clone(students),appointments:clone(appointments),accounting:clone(accounting),personalExerciseBase:clone(personalExerciseBase)};
 localStorage.setItem(MONITOR_AUTO_BACKUP,JSON.stringify(d));
 localStorage.setItem(MONITOR_BACKUP_DATE,d.created);
 updateMonitorBackupStatus();
@@ -4796,7 +4806,9 @@ function showMonitorHome(){
 monitorStudentId=null;
 document.getElementById('monitorHome').style.display='block';
 document.getElementById('monitorEditor').style.display='none';
-renderStudents();
+renderMonitorSummary();
+const q=document.getElementById('studentSearch')?.value||'';
+renderStudents(q);
 updateMonitorBackupStatus();
 }
 function backToMonitor(){showMonitorHome()}
@@ -4870,12 +4882,63 @@ if(!confirm('¿Eliminar este alumno?'))return;
 students=students.filter(x=>x.id!==id);
 appointments=appointments.filter(x=>x.studentId!==id);
 accounting=accounting.filter(x=>x.studentId!==id);
-saveMonitor();renderStudents();
+saveMonitor();renderMonitorSummary();renderStudents(document.getElementById('studentSearch')?.value||'');
 }
-function renderStudents(){
+function renderMonitorSummary(){
+const box=document.getElementById('monitorDashboard');
+if(!box)return;
+
+const now=new Date();
+const y=now.getFullYear(),m=now.getMonth();
+
+const monthAccounting=(accounting||[]).filter(x=>{
+  const d=new Date(String(x.date||'')+'T12:00:00');
+  return !isNaN(d.getTime()) && d.getFullYear()===y && d.getMonth()===m;
+});
+
+const paid=monthAccounting
+  .filter(x=>String(x.status||'').toUpperCase()==='PAGADO')
+  .reduce((s,x)=>s+num(x.amount),0);
+
+const pending=monthAccounting
+  .filter(x=>String(x.status||'').toUpperCase()!=='PAGADO')
+  .reduce((s,x)=>s+num(x.amount),0);
+
+const upcoming=(appointments||[]).filter(a=>{
+  const d=new Date(`${a.date}T${a.time||'23:59'}`);
+  return !isNaN(d.getTime()) && d>=now;
+});
+
+box.innerHTML=`
+  <div class="stat"><b>${students.length}</b><span>Alumnos</span></div>
+  <div class="stat"><b>${upcoming.length}</b><span>Próximas citas</span></div>
+  <div class="stat"><b>${paid.toFixed(2)} €</b><span>Cobrado este mes</span></div>
+  <div class="stat"><b>${pending.toFixed(2)} €</b><span>Pendiente este mes</span></div>
+`;
+}
+
+function renderStudents(query=''){
 let box=document.getElementById('monitorList');
-if(!students.length){box.innerHTML='<div class="card empty">Todavía no hay alumnos.</div>';return}
-box.innerHTML=students.map(s=>{
+if(!box)return;
+
+const q=String(query||'').trim().toLowerCase();
+const list=(students||[]).filter(s=>{
+  if(!q)return true;
+  return String(s.name||'').toLowerCase().includes(q) ||
+         String(s.phone||'').toLowerCase().includes(q);
+});
+
+if(!students.length){
+  box.innerHTML='<div class="card empty">Todavía no hay alumnos.</div>';
+  return;
+}
+
+if(!list.length){
+  box.innerHTML='<div class="card empty">No hay alumnos que coincidan con la búsqueda.</div>';
+  return;
+}
+
+box.innerHTML=list.map(s=>{
 let days=Object.keys(s.routine||{}).length;
 return`<div class="monitorStudent"><strong>👤 ${esc(s.name)}</strong><br><small>${s.phone?`📞 ${esc(s.phone)} `:'📞 Sin teléfono '} · 📍 ${esc(s.place||'Gimnasio')} · ${days} día(s)</small><div class="row"><button class="btn sm" onclick="openStudent(${s.id})">Abrir ficha</button>${s.phone?`<button class="btn blue sm" onclick="callStudent('${esc(s.phone)}')">📞</button>`:''}<button class="btn danger sm" onclick="quickDeleteStudent(${s.id})">Eliminar</button></div></div>`;
 }).join('');
@@ -5381,7 +5444,266 @@ restoreMonitorAutoBackupIfNeeded();
 normalizeAllStudentPrivateRoutines();
 saveMonitor();
 updateMonitorBackupStatus();
+renderMonitorSummary();
 renderStudents();
+
+
+/* ===== v10.8 · HISTORIAL PAGOS + PENDIENTES + RUTINAS PRIVADAS REFORZADAS ===== */
+(function(){
+  function v108DateKey(d){
+    const x=new Date(String(d||'')+'T12:00:00');
+    return isNaN(x.getTime())?'':x.toISOString().slice(0,10);
+  }
+  function v108Pad(n){return String(n).padStart(2,'0')}
+  function v108LocalDateKey(d){
+    const x=d instanceof Date?d:new Date(d);
+    if(isNaN(x.getTime()))return '';
+    return `${x.getFullYear()}-${v108Pad(x.getMonth()+1)}-${v108Pad(x.getDate())}`;
+  }
+  function v108Monday(d){
+    const x=new Date(d.getFullYear(),d.getMonth(),d.getDate());
+    const day=x.getDay()||7;
+    x.setDate(x.getDate()-(day-1));
+    return x;
+  }
+  function v108AccountingRange(){
+    const mode=document.getElementById('accountPeriod')?.value||'MES';
+    const ref=document.getElementById('accountPeriodDate')?.value||v108LocalDateKey(new Date());
+    const base=new Date(ref+'T12:00:00');
+    if(isNaN(base.getTime()))return null;
+    let start,end;
+    if(mode==='SEMANA'){
+      start=v108Monday(base);
+      end=new Date(start); end.setDate(end.getDate()+7);
+    }else if(mode==='AÑO'){
+      start=new Date(base.getFullYear(),0,1);
+      end=new Date(base.getFullYear()+1,0,1);
+    }else{
+      start=new Date(base.getFullYear(),base.getMonth(),1);
+      end=new Date(base.getFullYear(),base.getMonth()+1,1);
+    }
+    return {start,end,mode,ref};
+  }
+  function v108InRange(date,range){
+    if(!range)return false;
+    const d=new Date(String(date||'')+'T12:00:00');
+    return !isNaN(d.getTime())&&d>=range.start&&d<range.end;
+  }
+  function v108StudentFilter(){return String(document.getElementById('accountStudentFilter')?.value||'').trim()}
+  function v108FilteredAccounting(){
+    const range=v108AccountingRange(), sid=v108StudentFilter();
+    return (accounting||[]).filter(x=>v108InRange(x.date,range)&&(!sid||String(x.studentId)===sid));
+  }
+  function v108PeriodLabel(range){
+    if(!range)return '';
+    const a=v108LocalDateKey(range.start), b=v108LocalDateKey(new Date(range.end.getTime()-86400000));
+    if(range.mode==='SEMANA')return `Semana: ${a} → ${b}`;
+    if(range.mode==='AÑO')return `Año: ${range.start.getFullYear()}`;
+    return `Mes: ${range.start.toLocaleDateString('es-ES',{month:'long',year:'numeric'})}`;
+  }
+  function v108PaymentRow(x){
+    const paid=String(x.status||'').toUpperCase()==='PAGADO';
+    const paidDate=x.paidDate?formatMonitorDate(v108DateKey(x.paidDate)):'';
+    return `<tr>
+      <td>${esc(formatMonitorDate(x.date))}</td>
+      <td>${esc(monitorStudentName(x.studentId))}</td>
+      <td>${esc(x.concept||'')}</td>
+      <td class="money">${num(x.amount).toFixed(2)} €</td>
+      <td>${paid?`<span style="color:var(--a)">✓ PAGADO${paidDate?`<br><small>${esc(paidDate)}</small>`:''}</span>`:'<span style="color:var(--gold)">⚠️ PENDIENTE</span>'}</td>
+      <td><button class="btn sm ${paid?'':'blue'}" onclick="toggleAccountingPaid(${x.id})">${paid?'↩️ PENDIENTE':'💶 MARCAR PAGADO'}</button><button class="btn danger sm" style="margin-top:4px" onclick="deleteAccounting(${x.id})">🗑️</button></td>
+    </tr>`;
+  }
+  function v108RenderAccounting(){
+    const summary=document.getElementById('accountingSummary'), allBox=document.getElementById('accountingHistoryRows'), pendingBox=document.getElementById('accountingPendingRows'), label=document.getElementById('accountingPeriodLabel');
+    if(!summary||!allBox||!pendingBox)return;
+    const range=v108AccountingRange();
+    const data=v108FilteredAccounting().slice().sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+    const paid=data.filter(x=>String(x.status||'').toUpperCase()==='PAGADO');
+    const pending=data.filter(x=>String(x.status||'').toUpperCase()!=='PAGADO').sort((a,b)=>String(a.date).localeCompare(String(b.date)));
+    const paidTotal=paid.reduce((s,x)=>s+num(x.amount),0), pendingTotal=pending.reduce((s,x)=>s+num(x.amount),0), total=paidTotal+pendingTotal;
+    if(label)label.innerHTML=`<b>${esc(v108PeriodLabel(range))}</b>${v108StudentFilter()?` · ${esc(monitorStudentName(Number(v108StudentFilter())))}`:' · Todos los alumnos'}`;
+    summary.innerHTML=`<div class="statgrid">
+      <div class="stat"><b>${total.toFixed(2)} €</b><span>Total periodo</span></div>
+      <div class="stat"><b>${paidTotal.toFixed(2)} €</b><span>Cobrado</span></div>
+      <div class="stat"><b>${pendingTotal.toFixed(2)} €</b><span>Pendiente</span></div>
+      <div class="stat"><b>${data.length}</b><span>Movimientos</span></div>
+    </div>`;
+    allBox.innerHTML=paid.length?paid.map(v108PaymentRow).join(''):'<tr><td colspan="6" class="empty">No hay pagos cobrados en este periodo.</td></tr>';
+    pendingBox.innerHTML=pending.length?pending.map(v108PaymentRow).join(''):'<tr><td colspan="6" class="empty">No hay pagos pendientes en este periodo.</td></tr>';
+  }
+  window.renderAccounting=v108RenderAccounting;
+  window.applyAccountingFilter=v108RenderAccounting;
+
+  window.showAccounting=function(){
+    document.getElementById('monitorHome').style.display='none';
+    const e=document.getElementById('monitorEditor'); e.style.display='block';
+    const studentOptions=(students||[]).map(s=>`<option value="${esc(s.id)}">${esc(s.name)}</option>`).join('');
+    e.innerHTML=`
+      <div class="monitorBack"><button class="btn out" onclick="backToMonitor()">← VOLVER A MONITOR</button></div>
+      <div class="monitorTitle">💶 CONTABILIDAD</div>
+      <div class="card">
+        <h2>🔎 Filtrar historial y pendientes</h2>
+        <label>Periodo</label>
+        <select id="accountPeriod" onchange="renderAccounting()">
+          <option value="SEMANA">Semana</option><option value="MES" selected>Mes</option><option value="AÑO">Año</option>
+        </select>
+        <label>Fecha de referencia</label>
+        <input type="date" id="accountPeriodDate" onchange="renderAccounting()" value="${v108LocalDateKey(new Date())}">
+        <label>Alumno</label>
+        <select id="accountStudentFilter" onchange="renderAccounting"><option value="">Todos los alumnos</option>${studentOptions}</select>
+        <div id="accountingPeriodLabel" class="backupBox" style="margin-top:4px"></div>
+      </div>
+      <div class="card"><h2>➕ Nuevo movimiento</h2>
+        <label>Alumno</label><select id="accountStudent"><option value="">Selecciona un alumno</option>${studentOptions}</select>
+        <label>Fecha</label><input type="date" id="accountDate" value="${v108LocalDateKey(new Date())}">
+        <label>Concepto</label><input id="accountConcept" placeholder="Cuota, sesión, bono...">
+        <label>Importe (€)</label><input type="number" id="accountAmount" min="0" step=".01" placeholder="0.00">
+        <label>Estado</label><select id="accountStatus"><option value="PENDIENTE">PENDIENTE</option><option value="PAGADO">PAGADO</option></select>
+        <button class="btn" onclick="saveAccounting()">💾 GUARDAR MOVIMIENTO</button>
+      </div>
+      <div class="card"><h2>📊 Resumen</h2><div id="accountingSummary"></div></div>
+      <div class="card"><h2>📜 Historial de pagos cobrados</h2><div class="accountTable"><table><thead><tr><th>Fecha</th><th>Alumno</th><th>Concepto</th><th>Importe</th><th>Estado</th><th></th></tr></thead><tbody id="accountingHistoryRows"></tbody></table></div></div>
+      <div class="card"><h2>⚠️ Pagos pendientes</h2><div class="accountTable"><table><thead><tr><th>Fecha</th><th>Alumno</th><th>Concepto</th><th>Importe</th><th>Estado</th><th></th></tr></thead><tbody id="accountingPendingRows"></tbody></table></div></div>
+    `;
+    v108RenderAccounting();
+  };
+
+  const oldSaveAccounting=window.saveAccounting;
+  window.saveAccounting=function(){
+    const studentId=document.getElementById('accountStudent')?.value||'';
+    const date=document.getElementById('accountDate')?.value||'';
+    const concept=document.getElementById('accountConcept')?.value?.trim()||'';
+    const amount=num(document.getElementById('accountAmount')?.value);
+    const status=document.getElementById('accountStatus')?.value||'PENDIENTE';
+    if(!studentId){alert('Selecciona un alumno.');return}
+    if(!date){alert('Selecciona una fecha.');return}
+    if(!concept){alert('Escribe un concepto.');return}
+    if(amount<=0){alert('Introduce un importe válido.');return}
+    accounting.push({id:Date.now(),studentId:Number(studentId),date,concept,amount,status,created:new Date().toISOString(),...(status==='PAGADO'?{paidDate:new Date().toISOString()}:{})});
+    saveMonitor();createMonitorAutoBackup();v108RenderAccounting();renderMonitorSummary();
+    document.getElementById('accountConcept').value='';document.getElementById('accountAmount').value='';
+    alert('✓ Movimiento guardado correctamente.');
+  };
+  const oldToggle=window.toggleAccountingPaid;
+  window.toggleAccountingPaid=function(id){
+    const item=accounting.find(x=>String(x.id)===String(id)); if(!item)return;
+    if(String(item.status||'').toUpperCase()==='PAGADO'){item.status='PENDIENTE';delete item.paidDate}
+    else{item.status='PAGADO';item.paidDate=new Date().toISOString()}
+    saveMonitor();createMonitorAutoBackup();v108RenderAccounting();renderMonitorSummary();
+  };
+  const oldDelete=window.deleteAccounting;
+  window.deleteAccounting=function(id){
+    if(!confirm('¿Eliminar este movimiento?'))return;
+    accounting=accounting.filter(x=>String(x.id)!==String(id));saveMonitor();createMonitorAutoBackup();v108RenderAccounting();renderMonitorSummary();
+  };
+
+  /* ---- Rutina privada: almacenamiento estable por grupo/nombre + GIF ---- */
+  function v108FindExercise(group,name){
+    const g=String(group||'').trim().toUpperCase(), n=String(name||'').trim().toLowerCase();
+    const master=(EXERCISE_DB[g]||[]).find(x=>String(x[0]||'').trim().toLowerCase()===n);
+    if(master)return {name:master[0],image:master[1]||'',equipment:master[2]||getEquipmentLabel(master[0]),group:g};
+    const personal=(personalExerciseBase||[]).find(x=>String(x.group||'').trim().toUpperCase()===g&&String(x.name||'').trim().toLowerCase()===n);
+    if(personal)return {name:personal.name,image:personal.image||'',equipment:personal.equipment||getEquipmentLabel(personal.name),group:g};
+    return null;
+  }
+  function v108NormalizeRoutine(s){
+    if(!s)return;
+    const old=s.routine||{}, out={1:[],2:[],3:[],4:[],5:[]};
+    for(let d=1;d<=5;d++){
+      const arr=Array.isArray(old[d])?old[d]:(Array.isArray(old[String(d)])?old[String(d)]:[]);
+      arr.forEach(item=>{
+        if(!item)return;
+        let group='',name='',image='',equipment='';
+        if(typeof item==='object'&&item.name){group=item.group||'';name=item.name;image=item.image||item.img||'';equipment=item.equipment||''}
+        else if(typeof item==='object'&&Number.isFinite(Number(item.g))&&Number.isFinite(Number(item.i))&&routine[d]){
+          const g=routine[d].groups?.[Number(item.g)]; name=g?.exercises?.[Number(item.i)]||'';group=g?.name||'';image=(g?.images||[])[Number(item.i)]||'';
+        }
+        if(!name||!group)return;
+        const master=v108FindExercise(group,name);
+        const rec={group:String(group).trim().toUpperCase(),name:String(name),image:String(image||master?.image||''),equipment:String(equipment||master?.equipment||getEquipmentLabel(name)||'')};
+        if(!out[d].some(x=>x.group===rec.group&&x.name.trim().toLowerCase()===rec.name.trim().toLowerCase()))out[d].push(rec);
+      });
+    }
+    s.routine=out;
+    return s;
+  }
+  window.normalizeStudentPrivateRoutine=v108NormalizeRoutine;
+  window.normalizeAllStudentPrivateRoutines=function(){(students||[]).forEach(v108NormalizeRoutine)};
+
+  window.openStudent=function(id){
+    const s=students.find(x=>x.id===id);if(!s)return;
+    v108NormalizeRoutine(s);monitorStudentId=id;
+    document.getElementById('monitorHome').style.display='none';
+    const e=document.getElementById('monitorEditor');e.style.display='block';
+    let h=`<div class="monitorBack"><button class="btn out" onclick="backToMonitor()">← VOLVER A MONITOR</button></div><div class="card"><h2>👤 ${esc(s.name)}</h2><div style="font-size:.78rem;margin-bottom:8px">${s.phone?`📞 <span class="phone">${esc(s.phone)}</span>`:'📞 Sin teléfono'}<br>📍 <span class="place">${esc(s.place||'Gimnasio')}</span></div><div class="monitorMenu"><button class="btn" onclick="studentTraining()">🏋️ ENTRENAR</button><button class="btn blue" onclick="studentReports()">📊 INFORMES</button><button class="btn out" onclick="studentRoutine()">⚙️ RUTINA</button></div></div><div class="card"><label>Nombre del alumno</label><input id="studentName" value="${esc(s.name)}"><label>Teléfono</label><input id="studentPhone" type="tel" value="${esc(s.phone||'')}"><label>Lugar del entrenamiento</label><select id="studentPlace"><option value="Gimnasio" ${(s.place||'Gimnasio')==='Gimnasio'?'selected':''}>Gimnasio</option><option value="Domicilio" ${(s.place||'')==='Domicilio'?'selected':''}>Domicilio</option></select></div>`;
+    for(let d=1;d<=5;d++){
+      h+=`<div class="card"><h2>📅 Día ${d}</h2>`;
+      (MONITOR_DAY_GROUPS[d]||[]).forEach(groupName=>{
+        const list=getLibraryBaseForGroup(groupName), selected=(s.routine[d]||[]).filter(x=>String(x.group).toUpperCase()===String(groupName).toUpperCase()), names=new Set(selected.map(x=>String(x.name).trim().toLowerCase()));
+        h+=`<div class="groupEditor"><div class="groupEditorTitle"><strong>${esc(groupName)}</strong><span style="font-size:.68rem;color:var(--sub)">${list.length} disponibles</span></div>`;
+        list.forEach(item=>{
+          const checked=names.has(String(item[0]).trim().toLowerCase());
+          h+=`<label class="check"><input type="checkbox" class="studentExercise" data-d="${d}" data-group="${esc(groupName)}" data-name="${esc(item[0])}" data-image="${esc(item[1])}" data-equipment="${esc(item[2]||'')}" ${checked?'checked':''}><span>${esc(item[0])}</span><span style="margin-left:auto;color:var(--sub);font-size:.62rem">${esc(item[2]||'')}</span></label>`;
+        });
+        h+='</div>';
+      });
+      h+='</div>';
+    }
+    h+=`<div class="card"><div class="backupBox">🔒 <b>Rutina privada.</b> La selección pertenece exclusivamente a <b>${esc(s.name)}</b>.</div><button class="btn" onclick="saveStudent()">💾 GUARDAR RUTINA PRIVADA</button><br><br><button class="btn danger" onclick="deleteStudent()">🗑️ ELIMINAR ALUMNO</button></div>`;
+    e.innerHTML=h;
+  };
+
+  window.saveStudent=function(){
+    const name=(document.getElementById('studentName')||{}).value?.trim()||'',phone=(document.getElementById('studentPhone')||{}).value?.trim()||'',place=(document.getElementById('studentPlace')||{}).value||'Gimnasio';
+    if(!name){alert('Escribe el nombre del alumno.');return}
+    let s=monitorStudentId?students.find(x=>x.id===monitorStudentId):null;
+    if(!s){s={id:Date.now(),name:'',phone:'',place:'Gimnasio',routine:{1:[],2:[],3:[],4:[],5:[]},logs:[]};students.push(s)}
+    if(!Array.isArray(s.logs))s.logs=[];
+    v108NormalizeRoutine(s); s.name=name;s.phone=phone;s.place=place;
+    const checks=document.querySelectorAll('#monitorEditor .studentExercise');
+    if(checks.length){
+      const r={1:[],2:[],3:[],4:[],5:[]};
+      checks.forEach(c=>{if(!c.checked)return;const d=Number(c.dataset.d);if(!r[d])r[d]=[];r[d].push({group:String(c.dataset.group||'').trim().toUpperCase(),name:String(c.dataset.name||''),image:String(c.dataset.image||''),equipment:String(c.dataset.equipment||'')})});
+      Object.keys(r).forEach(d=>{r[d]=r[d].filter((x,i,a)=>a.findIndex(y=>y.group===x.group&&y.name.trim().toLowerCase()===x.name.trim().toLowerCase())===i)});
+      s.routine=r;
+    }
+    v108NormalizeRoutine(s);saveMonitor();createMonitorAutoBackup();alert('✓ Alumno y rutina privada guardados correctamente.');backToMonitor();
+  };
+
+  window.studentRoutine=function(){
+    const s=getMonitorStudent();if(!s)return;v108NormalizeRoutine(s);
+    let e=document.getElementById('monitorEditor'),h=`<div class="monitorBack"><button class="btn out" onclick="openStudent(${s.id})">← VOLVER A FICHA</button></div><div class="monitorTitle">⚙️ RUTINA PRIVADA — ${esc(s.name)}</div><div class="backupBox" style="margin-bottom:10px">👁️ <b>Modo solo lectura.</b> Aquí se muestra exactamente la rutina que has asignado, incluidos sus GIF.</div>`,any=false;
+    for(let d=1;d<=5;d++){
+      const assigned=s.routine[d]||[];if(!assigned.length)continue;any=true;
+      h+=`<div class="card"><h2>📅 Día ${d}</h2>`;
+      assigned.forEach(item=>{h+=`<div class="ex"><div class="exhead"><span>${esc(item.name)}</span>${item.equipment?`<span class="badge">${esc(item.equipment)}</span>`:''}</div><div style="font-size:.68rem;color:var(--sub);margin-bottom:5px">${esc(item.group)}</div>${item.image?`<img class="gifPreview" src="${esc(item.image)}" alt="${esc(item.name)}" loading="lazy" onerror="this.style.display='none'">`:''}</div>`});
+      h+='</div>';
+    }
+    if(!any)h+=`<div class="card empty">Este alumno todavía no tiene rutina privada asignada.</div>`;
+    h+=`<div class="card"><button class="btn" onclick="shareStudentRoutine()">📤 ENVIAR RUTINA AL ALUMNO</button><br><br><button class="btn out" onclick="openStudent(${s.id})">⚙️ EDITAR RUTINA PRIVADA</button></div>`;
+    e.innerHTML=h;
+  };
+
+  window.shareStudentRoutine=async function(){
+    const s=getMonitorStudent();if(!s)return;v108NormalizeRoutine(s);
+    const selectedDays=Object.keys(s.routine).filter(d=>(s.routine[d]||[]).length);
+    if(!selectedDays.length){alert('Este alumno no tiene ejercicios asignados.');return}
+    const daysHtml=selectedDays.map(d=>`<section><h2>Día ${d}</h2>${s.routine[d].map(x=>`<article><h3>${esc(x.name)}</h3><div class="group">${esc(x.group)}${x.equipment?' · '+esc(x.equipment):''}</div>${x.image?`<img src="${esc(x.image)}" alt="${esc(x.name)}">`:''}</article>`).join('')}</section>`).join('');
+    const html=`<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Rutina · ${esc(s.name)}</title><style>body{font-family:Arial,sans-serif;background:#121212;color:#fff;margin:0;padding:16px}main{max-width:720px;margin:auto}h1{color:#00e676}h2{color:#29b6f6;border-bottom:1px solid #333;padding-bottom:6px}article{background:#1e1e1e;border:1px solid #333;border-radius:10px;padding:10px;margin:10px 0}h3{margin:0 0 5px}.group{color:#aaa;font-size:12px}img{width:100%;max-height:300px;object-fit:contain;background:#0b0b0b;border-radius:8px;margin-top:8px}.note{color:#aaa;font-size:12px}</style></head><body><main><h1>🏋️ Rutina de ${esc(s.name)}</h1><p class="note">Rutina enviada por el monitor · SOLO LECTURA</p>${daysHtml}</main></body></html>`;
+    const blob=new Blob([html],{type:'text/html'}),file=new File([blob],`Rutina_${String(s.name).replace(/[^a-z0-9áéíóúüñ _-]/gi,'').trim()||'alumno'}.html`,{type:'text/html'});
+    try{
+      if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){await navigator.share({title:`Rutina de ${s.name}`,text:`Rutina de ${s.name} · solo lectura`,files:[file]});return}
+    }catch(e){if(e?.name==='AbortError')return}
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=file.name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+    alert('✓ Se ha generado la rutina en modo solo lectura. Puedes enviar el archivo descargado al alumno.');
+  };
+
+  /* Evita que una rutina antigua por índices vuelva a romperse al entrar en Entrenar. */
+  const oldStudentTraining=window.studentTraining;
+  window.studentTraining=function(){const s=getMonitorStudent();if(s){v108NormalizeRoutine(s);saveMonitor()}return oldStudentTraining.apply(this,arguments)};
+  const oldStudentSelectDay=window.studentSelectDay;
+  window.studentSelectDay=function(d){const s=getMonitorStudent();if(s)v108NormalizeRoutine(s);return oldStudentSelectDay.apply(this,arguments)};
+})();
 
 </script>
 
