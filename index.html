@@ -1043,6 +1043,18 @@ td input{font-size:.7rem;padding:5px 1px}.muscleStats{grid-template-columns:1fr 
 .remoteSearchBox select{margin-bottom:0}
 </style>
 
+
+<style>
+/* ===== v10.7 · INFORME COMPLETO DEL ALUMNO ===== */
+.studentReportGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:7px}
+.studentReportCard{background:var(--item);border:1px solid var(--bor);border-radius:9px;padding:10px}
+.studentReportCard h3{margin:0 0 7px;font-size:.82rem}
+.studentReportCard p{margin:4px 0;font-size:.72rem}
+.studentReportMuted{color:var(--sub);font-size:.66rem}
+.studentReportList{margin:0;padding-left:18px;font-size:.7rem;line-height:1.55}
+.studentReportMoney{font-size:1rem;font-weight:800}
+@media(max-width:600px){.studentReportGrid{grid-template-columns:1fr}}
+</style>
 </head>
 
 <body>
@@ -5012,9 +5024,34 @@ function studentReports(){
 let s=getMonitorStudent();
 if(!s)return;
 let e=document.getElementById('monitorEditor');
-e.innerHTML=`<div class="monitorBack"><button class="btn out" onclick="backToMonitor()">← VOLVER A MONITOR</button></div><div class="monitorTitle">📊 INFORMES — ${esc(s.name)}</div><div class="card"><h2>📊 Resumen</h2><div id="studentStats" class="statgrid"></div></div><div class="card"><h2>📋 Informe</h2><div style="display:flex;gap:5px;flex-wrap:wrap"><button class="btn out sm" onclick="studentReport(15)">15 días</button><button class="btn out sm" onclick="studentReport(30)">Mensual</button></div><div id="studentReportsBox" class="empty">Selecciona un periodo.</div></div>`;
+let now=new Date();
+let upcoming=(Array.isArray(appointments)?appointments:[])
+  .filter(a=>String(a.studentId)===String(s.id))
+  .map(a=>{let d=new Date(String(a.date||'')+'T'+String(a.time||'00:00'));return {a,d}})
+  .filter(x=>!isNaN(x.d.getTime())&&x.d>=now)
+  .sort((a,b)=>a.d-b.d);
+let ap=upcoming[0]?.a||null;
+let money=(Array.isArray(accounting)?accounting:[]).filter(a=>String(a.studentId)===String(s.id));
+let paid=money.filter(a=>String(a.status||'').toUpperCase()==='PAGADO').reduce((n,a)=>n+num(a.amount),0);
+let pending=money.filter(a=>String(a.status||'').toUpperCase()!=='PAGADO').reduce((n,a)=>n+num(a.amount),0);
+let routineDays=Object.keys(s.routine||{}).filter(d=>Array.isArray(s.routine[d])&&s.routine[d].length).length;
+let routineExercises=Object.values(s.routine||{}).reduce((n,a)=>n+(Array.isArray(a)?a.length:0),0);
+let lastLogs=(s.logs||[]).slice().sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,5);
+let lastHtml=lastLogs.length?'<ul class="studentReportList">'+lastLogs.map(l=>`<li>${formatMonitorDate(l.date)} · ${(l.groups||[]).reduce((n,g)=>n+(g.exercises||[]).filter(x=>(x.sets||[]).some(q=>num(q.reps)>0)).length,0)} ejercicios realizados</li>`).join('')+'</ul>':'<div class="studentReportMuted">Todavía no hay entrenamientos registrados.</div>';
+let nextHtml=ap?`<p><b>${formatMonitorDate(ap.date)}</b> · ${esc(ap.time||'')}</p><p>${esc(ap.note||'Sin observaciones')}</p>`:'<div class="studentReportMuted">No hay próximas citas.</div>';
+let routineHtml=routineExercises?`<p><b>${routineDays}</b> día(s) · <b>${routineExercises}</b> ejercicio(s)</p>`:'<div class="studentReportMuted">No tiene rutina privada asignada.</div>';
+e.innerHTML=`<div class="monitorBack"><button class="btn out" onclick="backToMonitor()">← VOLVER A MONITOR</button></div>
+<div class="monitorTitle">📊 INFORME DEL ALUMNO — ${esc(s.name)}</div>
+<div class="card"><h2>👤 Datos del alumno</h2><div class="studentReportGrid"><div class="studentReportCard"><h3>Contacto</h3><p>📞 ${s.phone?esc(s.phone):'Sin teléfono'}</p><p>📍 ${esc(s.place||'Gimnasio')}</p></div><div class="studentReportCard"><h3>Rutina privada</h3>${routineHtml}</div></div></div>
+<div class="card"><h2>📊 Resumen de actividad</h2><div id="studentStats" class="statgrid"></div></div>
+<div class="studentReportGrid">
+<div class="card"><h2>📅 Próxima cita</h2>${nextHtml}</div>
+<div class="card"><h2>💶 Situación económica</h2><div class="studentReportGrid"><div class="studentReportCard"><span class="studentReportMuted">Cobrado</span><div class="studentReportMoney">${paid.toFixed(2)} €</div></div><div class="studentReportCard"><span class="studentReportMuted">Pendiente</span><div class="studentReportMoney">${pending.toFixed(2)} €</div></div></div></div>
+</div>
+<div class="card"><h2>📋 Últimos entrenamientos</h2>${lastHtml}</div>
+<div class="card"><h2>📈 Informe por periodo</h2><div style="display:flex;gap:5px;flex-wrap:wrap"><button class="btn out sm" onclick="studentReport(15)">15 días</button><button class="btn out sm" onclick="studentReport(30)">Mensual</button></div><div id="studentReportsBox" class="empty">Selecciona un periodo.</div></div>`;
 studentStats();
-}
+}`
 function studentStats(){
 let s=getMonitorStudent();
 if(!s)return;
