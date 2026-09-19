@@ -1042,19 +1042,49 @@ td input{font-size:.7rem;padding:5px 1px}.muscleStats{grid-template-columns:1fr 
 .remoteSearchBox label{display:block;color:var(--a);font-weight:800;font-size:.75rem;margin-bottom:5px}
 .remoteSearchBox select{margin-bottom:0}
 
-/* ===== v10.7 · TIEMPO / TABATA / DURACIÓN DE RUTINA ===== */
-.prescriptionBox{margin-top:8px;padding:9px;border:1px solid rgba(255,255,255,.09);border-radius:12px;background:rgba(255,255,255,.025)}
-.prescriptionTitle{font-size:.72rem;font-weight:900;margin-bottom:6px;color:var(--a)}
-.prescriptionBox select,.prescriptionBox input{width:100%;box-sizing:border-box}
-.presTable{width:100%;margin-top:7px}.presTable th,.presTable td{padding:4px;text-align:center}.presTable input{min-width:0}
-.timeTarget,.tabataTarget{padding:9px;border-radius:10px;background:rgba(255,193,7,.08);margin-top:7px;text-align:center;font-weight:800}
-.timeActualBox{margin-top:7px;padding:8px;border-radius:10px;background:rgba(255,255,255,.025)}
+/* ===== v10.7 · PRESCRIPCIONES POR TIEMPO / TABATA ===== */
+.prescriptionBox{background:#111;border:1px solid #333;border-radius:8px;padding:8px;margin:6px 0 8px}
+.prescriptionTitle{color:var(--gold);font-size:.68rem;font-weight:800;margin-bottom:5px}
+.prescriptionBox select{margin-bottom:7px}
+.presTable{margin:0;border-spacing:3px}
+.presTable th{background:#191919;padding:4px}
+.presTable td{padding:1px}
+.presTable input{margin:0;padding:6px 3px;text-align:center}
+.tabataPresGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
+.tabataPresGrid label{font-size:.61rem}
+.tabataPresGrid input{margin-top:3px;text-align:center}
+.studentExerciseRow{margin:4px 0}
+.timeActualBox{background:#191919;border:1px solid var(--bor);border-radius:8px;padding:8px;margin:8px 0}
 .timeInputs{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:5px}
-.tabataBtn{margin-top:7px;width:100%;border:0;border-radius:10px;padding:10px;font-weight:900;cursor:pointer;background:linear-gradient(135deg,#ff8a00,#ff3d00);color:#fff}
-.monitorTimerOverlay{position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.82);display:none;align-items:center;justify-content:center;padding:18px}
-.monitorTimerCard{width:min(520px,96vw);border-radius:20px;padding:22px;text-align:center;background:var(--card,#171717);box-shadow:0 15px 60px rgba(0,0,0,.5)}
-.monitorTimerTitle{font-size:1rem;font-weight:900}.monitorTimerPhase{font-size:1.05rem;font-weight:900;margin-top:10px}.monitorTimerValue{font-size:5rem;line-height:1;font-weight:1000;margin:18px 0}.monitorTimerBtns{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}.monitorTimerBtns button{min-width:110px}
-.routineDurationBox{padding:10px;border-radius:12px;background:rgba(0,180,255,.06);margin-top:7px}
+.timeInputs input{margin:0;text-align:center}
+.timedBtn{width:100%;margin-top:7px;background:#263238;color:#80cbc4;border:1px solid #456a70;padding:8px;border-radius:7px;font-size:.72rem;font-weight:800}
+.timedOverlay{display:none;position:fixed;inset:0;z-index:160;background:rgba(0,0,0,.86);align-items:center;justify-content:center;padding:18px}
+.timedBox{width:100%;max-width:360px;background:var(--card);border:1px solid #456a70;border-radius:15px;padding:20px;text-align:center;box-shadow:0 12px 45px #000}
+.timedTitle{color:#80cbc4;font-size:1rem;font-weight:800;margin-bottom:5px}
+.timedSub{color:var(--sub);font-size:.7rem;margin-bottom:10px}
+.timedDisplay{font-size:4.3rem;font-weight:900;letter-spacing:2px;margin:8px 0;color:#80cbc4}
+.timedStatus{font-size:.8rem;font-weight:800;color:var(--a);min-height:20px}
+.timedActions{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:9px}
+.timedStart{background:#80cbc4;color:#000;border:0;border-radius:7px;padding:9px;font-weight:800}
+.timedReset{background:#333;color:#fff;border:1px solid var(--bor);border-radius:7px;padding:9px}
+.timedClose{width:100%;margin-top:6px;background:#222;color:#fff;border:1px solid var(--bor);border-radius:7px;padding:8px}
+.timedDone{color:var(--a)!important;border-color:var(--a)!important}
+.tabataBtn{width:100%;margin-top:7px;background:#4a1730;color:#ff80ab;border:1px solid #9b315f;padding:8px;border-radius:7px;font-size:.72rem;font-weight:bold}
+.tabataBtn:hover{background:#5a1d3a}
+.tabataOverlay{display:none;position:fixed;inset:0;z-index:150;background:rgba(0,0,0,.84);align-items:center;justify-content:center;padding:18px}
+.tabataBox{width:100%;max-width:360px;background:var(--card);border:1px solid #9b315f;border-radius:15px;padding:18px;text-align:center;box-shadow:0 12px 45px #000}
+.tabataTitle{color:#ff80ab;font-size:1rem;font-weight:800;margin-bottom:4px}
+.tabataExercise{color:var(--sub);font-size:.7rem;margin-bottom:12px}
+.tabataSettings{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;text-align:left}
+.tabataSettings label{font-size:.62rem}.tabataSettings input{margin-top:3px;text-align:center}
+.tabataPhase{font-size:.82rem;font-weight:800;color:#ff80ab;margin-top:12px}
+.tabataRound{color:var(--sub);font-size:.68rem;margin-top:3px}
+.tabataDisplay{font-size:4.2rem;font-weight:900;letter-spacing:2px;margin:5px 0}
+.tabataDisplay.work{color:#ff80ab}.tabataDisplay.rest{color:var(--a)}
+.tabataActions{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}
+.tabataStart{background:#ff80ab;color:#000;border:0;border-radius:7px;padding:9px;font-weight:800}
+.tabataClose{background:#333;color:#fff;border:1px solid var(--bor);border-radius:7px;padding:9px}
+@media(max-width:380px){.tabataDisplay{font-size:3.5rem}.timedDisplay{font-size:3.7rem}.tabataPresGrid{grid-template-columns:1fr 1fr 1fr}}
 
 </style>
 
@@ -1308,6 +1338,40 @@ Cerrar
 
 </div>
 
+</div>
+
+
+<div id="timedOverlay" class="timedOverlay">
+  <div class="timedBox">
+    <div id="timedTitle" class="timedTitle">⏱️ EJERCICIO POR TIEMPO</div>
+    <div id="timedSub" class="timedSub">Ejercicio</div>
+    <div id="timedDisplay" class="timedDisplay">00:30</div>
+    <div id="timedStatus" class="timedStatus">LISTO</div>
+    <div class="timedActions">
+      <button id="timedStartBtn" class="timedStart" onclick="startTimedExercise()">▶ INICIAR</button>
+      <button class="timedReset" onclick="resetTimedExercise()">↺ REINICIAR</button>
+    </div>
+    <button class="timedClose" onclick="closeTimedExercise()">Cerrar</button>
+  </div>
+</div>
+
+<div id="tabataOverlay" class="tabataOverlay">
+  <div class="tabataBox">
+    <div class="tabataTitle">🔥 TABATA</div>
+    <div id="tabataExercise" class="tabataExercise">Ejercicio</div>
+    <div class="tabataSettings">
+      <div><label>TRABAJO (seg)</label><input id="tabataWork" type="number" min="1" max="600" value="20"></div>
+      <div><label>DESCANSO (seg)</label><input id="tabataRest" type="number" min="0" max="600" value="10"></div>
+      <div><label>RONDAS</label><input id="tabataRounds" type="number" min="1" max="99" value="8"></div>
+    </div>
+    <div id="tabataPhase" class="tabataPhase">LISTO</div>
+    <div id="tabataRound" class="tabataRound">0 / 8</div>
+    <div id="tabataDisplay" class="tabataDisplay work">00:20</div>
+    <div class="tabataActions">
+      <button class="tabataStart" onclick="startTabata()">▶ INICIAR</button>
+      <button class="tabataClose" onclick="closeTabata()">Cerrar</button>
+    </div>
+  </div>
 </div>
 
 <div id="closeScreen" class="closeScreen">
@@ -3640,7 +3704,7 @@ function saveConfig(){
 }
 
 function exportData(){
-let data={app:'Mi Gimnasio Pro Monitor',version:'10.7',exported:new Date().toISOString(),routine,logs,personalExerciseBase,students,appointments,accounting};
+let data={app:'Mi Gimnasio Pro Monitor',version:'10.6',exported:new Date().toISOString(),routine,logs,personalExerciseBase,students,appointments,accounting};
 let b=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),u=URL.createObjectURL(b),a=document.createElement('a');
 a.href=u;a.download='gym_v10.5_monitor_backup_'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);
 let e=document.getElementById('backupStatus');if(e)e.innerHTML='<span class="backupOk">✓ Copia completa creada correctamente.<br>Incluye rutina, entrenamientos, alumnos, citas y contabilidad.</span>';
@@ -4620,6 +4684,8 @@ document.getElementById(
 ).style.display='flex';
 
 updateTimerDisplay();
+unlockAudio();
+beep(750,.12);
 
 timerInterval=
 setInterval(()=>{
@@ -4711,37 +4777,61 @@ o.style.display='none';
 
 }
 
-function beep(){
-
-try{
-
-let c=
-new(
-window.AudioContext||
-window.webkitAudioContext
-)();
-
-let o=c.createOscillator();
-
-let g=c.createGain();
-
-o.connect(g);
-
-g.connect(c.destination);
-
-o.frequency.value=900;
-
-g.gain.value=.7;
-
-o.start();
-
-o.stop(
-c.currentTime+.18
-);
-
-}catch(e){}
-
+let monitorAudioCtx=null;
+function unlockAudio(){
+  try{
+    const AC=window.AudioContext||window.webkitAudioContext;
+    if(!AC)return;
+    if(!monitorAudioCtx)monitorAudioCtx=new AC();
+    if(monitorAudioCtx.state==='suspended')monitorAudioCtx.resume();
+  }catch(e){}
 }
+function beep(freq=900,duration=.18){
+  try{
+    unlockAudio();
+    if(!monitorAudioCtx)return;
+    const o=monitorAudioCtx.createOscillator(),g=monitorAudioCtx.createGain();
+    o.connect(g);g.connect(monitorAudioCtx.destination);
+    o.frequency.value=Number(freq)||900;g.gain.value=.55;
+    o.start();o.stop(monitorAudioCtx.currentTime+(Number(duration)||.18));
+  }catch(e){}
+}
+
+
+/* ===== v10.7 · MOTOR DE TIEMPO / TABATA ===== */
+const TABATA_CONFIG_KEY=MK+'tabataConfigs';
+let tabataConfigs=safeParse(localStorage.getItem(TABATA_CONFIG_KEY),{});
+if(!tabataConfigs || typeof tabataConfigs!=='object' || Array.isArray(tabataConfigs))tabataConfigs={};
+let tabataInterval=null,tabataSeconds=0,tabataRoundNo=0,tabataPhase='work',tabataExerciseKey='',tabataCurrent={work:20,rest:10,rounds:8},tabataDoneTargetId='';
+let timedInterval=null,timedSeconds=0,timedInitial=0,timedDoneTargetId='',timedTitleText='',timedSubText='';
+function saveTabataConfigs(){try{localStorage.setItem(TABATA_CONFIG_KEY,JSON.stringify(tabataConfigs))}catch(e){}}
+function tabataKey(group,name){return String(group||'').trim().toUpperCase()+'::'+String(name||'').trim().toLowerCase()}
+function formatTimerSeconds(sec){sec=Math.max(0,Math.floor(Number(sec)||0));return String(Math.floor(sec/60)).padStart(2,'0')+':'+String(sec%60).padStart(2,'0')}
+function openTimedExercise(name,seconds,targetId,title){
+  closeTimedExercise();
+  timedSeconds=Math.max(1,Math.floor(Number(seconds)||0));timedInitial=timedSeconds;timedDoneTargetId=targetId||'';timedTitleText=title||'⏱️ EJERCICIO POR TIEMPO';timedSubText=String(name||'Ejercicio');
+  const ov=document.getElementById('timedOverlay');if(!ov)return;
+  document.getElementById('timedTitle').innerText=timedTitleText;document.getElementById('timedSub').innerText=timedSubText;document.getElementById('timedDisplay').innerText=formatTimerSeconds(timedSeconds);document.getElementById('timedStatus').innerText='LISTO';
+  const b=document.getElementById('timedStartBtn');if(b){b.innerText='▶ INICIAR';b.classList.remove('timedDone')}
+  ov.style.display='flex';unlockAudio();
+}
+function startTimedExercise(){
+  if(timedInterval)return;
+  unlockAudio();beep(1100,.12);document.getElementById('timedStatus').innerText='EN MARCHA';
+  timedInterval=setInterval(()=>{timedSeconds--;document.getElementById('timedDisplay').innerText=formatTimerSeconds(timedSeconds);if(timedSeconds<=3&&timedSeconds>0)beep(800,.08);if(timedSeconds<=0){clearInterval(timedInterval);timedInterval=null;document.getElementById('timedStatus').innerText='🎉 COMPLETADO';const b=document.getElementById('timedStartBtn');if(b){b.innerText='✓ COMPLETADO';b.classList.add('timedDone')}if(timedDoneTargetId){const el=document.getElementById(timedDoneTargetId);if(el)el.value='1'}beep(1200,.18);setTimeout(()=>beep(1200,.18),220);setTimeout(()=>beep(1200,.28),440)}} ,1000);
+}
+function resetTimedExercise(){if(timedInterval){clearInterval(timedInterval);timedInterval=null}timedSeconds=timedInitial;const d=document.getElementById('timedDisplay');if(d)d.innerText=formatTimerSeconds(timedSeconds);const st=document.getElementById('timedStatus');if(st)st.innerText='LISTO';const b=document.getElementById('timedStartBtn');if(b){b.innerText='▶ INICIAR';b.classList.remove('timedDone')}}
+function closeTimedExercise(){if(timedInterval){clearInterval(timedInterval);timedInterval=null}const ov=document.getElementById('timedOverlay');if(ov)ov.style.display='none';timedDoneTargetId=''}
+function openTabata(name,group,work,rest,rounds,targetId){
+  closeTabata();const key=tabataKey(group,name);const cfg={work:Number(work)||20,rest:Number(rest)||10,rounds:Number(rounds)||8};tabataExerciseKey=key;tabataCurrent={work:Math.max(1,cfg.work),rest:Math.max(0,cfg.rest),rounds:Math.max(1,cfg.rounds)};tabataDoneTargetId=targetId||'';
+  const ov=document.getElementById('tabataOverlay');if(!ov)return;
+  document.getElementById('tabataExercise').innerText=String(name||'Ejercicio');document.getElementById('tabataWork').value=tabataCurrent.work;document.getElementById('tabataRest').value=tabataCurrent.rest;document.getElementById('tabataRounds').value=tabataCurrent.rounds;document.getElementById('tabataPhase').innerText='LISTO';document.getElementById('tabataRound').innerText='0 / '+tabataCurrent.rounds;document.getElementById('tabataDisplay').innerText=formatTimerSeconds(tabataCurrent.work);document.getElementById('tabataDisplay').className='tabataDisplay work';ov.style.display='flex';unlockAudio();
+}
+function readTabataSettings(){const work=Math.max(1,Math.min(600,Number(document.getElementById('tabataWork')?.value)||20)),rest=Math.max(0,Math.min(600,Number(document.getElementById('tabataRest')?.value)||10)),rounds=Math.max(1,Math.min(99,Number(document.getElementById('tabataRounds')?.value)||8));tabataCurrent={work,rest,rounds};tabataConfigs[tabataExerciseKey]={work,rest,rounds};saveTabataConfigs();return tabataCurrent}
+function renderTabata(){const d=document.getElementById('tabataDisplay'),p=document.getElementById('tabataPhase'),r=document.getElementById('tabataRound');if(!d)return;d.innerText=formatTimerSeconds(tabataSeconds);d.className='tabataDisplay '+(tabataPhase==='work'?'work':'rest');if(p)p.innerText=tabataPhase==='work'?'💪 TRABAJO':tabataPhase==='rest'?'🟢 DESCANSO':'🎉 TABATA COMPLETADO';if(r)r.innerText=tabataRoundNo+' / '+tabataCurrent.rounds}
+function startTabata(){if(tabataInterval){clearInterval(tabataInterval);tabataInterval=null}readTabataSettings();unlockAudio();tabataRoundNo=1;tabataPhase='work';tabataSeconds=tabataCurrent.work;renderTabata();beep(1100,.12);tabataInterval=setInterval(()=>{tabataSeconds--;if(tabataSeconds<=0){if(tabataPhase==='work'){if(tabataCurrent.rest>0){tabataPhase='rest';tabataSeconds=tabataCurrent.rest;beep(650,.12)}else if(tabataRoundNo<tabataCurrent.rounds){tabataRoundNo++;tabataPhase='work';tabataSeconds=tabataCurrent.work;beep(1100,.12)}else{return tabataFinished()}}else{if(tabataRoundNo<tabataCurrent.rounds){tabataRoundNo++;tabataPhase='work';tabataSeconds=tabataCurrent.work;beep(1100,.12)}else{return tabataFinished()}}}if(tabataSeconds<=3&&tabataSeconds>0)beep(800,.08);renderTabata()},1000)}
+function tabataFinished(){clearInterval(tabataInterval);tabataInterval=null;tabataPhase='done';tabataSeconds=0;renderTabata();if(tabataDoneTargetId){const el=document.getElementById(tabataDoneTargetId);if(el)el.value='1'}beep(1200,.18);setTimeout(()=>beep(1200,.18),220);setTimeout(()=>beep(1200,.28),440)}
+function closeTabata(){if(tabataInterval){clearInterval(tabataInterval);tabataInterval=null}const ov=document.getElementById('tabataOverlay');if(ov)ov.style.display='none';tabataDoneTargetId=''}
 
 restoreAutoBackupIfNeeded();
 
@@ -4774,7 +4864,7 @@ try{
 let old=localStorage.getItem(MONITOR_AUTO_BACKUP);
 if(old)localStorage.setItem(MONITOR_PREV_BACKUP,old);
 saveMonitor();
-let d={app:'Mi Gimnasio Pro - Monitor',version:'10.5',backupType:'automatic',created:new Date().toISOString(),students:clone(students),appointments:clone(appointments),accounting:clone(accounting),personalExerciseBase:clone(personalExerciseBase)};
+let d={app:'Mi Gimnasio Pro - Monitor',version:'10.7',backupType:'automatic',created:new Date().toISOString(),students:clone(students),appointments:clone(appointments),accounting:clone(accounting),personalExerciseBase:clone(personalExerciseBase)};
 localStorage.setItem(MONITOR_AUTO_BACKUP,JSON.stringify(d));
 localStorage.setItem(MONITOR_BACKUP_DATE,d.created);
 updateMonitorBackupStatus();
@@ -4828,26 +4918,21 @@ normalizeStudentPrivateRoutine(s);monitorStudentId=id;
 document.getElementById('monitorHome').style.display='none';
 let e=document.getElementById('monitorEditor');e.style.display='block';
 let h=`<div class="monitorBack"><button class="btn out" onclick="backToMonitor()">← VOLVER A MONITOR</button></div>
-<div class="card"><h2>👤 ${esc(s.name)}</h2>
-<div style="font-size:.78rem;margin-bottom:8px">${s.phone?`📞 <span class="phone">${esc(s.phone)}</span>`:'📞 Sin teléfono'}<br>📍 <span class="place">${esc(s.place||'Gimnasio')}</span></div>
-<div class="monitorMenu"><button class="btn" onclick="studentTraining()">🏋️ ENTRENAR</button><button class="btn blue" onclick="studentReports()">📊 INFORMES</button><button class="btn out" onclick="studentRoutine()">⚙️ RUTINA</button></div></div>
+<div class="card"><h2>👤 ${esc(s.name)}</h2><div style="font-size:.78rem;margin-bottom:8px">${s.phone?`📞 <span class="phone">${esc(s.phone)}</span>`:'📞 Sin teléfono'}<br>📍 <span class="place">${esc(s.place||'Gimnasio')}</span></div><div class="monitorMenu"><button class="btn" onclick="studentTraining()">🏋️ ENTRENAR</button><button class="btn blue" onclick="studentReports()">📊 INFORMES</button><button class="btn out" onclick="studentRoutine()">⚙️ RUTINA</button></div></div>
 <div class="card"><label>Nombre del alumno</label><input id="studentName" value="${esc(s.name)}"><label>Teléfono</label><input id="studentPhone" type="tel" value="${esc(s.phone||'')}"><label>Lugar del entrenamiento</label><select id="studentPlace"><option value="Gimnasio" ${(s.place||'Gimnasio')==='Gimnasio'?'selected':''}>Gimnasio</option><option value="Domicilio" ${(s.place||'')==='Domicilio'?'selected':''}>Domicilio</option></select></div>`;
 for(let d=1;d<=5;d++){
 h+=`<div class="card"><h2>📅 Día ${d}</h2>`;
 (MONITOR_DAY_GROUPS[d]||[]).forEach(groupName=>{
 const list=getLibraryBaseForGroup(groupName),selected=(s.routine[d]||[]).filter(x=>x.group===groupName),names=new Set(selected.map(x=>x.name));
 h+=`<div class="groupEditor"><div class="groupEditorTitle"><strong>${esc(groupName)}</strong><span style="font-size:.68rem;color:var(--sub)">${list.length} disponibles</span></div>`;
-list.forEach(item=>{
-const checked=names.has(item[0]);
-h+=`<label class="check"><input type="checkbox" class="studentExercise" data-d="${d}" data-group="${esc(groupName)}" data-name="${esc(item[0])}" data-image="${esc(item[1])}" data-equipment="${esc(item[2]||'')}" ${checked?'checked':''}><span>${esc(item[0])}</span><span style="margin-left:auto;color:var(--sub);font-size:.62rem">${esc(item[2]||'')}</span></label>`;
-});
+list.forEach((item,idx)=>{const checked=names.has(item[0]),current=selected.find(x=>x.name===item[0]),key=`d${d}g${groupName.replace(/[^a-zA-Z0-9]/g,'')}x${idx}`;h+=`<div class="studentExerciseRow"><label class="check"><input type="checkbox" class="studentExercise" data-key="${key}" data-d="${d}" data-group="${esc(groupName)}" data-name="${esc(item[0])}" data-image="${esc(item[1])}" data-equipment="${esc(item[2]||'')}" ${checked?'checked':''} onchange="toggleStudentPrescription('${key}',this)"><span>${esc(item[0])}</span><span style="margin-left:auto;color:var(--sub);font-size:.62rem">${esc(item[2]||'')}</span></label><div id="studentPres-${key}" style="display:${checked?'block':'none'}">${prescriptionHTML(current||{group:groupName,name:item[0],image:item[1],equipment:item[2]||''},key)}</div></div>`});
 h+=`</div>`;
-});
-h+=`</div>`;
+});h+=`</div>`;
 }
-h+=`<div class="card"><div class="backupBox">🔒 <b>Rutina privada.</b> Esta selección pertenece exclusivamente a <b>${esc(s.name)}</b> y no modifica las rutinas de otros alumnos.</div><button class="btn" onclick="saveStudent()">💾 GUARDAR RUTINA PRIVADA</button><br><br><button class="btn danger" onclick="deleteStudent()">🗑️ ELIMINAR ALUMNO</button></div>`;
+h+=`<div class="card"><div class="backupBox">🔒 <b>Rutina privada.</b> El monitor define aquí los ejercicios y el objetivo de cada uno. El alumno verá exactamente esta prescripción.</div><button class="btn" onclick="saveStudent()">💾 GUARDAR RUTINA PRIVADA</button><br><br><button class="btn danger" onclick="deleteStudent()">🗑️ ELIMINAR ALUMNO</button></div>`;
 e.innerHTML=h;
 }
+function toggleStudentPrescription(key,checkbox){const box=document.getElementById('studentPres-'+key);if(!box)return;if(checkbox.checked){box.style.display='block';togglePrescriptionMode(key)}else box.style.display='none'}
 function callStudent(phone){
 let p=String(phone||'').replace(/[^\d+]/g,'');
 if(p)window.location.href='tel:'+p;
@@ -4865,7 +4950,7 @@ const r={};
 checks.forEach(c=>{
 if(!c.checked)return;
 const d=Number(c.dataset.d);if(!r[d])r[d]=[];
-r[d].push(monitorCloneExercise(c.dataset.group,c.dataset.name,c.dataset.image,c.dataset.equipment));
+const base=monitorCloneExercise(c.dataset.group,c.dataset.name,c.dataset.image,c.dataset.equipment);base.prescription=readPrescription(c.dataset.key);r[d].push(base);
 });
 Object.keys(r).forEach(d=>r[d]=r[d].filter((x,i,a)=>a.findIndex(y=>y.group===x.group&&y.name===x.name)===i));
 s.routine=r;
@@ -4903,9 +4988,34 @@ const MONITOR_DAY_GROUPS={
 4:['PECHO','HOMBROS','TRÍCEPS','ABDOMINALES'],
 5:['ESPALDA','BÍCEPS','ABDOMINALES']
 };
-function monitorCloneExercise(group,name,image,equipment){
-return {group:String(group||''),name:String(name||''),image:String(image||''),equipment:String(equipment||'')};
+function monitorPrescriptionFromItem(item){
+  const p=item&&item.prescription&&typeof item.prescription==='object'?item.prescription:{};
+  let sets=Array.isArray(p.sets)?p.sets.slice(0,3):[];while(sets.length<3)sets.push({reps:'',weight:''});
+  let times=Array.isArray(p.times)?p.times.slice(0,3):[];while(times.length<3)times.push('');
+  const allowed=['REPS_KG','TIEMPO','TABATA','RUTINA_TIEMPO'];
+  const mode=allowed.includes(String(p.mode||'REPS_KG'))?String(p.mode||'REPS_KG'):'REPS_KG';
+  const t=p.tabata&&typeof p.tabata==='object'?p.tabata:{};
+  return {mode,sets,times,tabata:{work:Number(t.work)||20,rest:Number(t.rest)||10,rounds:Number(t.rounds)||8},totalDuration:Number(p.totalDuration)||3600};
 }
+function monitorCloneExercise(group,name,image,equipment,prescription){
+  const x={group:String(group||''),name:String(name||''),image:String(image||''),equipment:String(equipment||'')};
+  x.prescription=monitorPrescriptionFromItem({prescription});
+  return x;
+}
+function prescriptionHTML(item,key){
+  const p=monitorPrescriptionFromItem(item);
+  let h=`<div class="prescriptionBox" data-key="${key}"><div class="prescriptionTitle">🎯 OBJETIVO DEL MONITOR</div><select id="presMode-${key}" onchange="togglePrescriptionMode('${key}')"><option value="REPS_KG" ${p.mode==='REPS_KG'?'selected':''}>🏋️ Series / Repeticiones / Kg</option><option value="TIEMPO" ${p.mode==='TIEMPO'?'selected':''}>⏱️ Tiempo</option><option value="TABATA" ${p.mode==='TABATA'?'selected':''}>🔥 Tabata</option><option value="RUTINA_TIEMPO" ${p.mode==='RUTINA_TIEMPO'?'selected':''}>🕐 Rutina por tiempo</option></select>`;
+  h+=`<div id="presReps-${key}" style="display:${p.mode==='REPS_KG'?'block':'none'}"><table class="presTable"><thead><tr><th>SERIE</th><th>REPS</th><th>KG</th></tr></thead><tbody>`;
+  for(let j=0;j<3;j++)h+=`<tr><td>${j+1}</td><td><input type="number" min="0" id="pres-r-${key}-${j}" value="${esc(p.sets[j].reps??'')}" placeholder="—"></td><td><input type="number" min="0" step=".5" id="pres-w-${key}-${j}" value="${esc(p.sets[j].weight??'')}" placeholder="—"></td></tr>`;
+  h+=`</tbody></table></div><div id="presTime-${key}" style="display:${p.mode==='TIEMPO'?'block':'none'}"><table class="presTable"><thead><tr><th>SERIE</th><th>SEGUNDOS</th></tr></thead><tbody>`;
+  for(let j=0;j<3;j++)h+=`<tr><td>${j+1}</td><td><input type="number" min="1" id="pres-t-${key}-${j}" value="${esc(p.times[j]??'')}" placeholder="Ej. 30"></td></tr>`;
+  h+=`</tbody></table></div><div id="presTabata-${key}" style="display:${p.mode==='TABATA'?'block':'none'}"><div class="tabataPresGrid"><label>TRABAJO (s)<input type="number" min="1" id="pres-tw-${key}" value="${p.tabata.work}"></label><label>DESCANSO (s)<input type="number" min="0" id="pres-tr-${key}" value="${p.tabata.rest}"></label><label>RONDAS<input type="number" min="1" id="pres-to-${key}" value="${p.tabata.rounds}"></label></div></div>`;
+  h+=`<div id="presRoutineTime-${key}" style="display:${p.mode==='RUTINA_TIEMPO'?'block':'none'}"><label>⏱️ DURACIÓN TOTAL (minutos)<input type="number" min="1" max="1440" id="pres-duration-${key}" value="${Math.max(1,Math.round(p.totalDuration/60))}"></label><div style="font-size:.6rem;color:var(--sub)">Ejemplo: 60 minutos = una rutina completa de una hora.</div></div></div>`;
+  return h;
+}
+function togglePrescriptionMode(key){const m=document.getElementById('presMode-'+key)?.value||'REPS_KG';const ids=[['presReps','REPS_KG'],['presTime','TIEMPO'],['presTabata','TABATA'],['presRoutineTime','RUTINA_TIEMPO']];ids.forEach(([id,mode])=>{const el=document.getElementById(id+'-'+key);if(el)el.style.display=m===mode?'block':'none'})}
+function readPrescription(key){const mode=document.getElementById('presMode-'+key)?.value||'REPS_KG',sets=[],times=[];for(let j=0;j<3;j++){sets.push({reps:document.getElementById(`pres-r-${key}-${j}`)?.value||'',weight:document.getElementById(`pres-w-${key}-${j}`)?.value||''});times.push(document.getElementById(`pres-t-${key}-${j}`)?.value||'')}return {mode,sets,times,tabata:{work:Number(document.getElementById('pres-tw-'+key)?.value)||20,rest:Number(document.getElementById('pres-tr-'+key)?.value)||10,rounds:Number(document.getElementById('pres-to-'+key)?.value)||8},totalDuration:Math.max(60,(Number(document.getElementById('pres-duration-'+key)?.value)||60)*60)}}
+
 function monitorFindMasterExercise(group,name){
 const groupKey=String(group||'').toUpperCase();
 const n=String(name||'').trim().toLowerCase();
@@ -4923,7 +5033,7 @@ const arr=Array.isArray(old[k])?old[k]:[];result[d]=[];
 arr.forEach(item=>{
 if(item&&typeof item==='object'&&item.name){
 const master=monitorFindMasterExercise(item.group,item.name);
-result[d].push(monitorCloneExercise(item.group,item.name,item.image||item.img||(master?master[1]:''),item.equipment||(master?master[2]:'')));
+result[d].push(monitorCloneExercise(item.group,item.name,item.image||item.img||(master?master[1]:''),item.equipment||(master?master[2]:''),item.prescription));
 }else if(item&&Number.isFinite(Number(item.g))&&Number.isFinite(Number(item.i))&&routine[d]){
 const g=routine[d].groups&&routine[d].groups[Number(item.g)];
 if(!g)return;
@@ -4959,19 +5069,27 @@ document.getElementById('studentWork').innerHTML=h;renderStudentWorkout(d,select
 function renderStudentWorkout(d,selected,previous){
 let s=getMonitorStudent(),html='';
 selected.forEach((item,index)=>{
-let ex=item.name||'',groupName=item.group||'';if(!ex)return;
-let master=monitorFindMasterExercise(groupName,ex),img=item.image||(master?master[1]:''),equipment=item.equipment||(master?master[2]:'');
-let old=previous?getStudentPreviousExercise(previous,ex):null,ps=old?(old.sets||[]).slice(0,3):[];
-while(ps.length<3)ps.push({reps:'',weight:''});
+let ex=item.name||'',groupName=item.group||'';if(!ex)return;let master=monitorFindMasterExercise(groupName,ex),img=item.image||(master?master[1]:''),equipment=item.equipment||(master?master[2]:''),p=monitorPrescriptionFromItem(item),old=previous?getStudentPreviousExercise(previous,ex):null,ps=old?(old.sets||[]).slice(0,3):[];while(ps.length<3)ps.push({reps:'',weight:''});
 let prefix='sg'+index+'e'+index;
 html+=`<div class="group">${esc(groupName)}</div><div class="ex"><div class="exhead"><span>${esc(ex)}</span>${equipment?`<span class="badge">${esc(equipment)}</span>`:''}</div>`;
 if(img)html+=`<div class="imgbox" style="display:block"><img src="${esc(img)}" alt="${esc(ex)}" onerror="this.style.display='none'"></div>`;
-html+=`<table><thead><tr><th colspan="2" style="color:var(--a)">HOY</th><th colspan="2" style="color:var(--gold)">ÚLTIMO</th></tr><tr><th>REPS</th><th>KG</th><th>REPS</th><th>KG</th></tr></thead><tbody>`;
-for(let j=0;j<3;j++)html+=`<tr><td><input type="number" min="0" id="${prefix}-r${j}" placeholder="—" onfocus="selectCell(this)" oninput="studentCalc('${prefix}')"></td><td><input type="number" min="0" step=".5" id="${prefix}-w${j}" placeholder="—" onfocus="selectCell(this)" oninput="studentCalc('${prefix}')"></td><td><input type="number" value="${ps[j].reps??''}" readonly tabindex="-1"></td><td><input type="number" value="${ps[j].weight??''}" readonly tabindex="-1"></td></tr>`;
-html+=`</tbody></table><div class="rm" id="rm-${prefix}">🔥 1RM estimado: --</div><div class="vol" id="vol-${prefix}">📦 Volumen: 0 kg</div><button class="restbtn" onclick="startTimer()">⏱️ Descanso 2:00</button></div>`;
-});
-document.getElementById('studentForm').innerHTML=html;
+if(p.mode==='REPS_KG'){
+ html+=`<div class="targetBox"><b>🎯 OBJETIVO DEL MONITOR</b><table class="workTable"><thead><tr><th>SERIE</th><th>REPS</th><th>KG</th></tr></thead><tbody>`;for(let j=0;j<3;j++)html+=`<tr><td>${j+1}</td><td>${p.sets[j].reps||'—'}</td><td>${p.sets[j].weight||'—'}</td></tr>`;html+=`</tbody></table></div>`;
+ html+=`<table><thead><tr><th colspan="2" style="color:var(--a)">REALIZADO HOY</th><th colspan="2" style="color:var(--gold)">ÚLTIMO</th></tr><tr><th>REPS</th><th>KG</th><th>REPS</th><th>KG</th></tr></thead><tbody>`;for(let j=0;j<3;j++)html+=`<tr><td><input type="number" min="0" id="${prefix}-r${j}" placeholder="—" onfocus="selectCell(this)" oninput="studentCalc('${prefix}')"></td><td><input type="number" min="0" step=".5" id="${prefix}-w${j}" placeholder="—" onfocus="selectCell(this)" oninput="studentCalc('${prefix}')"></td><td><input type="number" value="${ps[j].reps??''}" readonly tabindex="-1"></td><td><input type="number" value="${ps[j].weight??''}" readonly tabindex="-1"></td></tr>`;html+=`</tbody></table>`;
+}else if(p.mode==='TIEMPO'){
+ html+=`<div class="targetBox"><b>🎯 TIEMPO INDICADO POR EL MONITOR</b><div style="font-size:1.05rem;font-weight:800;text-align:center;margin-top:6px">${p.times.filter(Boolean).join(' · ')||'Sin tiempo indicado'} s</div></div><div class="timeActualBox"><label>⏱️ TIEMPO REALIZADO (segundos)</label><div class="timeInputs">`;
+ for(let j=0;j<3;j++)html+=`<input type="number" min="0" id="${prefix}-t${j}" placeholder="Serie ${j+1}" value="${old&&old.times&&old.times[j]?old.times[j]:''}">`;html+=`</div></div>`;
+ p.times.forEach((t,j)=>{if(Number(t)>0)html+=`<button class="timedBtn" onclick="openTimedExercise('${esc(ex)}',${Number(t)},'${prefix}-done-${j}','⏱️ TIEMPO · SERIE ${j+1}')">▶ INICIAR ${t} SEGUNDOS · SERIE ${j+1}</button>`});
+ for(let j=0;j<3;j++)html+=`<input type="hidden" id="${prefix}-done-${j}" value="${old&&old.timeCompleted&&old.timeCompleted[j]?'1':'0'}">`;
+}else if(p.mode==='TABATA'){
+ html+=`<div class="targetBox"><b>🎯 TABATA INDICADO POR EL MONITOR</b><div style="font-size:1rem;font-weight:800;text-align:center;margin-top:6px">${p.tabata.work}s trabajo · ${p.tabata.rest}s descanso · ${p.tabata.rounds} rondas</div></div><input type="hidden" id="${prefix}-tabataDone" value="${old&&old.tabataCompleted?'1':'0'}"><button class="tabataBtn" onclick="openStudentTabata('${esc(ex)}','${esc(groupName)}',${p.tabata.work},${p.tabata.rest},${p.tabata.rounds},'${prefix}-tabataDone')">🔥 INICIAR TABATA INDICADO</button>`;
+}else{
+ const mins=Math.max(1,Math.round(p.totalDuration/60));html+=`<div class="targetBox"><b>🎯 RUTINA POR TIEMPO</b><div style="font-size:1.35rem;font-weight:900;text-align:center;margin-top:6px">${mins} MINUTOS</div></div><input type="hidden" id="${prefix}-routineDone" value="${old&&old.timeCompleted?'1':'0'}"><button class="timedBtn" onclick="openTimedExercise('${esc(ex)}',${p.totalDuration},'${prefix}-routineDone','🕐 RUTINA · ${mins} MINUTOS')">▶ INICIAR RUTINA DE ${mins} MINUTOS</button>`;
 }
+html+=`<div class="rm" id="rm-${prefix}">🔥 1RM estimado: --</div><div class="vol" id="vol-${prefix}">📦 Volumen: 0 kg</div>${p.mode==='REPS_KG'?`<button class="restbtn" onclick="startTimer()">⏱️ Descanso 2:00</button>`:''}</div>`;
+});document.getElementById('studentForm').innerHTML=html;
+}
+function openStudentTabata(name,group,work,rest,rounds,targetId){openTabata(name,group,work,rest,rounds,targetId)}
 function getStudentPreviousExercise(log,name){
 if(!log)return null;
 for(let g of(log.groups||[]))for(let e of(g.exercises||[]))if(e.name===name)return e;
@@ -4990,25 +5108,15 @@ if(a)a.innerText='🔥 1RM estimado: '+(best?Math.round(best*10)/10+' kg':'--');
 if(b)b.innerText='📦 Volumen: '+Math.round(vol*10)/10+' kg';
 }
 function saveStudentWorkout(d){
-let s=getMonitorStudent();if(!s)return;normalizeStudentPrivateRoutine(s);
-let cd=(document.getElementById('studentDate')||{}).value||'';if(!cd){alert('Selecciona una fecha.');return}
-if(!Array.isArray(s.logs))s.logs=[];
-let log=s.logs.find(l=>Number(l.day)===d&&dateKey(l.date)===cd);
-if(!log){log={id:Date.now(),date:new Date(cd+'T12:00:00').toISOString(),day:d,groups:[]};s.logs.push(log)}
+let s=getMonitorStudent();if(!s)return;normalizeStudentPrivateRoutine(s);let cd=(document.getElementById('studentDate')||{}).value||'';if(!cd){alert('Selecciona una fecha.');return}if(!Array.isArray(s.logs))s.logs=[];let log=s.logs.find(l=>Number(l.day)===d&&dateKey(l.date)===cd);if(!log){log={id:Date.now(),date:new Date(cd+'T12:00:00').toISOString(),day:d,groups:[]};s.logs.push(log)}
 let selected=Array.isArray(s.routine&&s.routine[d])?s.routine[d]:[],totalVolume=0,totalSets=0,totalExercises=0;
-selected.forEach((item,index)=>{
-let ex=item.name;if(!ex)return;
-let p='sg'+index+'e'+index,sets=[];
-for(let j=0;j<3;j++){let r=document.getElementById(p+'-r'+j),w=document.getElementById(p+'-w'+j);sets.push({reps:r&&r.value!==''?num(r.value):0,weight:w&&w.value!==''?num(w.value):0})}
-let real=sets.filter(x=>x.reps>0);if(!real.length)return;
-let data={name:ex,sets,volume:volume(real),rm:maxSetRM(real),group:item.group||'Sin grupo'};
-let g=log.groups.find(x=>x.name===data.group);if(!g){g={name:data.group,exercises:[]};log.groups.push(g)}
-let old=g.exercises.find(x=>x.name===ex);if(old)Object.assign(old,data);else g.exercises.push(data);
-totalVolume+=data.volume;totalSets+=real.length;totalExercises++;
-});
-log.groups=(log.groups||[]).filter(g=>{g.exercises=(g.exercises||[]).filter(e=>(e.sets||[]).some(x=>num(x.reps)>0));return g.exercises.length});
-saveMonitor();
-document.getElementById('studentSummary').innerHTML=`<div class="summary"><h3>🎉 ENTRENAMIENTO GUARDADO</h3><div class="big">${esc(s.name)}</div><div>💪 <b>${totalExercises}</b> ejercicios realizados</div><div>🔢 <b>${totalSets}</b> series realizadas</div><div>📦 <b>${Math.round(totalVolume)}</b> kg de volumen</div><br><button class="btn" onclick="studentSelectDay(${d})">Seguir entrenando</button><br><br><button class="btn out" onclick="backToMonitor()">Volver a Monitor</button></div>`;
+selected.forEach((item,index)=>{let ex=item.name;if(!ex)return;let pfx='sg'+index+'e'+index,prescription=monitorPrescriptionFromItem(item),sets=[],times=[],timeCompleted=[],completed=false;
+if(prescription.mode==='REPS_KG'){for(let j=0;j<3;j++){let r=document.getElementById(pfx+'-r'+j),w=document.getElementById(pfx+'-w'+j);sets.push({reps:r&&r.value!==''?num(r.value):0,weight:w&&w.value!==''?num(w.value):0})}completed=sets.some(x=>x.reps>0)}
+else if(prescription.mode==='TIEMPO'){for(let j=0;j<3;j++){let t=document.getElementById(pfx+'-t'+j),done=document.getElementById(pfx+'-done-'+j);times.push(t&&t.value!==''?num(t.value):0);timeCompleted.push(done&&done.value==='1')}completed=times.some(x=>x>0)||timeCompleted.some(Boolean)}
+else if(prescription.mode==='TABATA'){const done=document.getElementById(pfx+'-tabataDone');completed=done&&done.value==='1'}
+else {const done=document.getElementById(pfx+'-routineDone');completed=done&&done.value==='1'}
+if(!completed)return;let real=sets.filter(x=>x.reps>0);let data={name:ex,group:item.group||'Sin grupo',prescription:monitorPrescriptionFromItem(item),sets,times,timeCompleted,tabataCompleted:prescription.mode==='TABATA'&&completed,routineTimeCompleted:prescription.mode==='RUTINA_TIEMPO'&&completed,completed:true,volume:volume(real),rm:maxSetRM(real)};let g=log.groups.find(x=>x.name===data.group);if(!g){g={name:data.group,exercises:[]};log.groups.push(g)}let old=g.exercises.find(x=>x.name===ex);if(old)Object.assign(old,data);else g.exercises.push(data);totalVolume+=data.volume;totalSets+=real.length;totalExercises++});
+log.groups=(log.groups||[]).filter(g=>{g.exercises=(g.exercises||[]).filter(e=>e.completed||((e.sets||[]).some(x=>num(x.reps)>0)));return g.exercises.length});saveMonitor();document.getElementById('studentSummary').innerHTML=`<div class="summary"><h3>🎉 ENTRENAMIENTO GUARDADO</h3><div class="big">${esc(s.name)}</div><div>💪 <b>${totalExercises}</b> ejercicios realizados</div><div>🔢 <b>${totalSets}</b> series realizadas</div><div>📦 <b>${Math.round(totalVolume)}</b> kg de volumen</div><br><button class="btn" onclick="studentSelectDay(${d})">Seguir entrenando</button><br><br><button class="btn out" onclick="backToMonitor()">Volver a Monitor</button></div>`;
 }
 function studentRoutine(){
 let s=getMonitorStudent();if(!s)return;normalizeStudentPrivateRoutine(s);
@@ -5016,7 +5124,7 @@ let e=document.getElementById('monitorEditor'),h=`<div class="monitorBack"><butt
 for(let d=1;d<=5;d++){
 let assigned=s.routine&&s.routine[d]?s.routine[d]:[];if(!assigned.length)continue;any=true;
 h+=`<div class="card"><h2>📅 Día ${d}</h2>`;
-assigned.forEach(item=>h+=`<div class="ex"><div class="exhead"><span>${esc(item.name)}</span>${item.equipment?`<span class="badge">${esc(item.equipment)}</span>`:''}</div><div style="font-size:.72rem;color:var(--sub)">${esc(item.group)}</div></div>`);
+assigned.forEach(item=>{const p=monitorPrescriptionFromItem(item);let target=p.mode==='REPS_KG'?p.sets.map((x,i)=>`S${i+1}: ${x.reps||'—'} reps · ${x.weight||'—'} kg`).join(' | '):p.mode==='TIEMPO'?`⏱️ ${p.times.filter(Boolean).join(' · ')||'—'} s`:p.mode==='TABATA'?`🔥 ${p.tabata.work}s trabajo · ${p.tabata.rest}s descanso · ${p.tabata.rounds} rondas`:`🕐 ${Math.max(1,Math.round(p.totalDuration/60))} minutos`;h+=`<div class="ex"><div class="exhead"><span>${esc(item.name)}</span>${item.equipment?`<span class="badge">${esc(item.equipment)}</span>`:''}</div><div style="font-size:.72rem;color:var(--sub)">${esc(item.group)}</div><div class="targetBox"><b>🎯 ${target}</b></div></div>`});
 h+='</div>';
 }
 if(!any)h+=`<div class="card empty">Este alumno todavía no tiene rutina privada asignada.</div>`;
@@ -5038,7 +5146,7 @@ let vol=0,sets=0,exercises=0,sessions=0;
 let real=false;
 (l.groups||[]).forEach(g=>(g.exercises||[]).forEach(e=>{
 let q=(e.sets||[]).filter(x=>num(x.reps)>0);
-if(q.length){real=true;exercises++;sets+=q.length;vol+=volume(q)}
+if(q.length || e.completed){real=true;exercises++;sets+=q.length;vol+=volume(q)}
 }));
 if(real)sessions++;
 });
@@ -5057,7 +5165,7 @@ if(!groups[key])groups[key]={volume:0,sets:0,exercises:new Set(),sessions:new Se
 let z=groups[key],real=false;
 (g.exercises||[]).forEach(e=>{
 let q=(e.sets||[]).filter(x=>num(x.reps)>0);
-if(!q.length)return;
+if(!q.length && !e.completed)return;
 real=true;z.exercises.add(e.name);z.sets+=q.length;z.volume+=volume(q);
 });
 if(real)z.sessions.add(dateKey(l.date));
@@ -5436,61 +5544,6 @@ window.backToMonitor = backToMonitor;
     });
   }
 })();
-
-
-/* ===== v10.7 · PRESCRIPCIONES POR TIEMPO / TABATA / DURACIÓN TOTAL ===== */
-let monitorTimerInterval=null,monitorTimerRemaining=0,monitorTimerPhase='',monitorTimerRounds=0,monitorTimerWork=20,monitorTimerRest=10,monitorTimerTotalRounds=8,monitorTimerExercise='';
-function monitorDefaultPrescription(p){
- p=p&&typeof p==='object'?p:{};const mode=['REPS_KG','TIEMPO','TABATA'].includes(String(p.mode||''))?String(p.mode):'REPS_KG';
- const sets=Array.isArray(p.sets)?p.sets.slice(0,3):[];while(sets.length<3)sets.push({reps:'',weight:''});
- const times=Array.isArray(p.times)?p.times.slice(0,3):[];while(times.length<3)times.push('');
- const t=p.tabata&&typeof p.tabata==='object'?p.tabata:{};
- return {mode,sets:sets.map(x=>({reps:x?.reps??'',weight:x?.weight??''})),times,tabata:{work:Number(t.work)||20,rest:Number(t.rest)||10,rounds:Number(t.rounds)||8}};
-}
-function monitorCloneExercise(group,name,image,equipment,prescription){const x={group:String(group||''),name:String(name||''),image:String(image||''),equipment:String(equipment||'')};x.prescription=monitorDefaultPrescription(prescription);return x;}
-function normalizeStudentPrivateRoutine(student){
- if(!student)return;const old=student.routine||{},result={};
- Object.keys(old).forEach(k=>{const d=Number(k);if(d<1||d>5)return;const arr=Array.isArray(old[k])?old[k]:[];result[d]=[];
-  arr.forEach(item=>{if(item&&typeof item==='object'&&item.name){const master=monitorFindMasterExercise(item.group,item.name);result[d].push(monitorCloneExercise(item.group,item.name,item.image||item.img||(master?master[1]:''),item.equipment||(master?master[2]:''),item.prescription));}
-   else if(item&&Number.isFinite(Number(item.g))&&Number.isFinite(Number(item.i))&&routine[d]){const g=routine[d].groups&&routine[d].groups[Number(item.g)];if(!g)return;const name=g.exercises&&g.exercises[Number(item.i)];if(!name)return;const master=monitorFindMasterExercise(g.name,name);result[d].push(monitorCloneExercise(g.name,name,master?master[1]:((g.images||[])[Number(item.i)]||''),master?master[2]:'',item.prescription));}});
-  result[d]=result[d].filter((x,i,a)=>a.findIndex(y=>y.group===x.group&&y.name===x.name)===i);});student.routine=result;if(!student.routineDuration)student.routineDuration={};
-}
-function normalizeAllStudentPrivateRoutines(){(students||[]).forEach(normalizeStudentPrivateRoutine);}
-function prescriptionHTML107(item,key){
- const p=monitorDefaultPrescription(item&&item.prescription);let h=`<div class="prescriptionBox" data-preskey="${key}"><div class="prescriptionTitle">🎯 OBJETIVO DEL MONITOR</div><select id="presMode-${key}" onchange="togglePrescriptionMode107('${key}')"><option value="REPS_KG" ${p.mode==='REPS_KG'?'selected':''}>🏋️ Repeticiones + peso</option><option value="TIEMPO" ${p.mode==='TIEMPO'?'selected':''}>⏱️ Tiempo</option><option value="TABATA" ${p.mode==='TABATA'?'selected':''}>🔥 Tabata</option></select>
- <div id="presReps-${key}" style="display:${p.mode==='REPS_KG'?'block':'none'}"><table class="presTable"><thead><tr><th>SERIE</th><th>REPS</th><th>KG</th></tr></thead><tbody>`;
- for(let j=0;j<3;j++)h+=`<tr><td>${j+1}</td><td><input type="number" min="0" id="pres-r-${key}-${j}" value="${esc(p.sets[j].reps)}" placeholder="—"></td><td><input type="number" min="0" step=".5" id="pres-w-${key}-${j}" value="${esc(p.sets[j].weight)}" placeholder="—"></td></tr>`;
- h+=`</tbody></table></div><div id="presTime-${key}" style="display:${p.mode==='TIEMPO'?'block':'none'}"><table class="presTable"><thead><tr><th>SERIE</th><th>SEGUNDOS</th></tr></thead><tbody>`;
- for(let j=0;j<3;j++)h+=`<tr><td>${j+1}</td><td><input type="number" min="0" id="pres-t-${key}-${j}" value="${esc(p.times[j])}" placeholder="Ej. 30"></td></tr>`;
- h+=`</tbody></table><div class="timeTarget">El alumno tendrá un temporizador para el primer tiempo indicado.</div></div><div id="presTabata-${key}" style="display:${p.mode==='TABATA'?'block':'none'}"><table class="presTable"><thead><tr><th>TRABAJO (s)</th><th>DESCANSO (s)</th><th>RONDAS</th></tr></thead><tbody><tr><td><input type="number" min="1" id="pres-tw-${key}" value="${p.tabata.work}"></td><td><input type="number" min="0" id="pres-tr-${key}" value="${p.tabata.rest}"></td><td><input type="number" min="1" id="pres-to-${key}" value="${p.tabata.rounds}"></td></tr></tbody></table><div class="tabataTarget">Configurable: trabajo · descanso · rondas.</div></div></div>`;return h;
-}
-function togglePrescriptionMode107(key){const m=document.getElementById('presMode-'+key)?.value||'REPS_KG',a=document.getElementById('presReps-'+key),b=document.getElementById('presTime-'+key),c=document.getElementById('presTabata-'+key);if(a)a.style.display=m==='REPS_KG'?'block':'none';if(b)b.style.display=m==='TIEMPO'?'block':'none';if(c)c.style.display=m==='TABATA'?'block':'none';}
-function readPrescription107(key){const mode=document.getElementById('presMode-'+key)?.value||'REPS_KG',sets=[],times=[];for(let j=0;j<3;j++){sets.push({reps:document.getElementById(`pres-r-${key}-${j}`)?.value||'',weight:document.getElementById(`pres-w-${key}-${j}`)?.value||''});times.push(document.getElementById(`pres-t-${key}-${j}`)?.value||'');}return {mode,sets,times,tabata:{work:Number(document.getElementById('pres-tw-'+key)?.value)||20,rest:Number(document.getElementById('pres-tr-'+key)?.value)||10,rounds:Number(document.getElementById('pres-to-'+key)?.value)||8}};}
-function openStudent(id){
- let s=students.find(x=>x.id===id);if(!s)return;normalizeStudentPrivateRoutine(s);monitorStudentId=id;document.getElementById('monitorHome').style.display='none';const e=document.getElementById('monitorEditor');e.style.display='block';
- let h=`<div class="monitorBack"><button class="btn out" onclick="backToMonitor()">← VOLVER A MONITOR</button></div><div class="card"><h2>👤 ${esc(s.name)}</h2><div style="font-size:.78rem;margin-bottom:8px">${s.phone?`📞 <span class="phone">${esc(s.phone)}</span>`:'📞 Sin teléfono'}<br>📍 <span class="place">${esc(s.place||'Gimnasio')}</span></div><div class="monitorMenu"><button class="btn" onclick="studentTraining()">🏋️ ENTRENAR</button><button class="btn blue" onclick="studentReports()">📊 INFORMES</button><button class="btn out" onclick="studentRoutine()">⚙️ RUTINA</button></div></div><div class="card"><label>Nombre del alumno</label><input id="studentName" value="${esc(s.name)}"><label>Teléfono</label><input id="studentPhone" type="tel" value="${esc(s.phone||'')}"><label>Lugar del entrenamiento</label><select id="studentPlace"><option value="Gimnasio" ${(s.place||'Gimnasio')==='Gimnasio'?'selected':''}>Gimnasio</option><option value="Domicilio" ${(s.place||'')==='Domicilio'?'selected':''}>Domicilio</option></select></div>`;
- for(let d=1;d<=5;d++){const dur=Number(s.routineDuration?.[d]||0);h+=`<div class="card"><h2>📅 Día ${d}</h2><div class="routineDurationBox"><label>🕐 DURACIÓN TOTAL DE LA RUTINA (minutos)</label><input type="number" min="0" id="routineDuration-${d}" value="${dur||''}" placeholder="Ej. 60"><small style="display:block;color:var(--sub);margin-top:4px">Ejemplo: 60 = rutina completa de 1 hora.</small></div>`;
-  (MONITOR_DAY_GROUPS[d]||[]).forEach(groupName=>{const list=getLibraryBaseForGroup(groupName),selected=(s.routine[d]||[]).filter(x=>x.group===groupName),byName=new Map(selected.map(x=>[x.name,x]));h+=`<div class="groupEditor"><div class="groupEditorTitle"><strong>${esc(groupName)}</strong><span style="font-size:.68rem;color:var(--sub)">${list.length} disponibles</span></div>`;
-   list.forEach((item,idx)=>{const checked=byName.has(item[0]),cur=byName.get(item[0]),key=`m${d}_${idx}`;h+=`<div class="studentExerciseRow"><label class="check"><input type="checkbox" class="studentExercise" data-key="${key}" data-d="${d}" data-group="${esc(groupName)}" data-name="${esc(item[0])}" data-image="${esc(item[1])}" data-equipment="${esc(item[2]||'')}" ${checked?'checked':''} onchange="document.getElementById('studentPres-${key}').style.display=this.checked?'block':'none'"><span>${esc(item[0])}</span><span style="margin-left:auto;color:var(--sub);font-size:.62rem">${esc(item[2]||'')}</span></label><div id="studentPres-${key}" style="display:${checked?'block':'none'}">${prescriptionHTML107(cur||{prescription:{mode:'REPS_KG'}},key)}</div></div>`;});h+=`</div>`;});h+=`</div>`;}
- h+=`<div class="card"><div class="backupBox">🔒 <b>Rutina privada.</b> Esta selección pertenece exclusivamente a <b>${esc(s.name)}</b>. Los objetivos de repeticiones, peso, tiempo y Tabata también quedan guardados para este alumno.</div><button class="btn" onclick="saveStudent()">💾 GUARDAR RUTINA PRIVADA</button><br><br><button class="btn danger" onclick="deleteStudent()">🗑️ ELIMINAR ALUMNO</button></div>`;e.innerHTML=h;
-}
-function saveStudent(){let name=(document.getElementById('studentName')||{}).value?.trim()||'',phone=(document.getElementById('studentPhone')||{}).value?.trim()||'',place=(document.getElementById('studentPlace')||{}).value||'Gimnasio';if(!name){alert('Escribe el nombre del alumno.');return}let s=monitorStudentId?students.find(x=>x.id===monitorStudentId):null;if(!s){s={id:Date.now(),name:'',phone:'',place:'Gimnasio',routine:{},routineDuration:{},logs:[]};students.push(s)}if(!Array.isArray(s.logs))s.logs=[];if(!s.routineDuration)s.routineDuration={};s.name=name;s.phone=phone;s.place=place;const checks=document.querySelectorAll('#monitorEditor .studentExercise'),r={};checks.forEach(c=>{if(!c.checked)return;const d=Number(c.dataset.d);if(!r[d])r[d]=[];r[d].push(monitorCloneExercise(c.dataset.group,c.dataset.name,c.dataset.image,c.dataset.equipment,readPrescription107(c.dataset.key)))});for(let d=1;d<=5;d++){const v=Number(document.getElementById('routineDuration-'+d)?.value)||0;if(v>0)s.routineDuration[d]=v;else delete s.routineDuration[d]}Object.keys(r).forEach(d=>r[d]=r[d].filter((x,i,a)=>a.findIndex(y=>y.group===x.group&&y.name===x.name)===i));s.routine=r;normalizeStudentPrivateRoutine(s);saveMonitor();createMonitorAutoBackup();alert('Alumno y rutina privada guardados correctamente.');backToMonitor();}
-function studentTraining(){let s=getMonitorStudent();if(!s)return;normalizeStudentPrivateRoutine(s);if(!Array.isArray(s.logs))s.logs=[];let e=document.getElementById('monitorEditor');e.innerHTML=`<div class="monitorBack"><button class="btn out" onclick="backToMonitor()">← VOLVER A MONITOR</button></div><div class="monitorTitle">🏋️ ENTRENAMIENTO — ${esc(s.name)}</div><div class="card"><div class="days"><button class="btn out" onclick="studentSelectDay(1)">Día 1</button><button class="btn out" onclick="studentSelectDay(2)">Día 2</button><button class="btn out" onclick="studentSelectDay(3)">Día 3</button><button class="btn out" onclick="studentSelectDay(4)">Día 4</button><button class="btn out" onclick="studentSelectDay(5)">Día 5</button></div></div><div id="studentWork"></div>`;}
-function studentSelectDay(d){let s=getMonitorStudent();if(!s)return;normalizeStudentPrivateRoutine(s);let selected=Array.isArray(s.routine?.[d])?s.routine[d]:[];if(!selected.length){document.getElementById('studentWork').innerHTML=`<div class="card"><div class="empty">Este alumno no tiene ejercicios asignados para el Día ${d}.</div></div>`;return}let previous=null,a=(s.logs||[]).filter(l=>Number(l.day)===d);if(a.length){a.sort((x,y)=>new Date(x.date)-new Date(y.date));previous=a[a.length-1]}const dur=Number(s.routineDuration?.[d]||0);let h=`<div class="card"><h2>🏋️ ${esc(s.name)} — Día ${d}</h2><div class="monitorBack"><button class="btn out" onclick="openStudent(${s.id})">← VOLVER A FICHA</button></div><label>Fecha</label><input type="date" id="studentDate" value="${new Date().toISOString().slice(0,10)}">`;if(dur)h+=`<div class="routineDurationBox"><b>🕐 RUTINA PROGRAMADA: ${dur} minutos</b><br><button class="tabataBtn" onclick="openMonitorCountdown(${dur*60},'RUTINA COMPLETA')">▶️ INICIAR TEMPORIZADOR DE RUTINA</button></div>`;h+=`<div id="studentForm"></div><button class="btn" onclick="saveStudentWorkout(${d})">💾 GUARDAR ENTRENAMIENTO</button><div id="studentSummary"></div></div>`;document.getElementById('studentWork').innerHTML=h;renderStudentWorkout107(d,selected,previous);}
-function renderStudentWorkout107(d,selected,previous){let html='';selected.forEach((item,index)=>{let ex=item.name||'',groupName=item.group||'';if(!ex)return;let master=monitorFindMasterExercise(groupName,ex),img=item.image||(master?master[1]:''),equipment=item.equipment||(master?master[2]:''),p=monitorDefaultPrescription(item.prescription),old=previous?getStudentPreviousExercise(previous,ex):null,prefix='sg'+index+'e'+index;html+=`<div class="group">${esc(groupName)}</div><div class="ex"><div class="exhead"><span>${esc(ex)}</span>${equipment?`<span class="badge">${esc(equipment)}</span>`:''}</div>`;if(img)html+=`<div class="imgbox" style="display:block"><img src="${esc(img)}" alt="${esc(ex)}" onerror="this.style.display='none'"></div>`;
- if(p.mode==='REPS_KG'){let ps=old?(old.sets||[]).slice(0,3):[];while(ps.length<3)ps.push({reps:'',weight:''});html+=`<table><thead><tr><th colspan="2" style="color:var(--a)">HOY</th><th colspan="2" style="color:var(--gold)">ÚLTIMO</th></tr><tr><th>REPS</th><th>KG</th><th>REPS</th><th>KG</th></tr></thead><tbody>`;for(let j=0;j<3;j++)html+=`<tr><td><input type="number" min="0" id="${prefix}-r${j}" placeholder="—" onfocus="selectCell(this)" oninput="studentCalc('${prefix}')"></td><td><input type="number" min="0" step=".5" id="${prefix}-w${j}" placeholder="—" onfocus="selectCell(this)" oninput="studentCalc('${prefix}')"></td><td><input type="number" value="${ps[j].reps??''}" readonly tabindex="-1"></td><td><input type="number" value="${ps[j].weight??''}" readonly tabindex="-1"></td></tr>`;html+=`</tbody></table><div class="rm" id="rm-${prefix}">🔥 1RM estimado: --</div><div class="vol" id="vol-${prefix}">📦 Volumen: 0 kg</div><button class="restbtn" onclick="startTimer()">⏱️ Descanso 2:00</button>`;}
- else if(p.mode==='TIEMPO'){const oldTimes=Array.isArray(old?.times)?old.times:[];html+=`<div class="timeTarget">🎯 TIEMPOS INDICADOS: ${p.times.filter(Boolean).join(' · ')||'—'} segundos</div><div class="timeActualBox"><label>⏱️ TIEMPO REALIZADO (segundos)</label><div class="timeInputs">`;for(let j=0;j<3;j++)html+=`<input type="number" min="0" id="${prefix}-t${j}" value="" placeholder="Serie ${j+1}${oldTimes[j]?' · último '+oldTimes[j]+'s':''}">`;html+=`</div><button class="tabataBtn" onclick="openMonitorCountdown(${Number(p.times.find(Boolean))||0},'${esc(ex)}')">▶️ INICIAR TIEMPO INDICADO</button></div>`;}
- else html+=`<div class="tabataTarget">🔥 TABATA INDICADO: ${p.tabata.work}s trabajo · ${p.tabata.rest}s descanso · ${p.tabata.rounds} rondas</div><button class="tabataBtn" onclick="openMonitorTabata(${p.tabata.work},${p.tabata.rest},${p.tabata.rounds},'${esc(ex)}')">🔥 INICIAR TABATA</button>`;html+=`</div>`;});document.getElementById('studentForm').innerHTML=html;}
-function saveStudentWorkout(d){let s=getMonitorStudent();if(!s)return;normalizeStudentPrivateRoutine(s);let cd=(document.getElementById('studentDate')||{}).value||'';if(!cd){alert('Selecciona una fecha.');return}if(!Array.isArray(s.logs))s.logs=[];let log=s.logs.find(l=>Number(l.day)===d&&dateKey(l.date)===cd);if(!log){log={id:Date.now(),date:new Date(cd+'T12:00:00').toISOString(),day:d,groups:[]};s.logs.push(log)}let selected=Array.isArray(s.routine?.[d])?s.routine[d]:[],totalVolume=0,totalSets=0,totalExercises=0;selected.forEach((item,index)=>{let ex=item.name;if(!ex)return;let p='sg'+index+'e'+index,pr=monitorDefaultPrescription(item.prescription),data={name:ex,group:item.group||'Sin grupo',prescription:pr,sets:[],times:[],tabataCompleted:false};if(pr.mode==='REPS_KG'){for(let j=0;j<3;j++){let r=document.getElementById(p+'-r'+j),w=document.getElementById(p+'-w'+j);data.sets.push({reps:r&&r.value!==''?num(r.value):0,weight:w&&w.value!==''?num(w.value):0})}const real=data.sets.filter(x=>x.reps>0);if(!real.length)return;data.volume=volume(real);data.rm=maxSetRM(real);totalVolume+=data.volume;totalSets+=real.length;totalExercises++;}else if(pr.mode==='TIEMPO'){for(let j=0;j<3;j++){let t=document.getElementById(p+'-t'+j);data.times.push(t&&t.value!==''?num(t.value):0)}if(!data.times.some(x=>x>0))return;totalExercises++;}else{data.tabataCompleted=true;totalExercises++;}let g=log.groups.find(x=>x.name===data.group);if(!g){g={name:data.group,exercises:[]};log.groups.push(g)}let old=g.exercises.find(x=>x.name===ex);if(old)Object.assign(old,data);else g.exercises.push(data);});log.groups=(log.groups||[]).filter(g=>{g.exercises=(g.exercises||[]).filter(e=>{if(e.prescription?.mode==='REPS_KG')return(e.sets||[]).some(x=>num(x.reps)>0);if(e.prescription?.mode==='TIEMPO')return(e.times||[]).some(x=>num(x)>0);return !!e.tabataCompleted});return g.exercises.length});saveMonitor();createMonitorAutoBackup();document.getElementById('studentSummary').innerHTML=`<div class="summary"><h3>🎉 ENTRENAMIENTO GUARDADO</h3><div class="big">${esc(s.name)}</div><div>💪 <b>${totalExercises}</b> ejercicios realizados</div><div>🔢 <b>${totalSets}</b> series realizadas</div><div>📦 <b>${Math.round(totalVolume)}</b> kg de volumen</div><br><button class="btn" onclick="studentSelectDay(${d})">Seguir entrenando</button><br><br><button class="btn out" onclick="backToMonitor()">Volver a Monitor</button></div>`;}
-function closeMonitorTimer(){if(monitorTimerInterval){clearInterval(monitorTimerInterval);monitorTimerInterval=null}const o=document.getElementById('monitorTimerOverlay');if(o)o.remove();}
-function beepMonitor(){try{const C=window.AudioContext||window.webkitAudioContext,c=new C(),o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.frequency.value=900;g.gain.value=.5;o.start();o.stop(c.currentTime+.16)}catch(e){}}
-function openMonitorTimerUI(){let o=document.getElementById('monitorTimerOverlay');if(o)o.remove();o=document.createElement('div');o.id='monitorTimerOverlay';o.className='monitorTimerOverlay';o.style.display='flex';o.innerHTML=`<div class="monitorTimerCard"><div class="monitorTimerTitle">${esc(monitorTimerExercise)}</div><div id="monitorTimerPhase" class="monitorTimerPhase">${esc(monitorTimerPhase)}</div><div id="monitorTimerValue" class="monitorTimerValue">00:00</div><div id="monitorTimerRound" style="color:var(--sub);font-size:.8rem"></div><div class="monitorTimerBtns"><button class="btn" onclick="toggleMonitorTimer()" id="monitorTimerToggle">⏸️ PAUSA</button><button class="btn out" onclick="closeMonitorTimer()">✕ CERRAR</button></div></div>`;document.body.appendChild(o);updateMonitorTimerDisplay();}
-function updateMonitorTimerDisplay(){const v=document.getElementById('monitorTimerValue');if(!v)return;const sec=Math.max(0,monitorTimerRemaining),m=Math.floor(sec/60),x=sec%60;v.textContent=String(m).padStart(2,'0')+':'+String(x).padStart(2,'0');const p=document.getElementById('monitorTimerPhase');if(p)p.textContent=monitorTimerPhase;const r=document.getElementById('monitorTimerRound');if(r&&monitorTimerTotalRounds)r.textContent=`Ronda ${Math.min(monitorTimerRounds,monitorTimerTotalRounds)} / ${monitorTimerTotalRounds}`;}
-function toggleMonitorTimer(){if(monitorTimerInterval){clearInterval(monitorTimerInterval);monitorTimerInterval=null;const b=document.getElementById('monitorTimerToggle');if(b)b.textContent='▶️ CONTINUAR';}else{const b=document.getElementById('monitorTimerToggle');if(b)b.textContent='⏸️ PAUSA';startMonitorTimerTick();}}
-function startMonitorTimerTick(){if(monitorTimerInterval)return;monitorTimerInterval=setInterval(()=>{monitorTimerRemaining--;if(monitorTimerRemaining<=0){clearInterval(monitorTimerInterval);monitorTimerInterval=null;beepMonitor();setTimeout(()=>{if(monitorTimerPhase==='TRABAJO'&&monitorTimerRounds<monitorTimerTotalRounds){monitorTimerPhase='DESCANSO';monitorTimerRemaining=monitorTimerRest;startMonitorTimerTick();}else if(monitorTimerPhase==='DESCANSO'&&monitorTimerRounds<monitorTimerTotalRounds){monitorTimerRounds++;monitorTimerPhase='TRABAJO';monitorTimerRemaining=monitorTimerWork;startMonitorTimerTick();}else{monitorTimerPhase='🎉 COMPLETADO';monitorTimerRemaining=0;const b=document.getElementById('monitorTimerToggle');if(b)b.textContent='✓ TERMINADO';}},250)}updateMonitorTimerDisplay()},1000)}
-function openMonitorCountdown(seconds,name){seconds=Math.max(0,Number(seconds)||0);if(!seconds){alert('No hay un tiempo indicado.');return}monitorTimerExercise=name||'Ejercicio';monitorTimerPhase='TIEMPO';monitorTimerRemaining=seconds;monitorTimerRounds=0;monitorTimerTotalRounds=0;openMonitorTimerUI();startMonitorTimerTick();}
-function openMonitorTabata(work,rest,rounds,name){monitorTimerExercise=name||'TABATA';monitorTimerWork=Math.max(1,Number(work)||20);monitorTimerRest=Math.max(0,Number(rest)||10);monitorTimerTotalRounds=Math.max(1,Number(rounds)||8);monitorTimerRounds=1;monitorTimerPhase='TRABAJO';monitorTimerRemaining=monitorTimerWork;openMonitorTimerUI();startMonitorTimerTick();}
-try{normalizeAllStudentPrivateRoutines();saveMonitor()}catch(e){}
 
 </script>
 
