@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>MI GIMNASIO PRO MONITOR v10.24</title>
+<title>MI GIMNASIO PRO MONITOR v10.23</title>
 <meta name="theme-color" content="#121212">
 
 <style>
@@ -1178,8 +1178,8 @@ td input{font-size:.7rem;padding:5px 1px}.muscleStats{grid-template-columns:1fr 
 </script>
 
 <header>
-<h1>MI GIMNASIO PRO MONITOR v10.24</h1>
-<div style="text-align:center;color:#00ff88;font-weight:800;font-size:.8rem;margin:6px 0">CONTROL MONITOR v10.24</div>
+<h1>MI GIMNASIO PRO MONITOR v10.23</h1>
+<div style="text-align:center;color:#00ff88;font-weight:800;font-size:.8rem;margin:6px 0">CONTROL MONITOR v10.23</div>
 </header>
 
 <div class="container">
@@ -1283,17 +1283,6 @@ Aquí tienes los <b>15 ejercicios base</b> de cada grupo. Los ejercicios nuevos 
 <div style="font-size:.72rem;color:var(--sub);line-height:1.5;margin-bottom:10px">
 La aplicación guarda automáticamente los datos. Al utilizar "Salir y guardar" se crea una copia interna adicional de seguridad.
 </div>
-
-<div class="backupBox">
-<b style="color:var(--a)">💾 COPIA COMPLETA</b><br>
-Guarda en un único archivo todos los datos de <b>Mi.Gimnasio</b> y <b>Mi.Gimnasio.Monitor</b>, incluyendo alumnos, rutinas, entrenamientos, ejercicios, GIF, citas, contabilidad, configuraciones y copias automáticas internas.
-</div>
-
-<button class="btn" style="margin-top:8px" onclick="exportData()">📥 CREAR COPIA COMPLETA</button>
-<button class="btn blue" style="margin-top:7px" onclick="document.getElementById('fullBackupImport').click()">📤 RESTAURAR COPIA COMPLETA</button>
-<input id="fullBackupImport" type="file" accept="application/json,.json" style="display:none" onchange="importData(event)">
-
-<div id="backupStatus" class="backupBox" style="margin-top:8px"></div>
 </div>
 
 </section>
@@ -3806,110 +3795,34 @@ function saveConfig(){
   if(s)s.innerText='✓ Rutina guardada correctamente.';
 }
 
-function getFullBackupStorage(){
-  const storage={};
-  const prefixes=[K,MK];
-  for(let i=0;i<localStorage.length;i++){
-    const key=localStorage.key(i);
-    if(!key)continue;
-    if(prefixes.some(prefix=>key.indexOf(prefix)===0)){
-      storage[key]=localStorage.getItem(key);
-    }
-  }
-  return storage;
-}
-
 function exportData(){
-  try{
-    save();
-    saveMonitor();
-    createAutoBackup();
-    createMonitorAutoBackup();
-
-    const storage=getFullBackupStorage();
-    const data={
-      app:'Mi Gimnasio Pro Monitor',
-      backupType:'COMPLETE',
-      backupVersion:'1.0',
-      sourceVersion:'10.23',
-      exported:new Date().toISOString(),
-      keyPrefixes:[K,MK],
-      keyCount:Object.keys(storage).length,
-      storage
-    };
-
-    const json=JSON.stringify(data,null,2);
-    const b=new Blob([json],{type:'application/json'});
-    const u=URL.createObjectURL(b);
-    const a=document.createElement('a');
-    const stamp=new Date().toISOString().replace(/[:.]/g,'-').slice(0,19);
-    a.href=u;
-    a.download='Mi.Gimnasio.Monitor_COPIA_COMPLETA_'+stamp+'.json';
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    setTimeout(()=>URL.revokeObjectURL(u),1000);
-
-    const e=document.getElementById('backupStatus');
-    if(e)e.innerHTML='<span class="backupOk">✓ COPIA COMPLETA CREADA CORRECTAMENTE.<br>Se han guardado '+Object.keys(storage).length+' bloques de datos de Mi.Gimnasio y Monitor.<br>Fecha: '+esc(new Date().toLocaleString('es-ES'))+'</span>';
-  }catch(err){
-    console.error('Error creando copia completa',err);
-    const e=document.getElementById('backupStatus');
-    if(e)e.innerHTML='<span class="backupWarn">⚠️ No se pudo crear la copia completa: '+esc(err.message||err)+'</span>';
-    else alert('⚠️ No se pudo crear la copia completa.');
-  }
+let data={app:'Mi Gimnasio Pro Monitor',version:'10.11',exported:new Date().toISOString(),routine,logs,personalExerciseBase,students,appointments,accounting};
+let b=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),u=URL.createObjectURL(b),a=document.createElement('a');
+a.href=u;a.download='gym_v10.23_monitor_backup_'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);
+let e=document.getElementById('backupStatus');if(e)e.innerHTML='<span class="backupOk">✓ Copia completa creada correctamente.<br>Incluye rutina, entrenamientos, alumnos, citas y contabilidad.</span>';
 }
 
 function importData(e){
-  const f=e&&e.target&&e.target.files?e.target.files[0]:null;
-  if(!f)return;
-
-  const r=new FileReader();
-  r.onload=()=>{
-    try{
-      const d=JSON.parse(r.result);
-      if(!d||d.app!=='Mi Gimnasio Pro Monitor'||d.backupType!=='COMPLETE'||!d.storage||typeof d.storage!=='object'||Array.isArray(d.storage)){
-        throw new Error('Formato de copia completa no válido.');
-      }
-
-      const keys=Object.keys(d.storage);
-      const validKeys=keys.filter(key=>key.indexOf(K)===0||key.indexOf(MK)===0);
-      if(!validKeys.length)throw new Error('La copia no contiene datos reconocibles de Mi.Gimnasio.');
-
-      const ok=window.confirm(
-        '⚠️ RESTAURAR COPIA COMPLETA\\n\\n'+
-        'Se sustituirán los datos actuales de Mi.Gimnasio y Mi.Gimnasio.Monitor por los datos de esta copia.\\n\\n'+
-        'Bloques que se restaurarán: '+validKeys.length+'\\n'+
-        'Fecha de la copia: '+(d.exported?new Date(d.exported).toLocaleString('es-ES'):'desconocida')+'\\n\\n'+
-        '¿Quieres continuar?'
-      );
-      if(!ok){e.target.value='';return;}
-
-      // Primero eliminamos únicamente los datos pertenecientes a estas dos aplicaciones.
-      const currentKeys=[];
-      for(let i=0;i<localStorage.length;i++){
-        const key=localStorage.key(i);
-        if(key&&(key.indexOf(K)===0||key.indexOf(MK)===0))currentKeys.push(key);
-      }
-      currentKeys.forEach(key=>localStorage.removeItem(key));
-
-      validKeys.forEach(key=>{
-        const value=d.storage[key];
-        if(typeof value==='string')localStorage.setItem(key,value);
-        else localStorage.setItem(key,JSON.stringify(value));
-      });
-
-      const restored=validKeys.length;
-      alert('✓ COPIA COMPLETA RESTAURADA CORRECTAMENTE.\\n\\nSe han restaurado '+restored+' bloques de datos.\\nLa aplicación se reiniciará para cargar toda la información.');
-      e.target.value='';
-      location.reload();
-    }catch(err){
-      console.error('Error restaurando copia completa',err);
-      alert('⚠️ No se pudo restaurar la copia.\\n\\n'+(err.message||'El archivo no es una copia completa válida de Mi.Gimnasio.Monitor.'));
-      e.target.value='';
-    }
-  };
-  r.readAsText(f);
+let f=e.target.files[0];if(!f)return;
+let r=new FileReader();
+r.onload=()=>{
+try{
+let d=JSON.parse(r.result);if(!d||!d.routine||!Array.isArray(d.logs))throw 0;
+routine=clone(d.routine);logs=clone(d.logs);
+if(Array.isArray(d.personalExerciseBase))personalExerciseBase=clone(d.personalExerciseBase);
+personalExerciseBase=(Array.isArray(personalExerciseBase)?personalExerciseBase:[])
+  .filter(x=>x&&typeof x==='object')
+  .map(x=>({name:String(x.name||'').trim(),image:String(x.image||'').trim(),equipment:String(x.equipment||'').trim(),group:String(x.group||'').trim().toUpperCase()}))
+  .filter(x=>x.name&&x.image&&x.group);
+if(Array.isArray(d.students))students=clone(d.students);
+if(Array.isArray(d.appointments))appointments=clone(d.appointments);
+if(Array.isArray(d.accounting))accounting=clone(d.accounting);
+normalizeRoutine();save();saveMonitor();createAutoBackup();createMonitorAutoBackup();
+alert('✓ Datos recuperados correctamente.');location.reload();
+}catch(x){alert('⚠️ El archivo no es una copia válida de Mi Gimnasio.')}
+e.target.value='';
+};
+r.readAsText(f);
 }
 
 function month(n){
@@ -5035,6 +4948,26 @@ function beep(freq=900,duration=.18){
   }catch(e){}
 }
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&timerOrTabataActive()){keepScreenOn();unlockAudio();}});
+
+/* ===== ARRANQUE: ABRIR SIEMPRE EN MONITOR ===== */
+function openMonitorOnStartup(){
+  try{
+    if(typeof tab==='function'){
+      tab('monitor');
+      return;
+    }
+    if(typeof showMonitorHome==='function') showMonitorHome();
+  }catch(e){
+    console.error('No se pudo abrir Monitor automáticamente',e);
+  }
+}
+
+if(document.readyState==='loading'){
+  document.addEventListener('DOMContentLoaded',openMonitorOnStartup,{once:true});
+}else{
+  openMonitorOnStartup();
+}
+window.addEventListener('load',openMonitorOnStartup,{once:true});
 
 restoreAutoBackupIfNeeded();
 
@@ -6522,26 +6455,6 @@ function monitorFindMasterExercise(group,name){
   },true);
 })();
 
-
-
-/* ===== v10.24 · INICIO DIRECTO EN MONITOR ===== */
-function openMonitorOnStartup(){
-  try{
-    if(typeof tab==='function'){
-      tab('monitor');
-      return;
-    }
-    if(typeof showMonitorHome==='function')showMonitorHome();
-  }catch(e){
-    console.error('No se pudo abrir Monitor automáticamente',e);
-  }
-}
-if(document.readyState==='loading'){
-  document.addEventListener('DOMContentLoaded',openMonitorOnStartup,{once:true});
-}else{
-  openMonitorOnStartup();
-}
-window.addEventListener('load',openMonitorOnStartup,{once:true});
 </script>
 
 </body>
