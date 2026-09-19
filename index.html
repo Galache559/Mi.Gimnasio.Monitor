@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>MI GIMNASIO PRO MONITOR v10.4</title>
+<title>MI GIMNASIO PRO MONITOR v10.5</title>
 <meta name="theme-color" content="#121212">
 
 <style>
@@ -1048,7 +1048,7 @@ td input{font-size:.7rem;padding:5px 1px}.muscleStats{grid-template-columns:1fr 
 <body>
 
 <header>
-<h1>MI GIMNASIO PRO MONITOR v10.4</h1>
+<h1>MI GIMNASIO PRO MONITOR v10.5</h1>
 </header>
 
 <div class="container">
@@ -3625,9 +3625,9 @@ function saveConfig(){
 }
 
 function exportData(){
-let data={app:'Mi Gimnasio Pro Monitor',version:'10.4',exported:new Date().toISOString(),routine,logs,personalExerciseBase,students,appointments,accounting};
+let data={app:'Mi Gimnasio Pro Monitor',version:'10.5',exported:new Date().toISOString(),routine,logs,personalExerciseBase,students,appointments,accounting};
 let b=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),u=URL.createObjectURL(b),a=document.createElement('a');
-a.href=u;a.download='gym_v10.4_monitor_backup_'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);
+a.href=u;a.download='gym_v10.5_monitor_backup_'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);
 let e=document.getElementById('backupStatus');if(e)e.innerHTML='<span class="backupOk">✓ Copia completa creada correctamente.<br>Incluye rutina, entrenamientos, alumnos, citas y contabilidad.</span>';
 }
 
@@ -4759,7 +4759,7 @@ try{
 let old=localStorage.getItem(MONITOR_AUTO_BACKUP);
 if(old)localStorage.setItem(MONITOR_PREV_BACKUP,old);
 saveMonitor();
-let d={app:'Mi Gimnasio Pro - Monitor',version:'10.4',backupType:'automatic',created:new Date().toISOString(),students:clone(students),appointments:clone(appointments),accounting:clone(accounting),personalExerciseBase:clone(personalExerciseBase)};
+let d={app:'Mi Gimnasio Pro - Monitor',version:'10.5',backupType:'automatic',created:new Date().toISOString(),students:clone(students),appointments:clone(appointments),accounting:clone(accounting),personalExerciseBase:clone(personalExerciseBase)};
 localStorage.setItem(MONITOR_AUTO_BACKUP,JSON.stringify(d));
 localStorage.setItem(MONITOR_BACKUP_DATE,d.created);
 updateMonitorBackupStatus();
@@ -5061,6 +5061,305 @@ saveMonitor();
 updateMonitorBackupStatus();
 renderStudents();
 window.addEventListener('pagehide',()=>{try{createMonitorAutoBackup()}catch(e){}});
+
+/* ===== v10.5 · CITAS + CONTABILIDAD + COMPATIBILIDAD ===== */
+
+function clone(obj){
+  return JSON.parse(JSON.stringify(obj));
+}
+
+function monitorStudentName(id){
+  const s=(students||[]).find(x=>String(x.id)===String(id));
+  return s ? s.name : 'Alumno eliminado';
+}
+
+function formatMonitorDate(v){
+  if(!v)return '';
+  const d=new Date(v);
+  if(isNaN(d.getTime()))return String(v);
+  return d.toLocaleDateString('es-ES');
+}
+
+function showAppointments(){
+  document.getElementById('monitorHome').style.display='none';
+  const e=document.getElementById('monitorEditor');
+  e.style.display='block';
+
+  const studentOptions=(students||[]).map(s=>
+    `<option value="${esc(s.id)}">${esc(s.name)}</option>`
+  ).join('');
+
+  e.innerHTML=`
+    <div class="monitorBack">
+      <button class="btn out" onclick="backToMonitor()">← VOLVER A MONITOR</button>
+    </div>
+    <div class="monitorTitle">📅 CITAS</div>
+
+    <div class="card">
+      <h2>➕ Nueva cita</h2>
+      <label>Alumno</label>
+      <select id="appointmentStudent">
+        <option value="">Selecciona un alumno</option>
+        ${studentOptions}
+      </select>
+
+      <label>Fecha</label>
+      <input type="date" id="appointmentDate">
+
+      <label>Hora</label>
+      <input type="time" id="appointmentTime">
+
+      <label>Motivo / nota</label>
+      <input id="appointmentNote" placeholder="Entrenamiento, revisión, etc.">
+
+      <button class="btn" onclick="saveAppointment()">💾 GUARDAR CITA</button>
+    </div>
+
+    <div class="card">
+      <h2>📋 Próximas citas</h2>
+      <div id="appointmentsList"></div>
+    </div>
+  `;
+
+  const today=new Date();
+  document.getElementById('appointmentDate').value=today.toISOString().slice(0,10);
+  renderAppointments();
+}
+
+function saveAppointment(){
+  const studentId=document.getElementById('appointmentStudent')?.value||'';
+  const date=document.getElementById('appointmentDate')?.value||'';
+  const time=document.getElementById('appointmentTime')?.value||'';
+  const note=document.getElementById('appointmentNote')?.value?.trim()||'';
+
+  if(!studentId){alert('Selecciona un alumno.');return;}
+  if(!date){alert('Selecciona una fecha.');return;}
+  if(!time){alert('Selecciona una hora.');return;}
+
+  appointments.push({
+    id:Date.now(),
+    studentId:Number(studentId),
+    date,
+    time,
+    note,
+    created:new Date().toISOString()
+  });
+
+  appointments.sort((a,b)=>
+    String(a.date+' '+a.time).localeCompare(String(b.date+' '+b.time))
+  );
+
+  saveMonitor();
+  createMonitorAutoBackup();
+  renderAppointments();
+
+  document.getElementById('appointmentNote').value='';
+  alert('✓ Cita guardada correctamente.');
+}
+
+function deleteAppointment(id){
+  if(!confirm('¿Eliminar esta cita?'))return;
+  appointments=appointments.filter(x=>String(x.id)!==String(id));
+  saveMonitor();
+  createMonitorAutoBackup();
+  renderAppointments();
+}
+
+function renderAppointments(){
+  const box=document.getElementById('appointmentsList');
+  if(!box)return;
+
+  const now=new Date();
+  const sorted=(appointments||[]).slice().sort((a,b)=>
+    String(a.date+' '+a.time).localeCompare(String(b.date+' '+b.time))
+  );
+
+  if(!sorted.length){
+    box.innerHTML='<div class="empty">No hay citas registradas.</div>';
+    return;
+  }
+
+  box.innerHTML=sorted.map(a=>{
+    const d=new Date(`${a.date}T${a.time||'00:00'}`);
+    const past=!isNaN(d.getTime()) && d<now;
+    return `
+      <div class="accountBox" style="${past?'opacity:.55':''}">
+        <h3>📅 ${esc(formatMonitorDate(a.date))} · ${esc(a.time||'')}</h3>
+        <div style="font-size:.75rem">
+          👤 <b>${esc(monitorStudentName(a.studentId))}</b>
+        </div>
+        ${a.note?`<div style="font-size:.7rem;color:var(--sub);margin-top:4px">📝 ${esc(a.note)}</div>`:''}
+        <button class="btn danger sm" style="margin-top:7px" onclick="deleteAppointment(${a.id})">
+          🗑️ ELIMINAR
+        </button>
+      </div>
+    `;
+  }).join('');
+}
+
+function showAccounting(){
+  document.getElementById('monitorHome').style.display='none';
+  const e=document.getElementById('monitorEditor');
+  e.style.display='block';
+
+  const studentOptions=(students||[]).map(s=>
+    `<option value="${esc(s.id)}">${esc(s.name)}</option>`
+  ).join('');
+
+  e.innerHTML=`
+    <div class="monitorBack">
+      <button class="btn out" onclick="backToMonitor()">← VOLVER A MONITOR</button>
+    </div>
+    <div class="monitorTitle">💶 CONTABILIDAD</div>
+
+    <div class="card">
+      <h2>➕ Nuevo movimiento</h2>
+      <label>Alumno</label>
+      <select id="accountStudent">
+        <option value="">Selecciona un alumno</option>
+        ${studentOptions}
+      </select>
+
+      <label>Fecha</label>
+      <input type="date" id="accountDate">
+
+      <label>Concepto</label>
+      <input id="accountConcept" placeholder="Cuota, sesión, bono...">
+
+      <label>Importe (€)</label>
+      <input type="number" id="accountAmount" min="0" step=".01" placeholder="0.00">
+
+      <label>Estado</label>
+      <select id="accountStatus">
+        <option value="PENDIENTE">PENDIENTE</option>
+        <option value="PAGADO">PAGADO</option>
+      </select>
+
+      <button class="btn" onclick="saveAccounting()">💾 GUARDAR MOVIMIENTO</button>
+    </div>
+
+    <div class="card">
+      <h2>📊 Resumen</h2>
+      <div id="accountingSummary"></div>
+    </div>
+
+    <div class="card">
+      <h2>📋 Movimientos</h2>
+      <div class="accountTable">
+        <table>
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Alumno</th>
+              <th>Concepto</th>
+              <th>Importe</th>
+              <th>Estado</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="accountingRows"></tbody>
+        </table>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('accountDate').value=new Date().toISOString().slice(0,10);
+  renderAccounting();
+}
+
+function saveAccounting(){
+  const studentId=document.getElementById('accountStudent')?.value||'';
+  const date=document.getElementById('accountDate')?.value||'';
+  const concept=document.getElementById('accountConcept')?.value?.trim()||'';
+  const amount=num(document.getElementById('accountAmount')?.value);
+  const status=document.getElementById('accountStatus')?.value||'PENDIENTE';
+
+  if(!studentId){alert('Selecciona un alumno.');return;}
+  if(!date){alert('Selecciona una fecha.');return;}
+  if(!concept){alert('Escribe un concepto.');return;}
+  if(amount<=0){alert('Introduce un importe válido.');return;}
+
+  accounting.push({
+    id:Date.now(),
+    studentId:Number(studentId),
+    date,
+    concept,
+    amount,
+    status,
+    created:new Date().toISOString()
+  });
+
+  saveMonitor();
+  createMonitorAutoBackup();
+  renderAccounting();
+
+  document.getElementById('accountConcept').value='';
+  document.getElementById('accountAmount').value='';
+  alert('✓ Movimiento guardado correctamente.');
+}
+
+function deleteAccounting(id){
+  if(!confirm('¿Eliminar este movimiento?'))return;
+  accounting=accounting.filter(x=>String(x.id)!==String(id));
+  saveMonitor();
+  createMonitorAutoBackup();
+  renderAccounting();
+}
+
+function renderAccounting(){
+  const rows=document.getElementById('accountingRows');
+  const summary=document.getElementById('accountingSummary');
+  if(!rows)return;
+
+  const data=(accounting||[]).slice().sort((a,b)=>
+    String(b.date).localeCompare(String(a.date))
+  );
+
+  const paid=data.filter(x=>String(x.status).toUpperCase()==='PAGADO')
+                 .reduce((s,x)=>s+num(x.amount),0);
+  const pending=data.filter(x=>String(x.status).toUpperCase()!=='PAGADO')
+                    .reduce((s,x)=>s+num(x.amount),0);
+  const total=paid+pending;
+
+  if(summary){
+    summary.innerHTML=`
+      <div class="statgrid">
+        <div class="stat"><b>${total.toFixed(2)} €</b><span>Total</span></div>
+        <div class="stat"><b>${paid.toFixed(2)} €</b><span>Cobrado</span></div>
+        <div class="stat"><b>${pending.toFixed(2)} €</b><span>Pendiente</span></div>
+        <div class="stat"><b>${data.length}</b><span>Movimientos</span></div>
+      </div>
+    `;
+  }
+
+  if(!data.length){
+    rows.innerHTML='<tr><td colspan="6" class="empty">No hay movimientos registrados.</td></tr>';
+    return;
+  }
+
+  rows.innerHTML=data.map(x=>`
+    <tr>
+      <td>${esc(formatMonitorDate(x.date))}</td>
+      <td>${esc(monitorStudentName(x.studentId))}</td>
+      <td>${esc(x.concept||'')}</td>
+      <td class="money">${num(x.amount).toFixed(2)} €</td>
+      <td>${String(x.status).toUpperCase()==='PAGADO'
+        ?'<span class="money">PAGADO</span>'
+        :'<span class="place">PENDIENTE</span>'}</td>
+      <td>
+        <button class="btn danger sm" onclick="deleteAccounting(${x.id})">🗑️</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+/* Compatibilidad con copias antiguas y apertura del Monitor */
+restoreMonitorAutoBackupIfNeeded();
+normalizeAllStudentPrivateRoutines();
+saveMonitor();
+updateMonitorBackupStatus();
+renderStudents();
+
 </script>
 
 </body>
