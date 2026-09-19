@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>MI GIMNASIO PRO MONITOR v10.5</title>
+<title>MI GIMNASIO PRO MONITOR v10.6</title>
 <meta name="theme-color" content="#121212">
 
 <style>
@@ -1240,8 +1240,8 @@ Selecciona un periodo.
 <h2>👥 Monitor</h2>
 <div class="monitorMenu">
 <button class="btn" onclick="newStudent()">➕ NUEVO ALUMNO</button>
-<button class="btn blue" onclick="showAppointments()">📅 CITAS</button>
-<button class="btn out" onclick="showAccounting()">💶 CONTABILIDAD</button>
+<button id="btnMonitorAppointments" class="btn blue" type="button">📅 CITAS</button>
+<button id="btnMonitorAccounting" class="btn out" type="button">💶 CONTABILIDAD</button>
 </div>
 <br>
 <button class="btn danger" onclick="exitMonitorApp()">🚪 SALIR Y GUARDAR</button>
@@ -3625,7 +3625,7 @@ function saveConfig(){
 }
 
 function exportData(){
-let data={app:'Mi Gimnasio Pro Monitor',version:'10.5',exported:new Date().toISOString(),routine,logs,personalExerciseBase,students,appointments,accounting};
+let data={app:'Mi Gimnasio Pro Monitor',version:'10.6',exported:new Date().toISOString(),routine,logs,personalExerciseBase,students,appointments,accounting};
 let b=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),u=URL.createObjectURL(b),a=document.createElement('a');
 a.href=u;a.download='gym_v10.5_monitor_backup_'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);
 let e=document.getElementById('backupStatus');if(e)e.innerHTML='<span class="backupOk">✓ Copia completa creada correctamente.<br>Incluye rutina, entrenamientos, alumnos, citas y contabilidad.</span>';
@@ -5382,6 +5382,45 @@ normalizeAllStudentPrivateRoutines();
 saveMonitor();
 updateMonitorBackupStatus();
 renderStudents();
+
+/* ===== v10.6 · ENLACES ROBUSTOS CITAS / CONTABILIDAD ===== */
+/*
+   Los botones del Monitor ya no dependen exclusivamente de onclick inline.
+   Se exponen las funciones en window y se conectan mediante addEventListener.
+   Esto evita que una diferencia de ejecución del navegador deje los botones sin respuesta.
+*/
+window.showAppointments = showAppointments;
+window.showAccounting = showAccounting;
+window.backToMonitor = backToMonitor;
+
+(function bindMonitorManagementButtons(){
+  const appointmentsBtn=document.getElementById('btnMonitorAppointments');
+  const accountingBtn=document.getElementById('btnMonitorAccounting');
+
+  if(appointmentsBtn){
+    appointmentsBtn.addEventListener('click',function(ev){
+      ev.preventDefault();
+      ev.stopPropagation();
+      try{showAppointments();}
+      catch(err){
+        console.error('Error al abrir CITAS:',err);
+        alert('No se ha podido abrir CITAS. Revisa la consola del navegador.');
+      }
+    });
+  }
+
+  if(accountingBtn){
+    accountingBtn.addEventListener('click',function(ev){
+      ev.preventDefault();
+      ev.stopPropagation();
+      try{showAccounting();}
+      catch(err){
+        console.error('Error al abrir CONTABILIDAD:',err);
+        alert('No se ha podido abrir CONTABILIDAD. Revisa la consola del navegador.');
+      }
+    });
+  }
+})();
 
 </script>
 
