@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>MI GIMNASIO PRO MONITOR v10.10</title>
+<title>MI GIMNASIO PRO MONITOR v10.14</title>
 <meta name="theme-color" content="#121212">
 
 <style>
@@ -1133,7 +1133,7 @@ textarea{width:100%;box-sizing:border-box;resize:vertical}
 <body>
 
 <header>
-<h1>MI GIMNASIO PRO MONITOR v10.5</h1>
+<h1>MI GIMNASIO PRO MONITOR v10.14</h1>
 </header>
 
 <div class="container">
@@ -3747,7 +3747,7 @@ function saveConfig(){
 function exportData(){
 let data={app:'Mi Gimnasio Pro Monitor',version:'10.14',exported:new Date().toISOString(),routine,logs,personalExerciseBase,students,appointments,accounting};
 let b=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),u=URL.createObjectURL(b),a=document.createElement('a');
-a.href=u;a.download='gym_v10.5_monitor_backup_'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);
+a.href=u;a.download='gym_v10.14_monitor_backup_'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);
 let e=document.getElementById('backupStatus');if(e)e.innerHTML='<span class="backupOk">✓ Copia completa creada correctamente.<br>Incluye rutina, entrenamientos, alumnos, citas y contabilidad.</span>';
 }
 
@@ -6151,17 +6151,19 @@ window.backToMonitor = backToMonitor;
 
 
 /* ===== v10.14: ABRIR MONITOR AUTOMÁTICAMENTE AL CARGAR ===== */
-document.addEventListener('DOMContentLoaded',()=>{
-  try{
-    if(typeof openMonitor==='function'){
-      openMonitor();
-    }else if(typeof showMonitor==='function'){
-      showMonitor();
-    }
-  }catch(e){
-    console.error('No se pudo abrir Monitor automáticamente',e);
+/*
+   En esta versión la función real de entrada al Monitor es tab('monitor').
+   Las versiones anteriores intentaban llamar a openMonitor()/showMonitor(),
+   funciones que no existen en este código y por eso la aplicación se quedaba
+   en ENTRENAR al abrirse.
+*/
+try{
+  if(typeof tab==='function'){
+    tab('monitor');
   }
-});
+}catch(e){
+  console.error('No se pudo abrir Monitor automáticamente',e);
+}
 
 </script>
 
