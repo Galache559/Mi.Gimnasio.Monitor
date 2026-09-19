@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>MI GIMNASIO PRO MONITOR v10.7</title>
+<title>MI GIMNASIO PRO MONITOR v10.10</title>
 <meta name="theme-color" content="#121212">
 
 <style>
@@ -1087,6 +1087,15 @@ td input{font-size:.7rem;padding:5px 1px}.muscleStats{grid-template-columns:1fr 
 @media(max-width:380px){.tabataDisplay{font-size:3.5rem}.timedDisplay{font-size:3.7rem}.tabataPresGrid{grid-template-columns:1fr 1fr 1fr}}
 
 textarea{width:100%;box-sizing:border-box;resize:vertical}
+
+.accountingPeriodTools{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:end;margin-bottom:14px}
+.accountingPeriodTools .btn{grid-column:1/-1}
+.accountingPeriodTitle{font-size:1.05rem;font-weight:900;margin:8px 0 12px}
+.accountingQuickLegend{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0;font-size:.82rem;font-weight:800}
+.accountPaid{display:inline-block;padding:5px 8px;border-radius:8px;font-weight:900;background:rgba(0,230,118,.14);color:#00e676}
+.accountPending{display:inline-block;padding:5px 8px;border-radius:8px;font-weight:900;background:rgba(255,82,82,.14);color:#ff5252}
+.pendingMoney{font-weight:900}
+@media(max-width:650px){.accountingPeriodTools{grid-template-columns:1fr}}
 </style>
 
 </head>
@@ -5487,8 +5496,22 @@ function showAccounting(){
     </div>
 
     <div class="card">
-      <h2>📊 Resumen</h2>
+      <h2>📊 CONTABILIDAD GENERAL</h2>
+      <div class="accountingPeriodTools">
+        <label>Periodo</label>
+        <select id="accountPeriod" onchange="renderAccountingPeriod()">
+          <option value="WEEK">📅 Semanal</option>
+          <option value="FORTNIGHT">📆 Quincenal</option>
+          <option value="MONTH" selected>🗓️ Mensual</option>
+          <option value="YEAR">📊 Anual</option>
+        </select>
+        <label id="accountPeriodDateLabel">Mes</label>
+        <input type="date" id="accountPeriodDate" onchange="renderAccountingPeriod()">
+        <button class="btn blue" type="button" onclick="renderAccountingPeriod()">🔄 ACTUALIZAR</button>
+        <button class="btn" type="button" id="btnExportMonthlyExcel" onclick="exportMonthlyAccountingExcel()">📥 COPIA EXCEL DEL MES</button>
+      </div>
       <div id="accountingSummary"></div>
+      <div id="accountingPeriodBox"></div>
     </div>
 
     <div class="card">
@@ -5513,6 +5536,8 @@ function showAccounting(){
   `;
 
   document.getElementById('accountDate').value=new Date().toISOString().slice(0,10);
+  const periodInput=document.getElementById('accountPeriodDate');
+  if(periodInput)periodInput.value=new Date().toISOString().slice(0,10);
   renderAccounting();
 }
 
@@ -5574,57 +5599,309 @@ function toggleAccountingPaid(id){
   renderAccounting();
 }
 
+function accountingDateKey(v){
+  return String(v||'').slice(0,10);
+}
+
+function accountingDateObj(v){
+  const k=accountingDateKey(v);
+  if(!k)return null;
+  const p=k.split('-').map(Number);
+  if(p.length!==3||!p[0]||!p[2])return null;
+  return new Date(p[0],p[1]-1,p[2]);
+}
+
+function accountingPeriodRange(type, anchor){
+  const d=accountingDateObj(anchor)||new Date();
+  d.setHours(0,0,0,0);
+  let start=new Date(d), end=new Date(d);
+
+  if(type==='WEEK'){
+    const monday=(d.getDay()+6)%7;
+    start.setDate(d.getDate()-monday);
+    end=new Date(start); end.setDate(start.getDate()+6);
+  }else if(type==='FORTNIGHT'){
+    start.setDate(d.getDate()<=15?1:16);
+    end=new Date(start);
+    if(d.getDate()<=15) end.setDate(15);
+    else end.setMonth(end.getMonth()+1,0);
+  }else if(type==='MONTH'){
+    start.setDate(1);
+    end=new Date(start.getFullYear(),start.getMonth()+1,0);
+  }else{
+    start=new Date(d.getFullYear(),0,1);
+    end=new Date(d.getFullYear(),11,31);
+  }
+  return {start,end};
+}
+
+function accountingDateISO(d){
+  const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
+}
+
+function accountingPeriodLabel(type, range){
+  const a=range.start,b=range.end;
+  if(type==='WEEK') return `Semana del ${formatMonitorDate(accountingDateISO(a))} al ${formatMonitorDate(accountingDateISO(b))}`;
+  if(type==='FORTNIGHT') return `Quincena del ${formatMonitorDate(accountingDateISO(a))} al ${formatMonitorDate(accountingDateISO(b))}`;
+  if(type==='MONTH') return a.toLocaleDateString('es-ES',{month:'long',year:'numeric'}).replace(/^./,c=>c.toUpperCase());
+  return `Año ${a.getFullYear()}`;
+}
+
+function accountingPeriodData(type, anchor){
+  const range=accountingPeriodRange(type,anchor);
+  const from=accountingDateISO(range.start),to=accountingDateISO(range.end);
+  const data=(accounting||[]).filter(x=>{
+    const k=accountingDateKey(x.date);
+    return k>=from&&k<=to;
+  });
+  return {range,data};
+}
+
+function exportMonthlyAccountingExcel(){
+  const type=document.getElementById('accountPeriod')?.value||'MONTH';
+  if(type!=='MONTH'){
+    alert('La copia Excel solicitada corresponde al apartado mensual. Selecciona "Mensual" primero.');
+    return;
+  }
+
+  const input=document.getElementById('accountPeriodDate');
+  const anchor=input?.value||accountingDateISO(new Date());
+  const {range,data}=accountingPeriodData('MONTH',anchor);
+
+  const by={};
+  data.forEach(x=>{
+    const key=String(x.studentId);
+    if(!by[key])by[key]={name:monitorStudentName(x.studentId),paid:0,pending:0,total:0};
+    const amount=num(x.amount);
+    by[key].total+=amount;
+    if(String(x.status).toUpperCase()==='PAGADO')by[key].paid+=amount;
+    else by[key].pending+=amount;
+  });
+
+  const studentsData=Object.values(by).sort((a,b)=>{
+    if(b.pending!==a.pending)return b.pending-a.pending;
+    return a.name.localeCompare(b.name,'es');
+  });
+
+  const escXml=v=>String(v??'')
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&apos;');
+
+  const money=v=>Number(v||0).toFixed(2).replace('.',',');
+
+  const paid=data.filter(x=>String(x.status).toUpperCase()==='PAGADO')
+    .reduce((a,x)=>a+num(x.amount),0);
+  const pending=data.filter(x=>String(x.status).toUpperCase()!=='PAGADO')
+    .reduce((a,x)=>a+num(x.amount),0);
+  const total=paid+pending;
+
+  let xml=`<?xml version="1.0"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:o="urn:schemas-microsoft-com:office:office"
+ xmlns:x="urn:schemas-microsoft-com:office:excel"
+ xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">
+ <Styles>
+  <Style ss:ID="Default" ss:Name="Normal"><Alignment ss:Vertical="Center"/><Font ss:FontName="Calibri" ss:Size="11"/></Style>
+  <Style ss:ID="Title"><Font ss:Bold="1" ss:Size="16"/></Style>
+  <Style ss:ID="Header"><Font ss:Bold="1"/><Interior ss:Color="#D9EAF7" ss:Pattern="Solid"/></Style>
+  <Style ss:ID="Money"><NumberFormat ss:Format="0.00"/></Style>
+ </Styles>
+ <Worksheet ss:Name="Resumen mensual">
+  <Table>
+   <Row><Cell ss:StyleID="Title"><Data ss:Type="String">CONTABILIDAD MENSUAL</Data></Cell></Row>
+   <Row><Cell><Data ss:Type="String">${escXml(accountingPeriodLabel('MONTH',range))}</Data></Cell></Row>
+   <Row><Cell ss:StyleID="Header"><Data ss:Type="String">Total facturado</Data></Cell><Cell ss:StyleID="Money"><Data ss:Type="Number">${total.toFixed(2)}</Data></Cell></Row>
+   <Row><Cell ss:StyleID="Header"><Data ss:Type="String">Cobrado</Data></Cell><Cell ss:StyleID="Money"><Data ss:Type="Number">${paid.toFixed(2)}</Data></Cell></Row>
+   <Row><Cell ss:StyleID="Header"><Data ss:Type="String">Pendiente</Data></Cell><Cell ss:StyleID="Money"><Data ss:Type="Number">${pending.toFixed(2)}</Data></Cell></Row>
+   <Row><Cell ss:StyleID="Header"><Data ss:Type="String">Movimientos</Data></Cell><Cell><Data ss:Type="Number">${data.length}</Data></Cell></Row>
+   <Row/>
+   <Row>
+    <Cell ss:StyleID="Header"><Data ss:Type="String">Alumno</Data></Cell>
+    <Cell ss:StyleID="Header"><Data ss:Type="String">Cobrado</Data></Cell>
+    <Cell ss:StyleID="Header"><Data ss:Type="String">Debe</Data></Cell>
+    <Cell ss:StyleID="Header"><Data ss:Type="String">Total</Data></Cell>
+    <Cell ss:StyleID="Header"><Data ss:Type="String">Situación</Data></Cell>
+   </Row>`;
+
+  studentsData.forEach(x=>{
+    xml+=`<Row>
+      <Cell><Data ss:Type="String">${escXml(x.name)}</Data></Cell>
+      <Cell ss:StyleID="Money"><Data ss:Type="Number">${x.paid.toFixed(2)}</Data></Cell>
+      <Cell ss:StyleID="Money"><Data ss:Type="Number">${x.pending.toFixed(2)}</Data></Cell>
+      <Cell ss:StyleID="Money"><Data ss:Type="Number">${x.total.toFixed(2)}</Data></Cell>
+      <Cell><Data ss:Type="String">${x.pending>0?'DEBE':'PAGADO'}</Data></Cell>
+    </Row>`;
+  });
+
+  xml+=`</Table>
+ </Worksheet>
+ <Worksheet ss:Name="Movimientos">
+  <Table>
+   <Row>
+    <Cell ss:StyleID="Header"><Data ss:Type="String">Fecha</Data></Cell>
+    <Cell ss:StyleID="Header"><Data ss:Type="String">Alumno</Data></Cell>
+    <Cell ss:StyleID="Header"><Data ss:Type="String">Concepto</Data></Cell>
+    <Cell ss:StyleID="Header"><Data ss:Type="String">Importe</Data></Cell>
+    <Cell ss:StyleID="Header"><Data ss:Type="String">Estado</Data></Cell>
+    <Cell ss:StyleID="Header"><Data ss:Type="String">Fecha pago</Data></Cell>
+   </Row>`;
+
+  data.slice().sort((a,b)=>String(a.date).localeCompare(String(b.date))).forEach(x=>{
+    xml+=`<Row>
+      <Cell><Data ss:Type="String">${escXml(formatMonitorDate(x.date))}</Data></Cell>
+      <Cell><Data ss:Type="String">${escXml(monitorStudentName(x.studentId))}</Data></Cell>
+      <Cell><Data ss:Type="String">${escXml(x.concept||'')}</Data></Cell>
+      <Cell ss:StyleID="Money"><Data ss:Type="Number">${num(x.amount).toFixed(2)}</Data></Cell>
+      <Cell><Data ss:Type="String">${String(x.status).toUpperCase()==='PAGADO'?'PAGADO':'PENDIENTE'}</Data></Cell>
+      <Cell><Data ss:Type="String">${x.paidDate?escXml(formatMonitorDate(x.paidDate)):'—'}</Data></Cell>
+    </Row>`;
+  });
+
+  xml+=`</Table>
+ </Worksheet>
+</Workbook>`;
+
+  const blob=new Blob([xml],{type:'application/vnd.ms-excel;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  const month=String(anchor).slice(0,7);
+  a.href=url;
+  a.download=`Contabilidad_Mensual_${month}.xls`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+  alert('✓ Copia Excel mensual preparada correctamente.');
+}
+
+function renderAccountingPeriod(){
+  const type=document.getElementById('accountPeriod')?.value||'MONTH';
+  const input=document.getElementById('accountPeriodDate');
+  const label=document.getElementById('accountPeriodDateLabel');
+  if(!input)return;
+
+  if(type==='YEAR'){
+    input.type='number';
+    input.min='2000'; input.max='2100';
+    input.value=input.dataset.year||String(new Date().getFullYear());
+    if(label)label.textContent='Año';
+  }else{
+    input.type='date';
+    if(!input.value||input.dataset.mode!==type){
+      input.value=accountingDateISO(new Date());
+    }
+    input.dataset.mode=type;
+    if(label)label.textContent=type==='MONTH'?'Fecha del mes':type==='FORTNIGHT'?'Fecha de la quincena':'Fecha de la semana';
+  }
+
+  let anchor=input.value;
+  if(type==='YEAR') anchor=`${input.value}-01-01`;
+  const {range,data}=accountingPeriodData(type,anchor);
+
+  const paid=data.filter(x=>String(x.status).toUpperCase()==='PAGADO').reduce((s,x)=>s+num(x.amount),0);
+  const pending=data.filter(x=>String(x.status).toUpperCase()!=='PAGADO').reduce((s,x)=>s+num(x.amount),0);
+  const total=paid+pending;
+
+  const summary=document.getElementById('accountingSummary');
+  if(summary){
+    summary.innerHTML=`
+      <div class="accountingPeriodTitle">${accountingPeriodLabel(type,range)}</div>
+      <div class="statgrid">
+        <div class="stat"><b>${total.toFixed(2)} €</b><span>Total facturado</span></div>
+        <div class="stat"><b>${paid.toFixed(2)} €</b><span>✓ Cobrado</span></div>
+        <div class="stat"><b>${pending.toFixed(2)} €</b><span>⚠️ Pendiente</span></div>
+        <div class="stat"><b>${data.length}</b><span>Movimientos</span></div>
+      </div>`;
+  }
+
+  const by={};
+  data.forEach(x=>{
+    const key=String(x.studentId);
+    if(!by[key])by[key]={name:monitorStudentName(x.studentId),paid:0,pending:0,total:0,rows:[]};
+    const amount=num(x.amount);
+    by[key].total+=amount;
+    if(String(x.status).toUpperCase()==='PAGADO')by[key].paid+=amount;
+    else by[key].pending+=amount;
+    by[key].rows.push(x);
+  });
+
+  const studentsData=Object.values(by).sort((a,b)=>{
+    if(b.pending!==a.pending)return b.pending-a.pending;
+    return a.name.localeCompare(b.name,'es');
+  });
+
+  const box=document.getElementById('accountingPeriodBox');
+  if(!box)return;
+
+  if(!studentsData.length){
+    box.innerHTML='<div class="empty">No hay movimientos en este periodo.</div>';
+    return;
+  }
+
+  box.innerHTML=`
+    <div class="accountingQuickLegend">
+      <span>✓ PAGA / COBRADO</span>
+      <span>⚠️ DEBE / PENDIENTE</span>
+    </div>
+    <div class="accountTable">
+      <table>
+        <thead><tr><th>Alumno</th><th>Cobrado</th><th>Debe</th><th>Total</th><th>Situación</th></tr></thead>
+        <tbody>
+          ${studentsData.map(x=>`<tr>
+            <td><b>👤 ${esc(x.name)}</b></td>
+            <td class="money">${x.paid.toFixed(2)} €</td>
+            <td class="money ${x.pending>0?'pendingMoney':''}">${x.pending.toFixed(2)} €</td>
+            <td class="money">${x.total.toFixed(2)} €</td>
+            <td>${x.pending>0?'<span class="accountPending">⚠️ DEBE</span>':'<span class="accountPaid">✓ PAGADO</span>'}</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`;
+}
+
 function renderAccounting(){
   const rows=document.getElementById('accountingRows');
   const summary=document.getElementById('accountingSummary');
   if(!rows)return;
 
-  const data=(accounting||[]).slice().sort((a,b)=>
-    String(b.date).localeCompare(String(a.date))
-  );
-
-  const paid=data.filter(x=>String(x.status).toUpperCase()==='PAGADO')
-                 .reduce((s,x)=>s+num(x.amount),0);
-  const pending=data.filter(x=>String(x.status).toUpperCase()!=='PAGADO')
-                    .reduce((s,x)=>s+num(x.amount),0);
+  const data=(accounting||[]).slice().sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+  const paid=data.filter(x=>String(x.status).toUpperCase()==='PAGADO').reduce((s,x)=>s+num(x.amount),0);
+  const pending=data.filter(x=>String(x.status).toUpperCase()!=='PAGADO').reduce((s,x)=>s+num(x.amount),0);
   const total=paid+pending;
 
   if(summary){
     summary.innerHTML=`
+      <div class="accountingPeriodTitle">Resumen general de todos los movimientos</div>
       <div class="statgrid">
-        <div class="stat"><b>${total.toFixed(2)} €</b><span>Total</span></div>
-        <div class="stat"><b>${paid.toFixed(2)} €</b><span>Cobrado</span></div>
-        <div class="stat"><b>${pending.toFixed(2)} €</b><span>Pendiente</span></div>
+        <div class="stat"><b>${total.toFixed(2)} €</b><span>Total facturado</span></div>
+        <div class="stat"><b>${paid.toFixed(2)} €</b><span>✓ Cobrado</span></div>
+        <div class="stat"><b>${pending.toFixed(2)} €</b><span>⚠️ Pendiente</span></div>
         <div class="stat"><b>${data.length}</b><span>Movimientos</span></div>
-      </div>
-    `;
+      </div>`;
   }
 
   if(!data.length){
     rows.innerHTML='<tr><td colspan="7" class="empty">No hay movimientos registrados.</td></tr>';
-    return;
+  }else{
+    rows.innerHTML=data.map(x=>`
+      <tr>
+        <td>${esc(formatMonitorDate(x.date))}</td>
+        <td>${esc(monitorStudentName(x.studentId))}</td>
+        <td>${esc(x.concept||'')}</td>
+        <td class="money">${num(x.amount).toFixed(2)} €</td>
+        <td><button class="btn sm ${String(x.status).toUpperCase()==='PAGADO'?'':'blue'}" onclick="toggleAccountingPaid(${x.id})">${String(x.status).toUpperCase()==='PAGADO'?'✓ PAGADO':'💶 MARCAR PAGADO'}</button></td>
+        <td>${String(x.status).toUpperCase()==='PAGADO'&&x.paidDate?esc(formatMonitorDate(x.paidDate)):'—'}</td>
+        <td><button class="btn danger sm" onclick="deleteAccounting(${x.id})">🗑️</button></td>
+      </tr>`).join('');
   }
 
-  rows.innerHTML=data.map(x=>`
-    <tr>
-      <td>${esc(formatMonitorDate(x.date))}</td>
-      <td>${esc(monitorStudentName(x.studentId))}</td>
-      <td>${esc(x.concept||'')}</td>
-      <td class="money">${num(x.amount).toFixed(2)} €</td>
-      <td>
-        <button class="btn sm ${String(x.status).toUpperCase()==='PAGADO'?'':'blue'}"
-          onclick="toggleAccountingPaid(${x.id})">
-          ${String(x.status).toUpperCase()==='PAGADO'
-            ?'✓ PAGADO'
-            :'💶 MARCAR PAGADO'}
-        </button>
-      </td>
-      <td>${String(x.status).toUpperCase()==='PAGADO'&&x.paidDate?esc(formatMonitorDate(x.paidDate)):'—'}</td>
-      <td>
-        <button class="btn danger sm" onclick="deleteAccounting(${x.id})">🗑️</button>
-      </td>
-    </tr>
-  `).join('');
+  const period=document.getElementById('accountPeriod');
+  if(period)renderAccountingPeriod();
 }
 
 /* Compatibilidad con copias antiguas y apertura del Monitor */
