@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>MI GIMNASIO PRO MONITOR v10.9</title>
+<title>MI GIMNASIO PRO MONITOR v10.10</title>
 <meta name="theme-color" content="#121212">
 
 <style>
@@ -1042,7 +1042,7 @@ td input{font-size:.7rem;padding:5px 1px}.muscleStats{grid-template-columns:1fr 
 .remoteSearchBox label{display:block;color:var(--a);font-weight:800;font-size:.75rem;margin-bottom:5px}
 .remoteSearchBox select{margin-bottom:0}
 
-/* ===== v10.9 · TABATA POR EJERCICIO ===== */
+/* ===== v10.10 · TABATA POR EJERCICIO ===== */
 .tabataBtn{
   width:100%;
   margin-top:7px;
@@ -1128,7 +1128,7 @@ td input{font-size:.7rem;padding:5px 1px}.muscleStats{grid-template-columns:1fr 
 <body>
 
 <header>
-<h1>MI GIMNASIO PRO MONITOR v10.9</h1>
+<h1>MI GIMNASIO PRO MONITOR v10.10</h1>
 </header>
 
 <div class="container">
@@ -1331,6 +1331,8 @@ Selecciona un periodo.
 <button class="btn" onclick="newStudent()">➕ NUEVO ALUMNO</button>
 <button class="btn blue" onclick="showAppointments()">📅 CITAS</button>
 <button class="btn out" onclick="showAccounting()">💶 CONTABILIDAD</button>
+<button class="btn blue" onclick="document.getElementById('studentWorkoutImport').click()">📥 RECIBIR ENTRENAMIENTO</button>
+<input id="studentWorkoutImport" type="file" accept="application/json,.json" style="display:none" onchange="receiveStudentWorkoutFile(event)">
 </div>
 <br>
 <button class="btn danger" onclick="exitMonitorApp()">🚪 SALIR Y GUARDAR</button>
@@ -1370,7 +1372,7 @@ onclick="tab('informes')">
 <div class="timerBox">
 
 <div class="timerTitle">
-⏱️ DESCANSO
+⏱️ DESCANSO<br><span style="font-size:.62rem;color:var(--a)">🔒 PANTALLA ACTIVA</span>
 </div>
 
 <div id="timerDisplay" class="timerDisplay">
@@ -1388,7 +1390,7 @@ Cerrar
 
 <div id="tabataOverlay" class="tabataOverlay">
   <div class="tabataBox">
-    <div class="tabataTitle">🔥 TABATA</div>
+    <div class="tabataTitle">🔥 TABATA<br><span style="font-size:.62rem;color:var(--a)">🔒 PANTALLA ACTIVA</span></div>
     <div id="tabataExercise" class="tabataExercise">Ejercicio</div>
     <div class="tabataSettings">
       <div><label>TRABAJO (seg)</label><input id="tabataWork" type="number" min="1" max="600" value="20"></div>
@@ -1888,6 +1890,8 @@ let day=null;
 let monthDate=new Date();
 let timerInterval=null;
 let timerSeconds=0;
+let screenWakeLock=null;
+let audioCtx=null;
 
 
 const esc=s=>String(s??'').replace(
@@ -3741,9 +3745,9 @@ function saveConfig(){
 }
 
 function exportData(){
-let data={app:'Mi Gimnasio Pro Monitor',version:'10.8',exported:new Date().toISOString(),routine,logs,personalExerciseBase,students,appointments,accounting};
+let data={app:'Mi Gimnasio Pro Monitor',version:'10.11',exported:new Date().toISOString(),routine,logs,personalExerciseBase,students,appointments,accounting};
 let b=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),u=URL.createObjectURL(b),a=document.createElement('a');
-a.href=u;a.download='gym_v10.9_monitor_backup_'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);
+a.href=u;a.download='gym_v10.10_monitor_backup_'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);
 let e=document.getElementById('backupStatus');if(e)e.innerHTML='<span class="backupOk">✓ Copia completa creada correctamente.<br>Incluye rutina, entrenamientos, alumnos, citas y contabilidad.</span>';
 }
 
@@ -4765,93 +4769,72 @@ function renderTabata(){
   p.innerText=tabataPhase==='work'?'💪 TRABAJO':'🟢 DESCANSO';
   r.innerText=tabataRoundNo+' / '+tabataCurrent.rounds;
 }
-function startTabata(){
+async function keepScreenOn(){
+  try{
+    if('wakeLock' in navigator && !screenWakeLock){
+      screenWakeLock=await navigator.wakeLock.request('screen');
+    }
+  }catch(e){console.warn('No se pudo activar Wake Lock',e)}
+}
+function releaseScreenWakeLock(){
+  try{if(screenWakeLock){screenWakeLock.release().catch(()=>{});screenWakeLock=null;}}catch(e){screenWakeLock=null;}
+}
+function timerOrTabataActive(){return !!timerInterval || !!tabataInterval;}
+
+async function startTabata(){
   if(tabataInterval){clearInterval(tabataInterval);tabataInterval=null;}
   readTabataSettings();
-  tabataRoundNo=1;
-  tabataPhase='work';
-  tabataSeconds=tabataCurrent.work;
+  await keepScreenOn();
+  unlockAudio();
+  tabataRoundNo=1; tabataPhase='work'; tabataSeconds=tabataCurrent.work;
   renderTabata();
+  beep(1100,0.14);
   tabataInterval=setInterval(()=>{
     tabataSeconds--;
     if(tabataSeconds<=0){
-      beep();
+      beep(900,0.16);
       if(tabataPhase==='work'){
-        if(tabataCurrent.rest>0){
-          tabataPhase='rest';
-          tabataSeconds=tabataCurrent.rest;
-        }else if(tabataRoundNo<tabataCurrent.rounds){
-          tabataRoundNo++;
-          tabataPhase='work';
-          tabataSeconds=tabataCurrent.work;
-        }else{
-          clearInterval(tabataInterval);tabataInterval=null;
-          tabataPhase='done';tabataSeconds=0;
-          const p=document.getElementById('tabataPhase');if(p)p.innerText='🎉 TABATA COMPLETADO';
-          renderTabata();
-          setTimeout(closeTabata,900);
-          return;
-        }
+        if(tabataCurrent.rest>0){tabataPhase='rest';tabataSeconds=tabataCurrent.rest;beep(650,0.12);}
+        else if(tabataRoundNo<tabataCurrent.rounds){tabataRoundNo++;tabataPhase='work';tabataSeconds=tabataCurrent.work;beep(1100,0.12);}
+        else{return tabataFinished();}
       }else{
-        if(tabataRoundNo<tabataCurrent.rounds){
-          tabataRoundNo++;
-          tabataPhase='work';
-          tabataSeconds=tabataCurrent.work;
-        }else{
-          clearInterval(tabataInterval);tabataInterval=null;
-          tabataPhase='done';tabataSeconds=0;
-          const p=document.getElementById('tabataPhase');if(p)p.innerText='🎉 TABATA COMPLETADO';
-          renderTabata();
-          setTimeout(closeTabata,900);
-          return;
-        }
+        if(tabataRoundNo<tabataCurrent.rounds){tabataRoundNo++;tabataPhase='work';tabataSeconds=tabataCurrent.work;beep(1100,0.12);}
+        else{return tabataFinished();}
       }
     }
+    if(tabataSeconds<=3 && tabataSeconds>0) beep(800,0.08);
     renderTabata();
   },1000);
 }
+function tabataFinished(){
+  clearInterval(tabataInterval);tabataInterval=null;tabataPhase='done';tabataSeconds=0;
+  const p=document.getElementById('tabataPhase');if(p)p.innerText='🎉 TABATA COMPLETADO';
+  renderTabata();
+  beep(1200,0.18);setTimeout(()=>beep(1200,0.18),230);setTimeout(()=>beep(1200,0.28),460);
+  // El Tabata permanece visible hasta que el usuario pulse Cerrar.
+}
 function closeTabata(){
   if(tabataInterval){clearInterval(tabataInterval);tabataInterval=null;}
-  const ov=document.getElementById('tabataOverlay');
-  if(ov)ov.style.display='none';
+  const ov=document.getElementById('tabataOverlay'); if(ov)ov.style.display='none';
+  if(!timerInterval)releaseScreenWakeLock();
 }
 
-function startTimer(){
-
-closeTimer();
-
-timerSeconds=120;
-
-document.getElementById(
-'timerOverlay'
-).style.display='flex';
-
-updateTimerDisplay();
-
-timerInterval=
-setInterval(()=>{
-
-timerSeconds--;
-
-updateTimerDisplay();
-
-if(timerSeconds<=0){
-
-clearInterval(timerInterval);
-
-timerInterval=null;
-
-beep();
-
-setTimeout(
-closeTimer,
-700
-);
-
-}
-
-},1000);
-
+async function startTimer(){
+  closeTimer();
+  await keepScreenOn();
+  unlockAudio();
+  timerSeconds=120;
+  document.getElementById('timerOverlay').style.display='flex';
+  updateTimerDisplay();
+  beep(750,0.12);
+  timerInterval=setInterval(()=>{
+    timerSeconds--; updateTimerDisplay();
+    if(timerSeconds<=0){
+      clearInterval(timerInterval);timerInterval=null;
+      beep(1200,0.18);setTimeout(()=>beep(1200,0.18),230);setTimeout(()=>beep(1200,0.28),460);
+      // El cronómetro permanece visible hasta que el usuario pulse Cerrar.
+    }
+  },1000);
 }
 
 function updateTimerDisplay(){
@@ -4897,58 +4880,23 @@ beep();
 }
 
 function closeTimer(){
-
-if(timerInterval){
-
-clearInterval(
-timerInterval
-);
-
-timerInterval=null;
-
+  if(timerInterval){clearInterval(timerInterval);timerInterval=null;}
+  const o=document.getElementById('timerOverlay'); if(o)o.style.display='none';
+  if(!tabataInterval)releaseScreenWakeLock();
 }
-
-let o=
-document.getElementById(
-'timerOverlay'
-);
-
-if(o)
-o.style.display='none';
-
+function unlockAudio(){
+  try{const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;if(!audioCtx)audioCtx=new AC();if(audioCtx.state==='suspended')audioCtx.resume();}catch(e){}
 }
-
-function beep(){
-
-try{
-
-let c=
-new(
-window.AudioContext||
-window.webkitAudioContext
-)();
-
-let o=c.createOscillator();
-
-let g=c.createGain();
-
-o.connect(g);
-
-g.connect(c.destination);
-
-o.frequency.value=900;
-
-g.gain.value=.7;
-
-o.start();
-
-o.stop(
-c.currentTime+.18
-);
-
-}catch(e){}
-
+function beep(freq=900,duration=.18){
+  try{
+    const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;
+    if(!audioCtx)audioCtx=new AC();if(audioCtx.state==='suspended')audioCtx.resume();
+    const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.connect(g);g.connect(audioCtx.destination);o.frequency.value=freq;
+    g.gain.setValueAtTime(.0001,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(.7,audioCtx.currentTime+.01);g.gain.exponentialRampToValueAtTime(.0001,audioCtx.currentTime+duration);
+    o.start();o.stop(audioCtx.currentTime+duration+.02);
+  }catch(e){}
 }
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&timerOrTabataActive()){keepScreenOn();unlockAudio();}});
 
 restoreAutoBackupIfNeeded();
 
@@ -4961,7 +4909,7 @@ renderCalendar();
 loadConfig();
 
 
-/* ===== MONITOR PRIVADO ENLAZADO A v10.9 ===== */
+/* ===== MONITOR PRIVADO ENLAZADO A v10.10 ===== */
 let students=safeParse(localStorage.getItem(MK+'students'),[]);
 let appointments=safeParse(localStorage.getItem(MK+'appointments'),[]);
 let accounting=safeParse(localStorage.getItem(MK+'accounting'),[]);
@@ -5031,6 +4979,60 @@ let e=document.getElementById('monitorEditor');
 e.style.display='block';
 e.innerHTML=`<div class="monitorBack"><button class="btn out" onclick="backToMonitor()">← VOLVER A MONITOR</button></div><div class="card"><h2>➕ Nuevo alumno</h2><label>Nombre del alumno</label><input id="studentName" placeholder="Nombre y apellidos"><label>Teléfono</label><input id="studentPhone" type="tel" placeholder="Teléfono"><label>Lugar del entrenamiento</label><select id="studentPlace"><option value="Gimnasio">Gimnasio</option><option value="Domicilio">Domicilio</option></select><button class="btn" onclick="saveStudent()">💾 Guardar alumno</button><br><br><button class="btn out" onclick="backToMonitor()">Salir</button></div>`;
 }
+function monitorPrescriptionFromItem(item){
+  const p=item&&item.prescription&&typeof item.prescription==='object'?item.prescription:{};
+  let sets=Array.isArray(p.sets)?p.sets.slice(0,3):[];
+  while(sets.length<3)sets.push({reps:'',weight:''});
+  let times=Array.isArray(p.times)?p.times.slice(0,3):[];
+  while(times.length<3)times.push('');
+  const mode=['REPS_KG','TIEMPO','TABATA'].includes(String(p.mode||'REPS_KG'))?String(p.mode||'REPS_KG'):'REPS_KG';
+  const tabata=p.tabata&&typeof p.tabata==='object'?p.tabata:{};
+  return {mode,sets,times,tabata:{work:Number(tabata.work)||20,rest:Number(tabata.rest)||10,rounds:Number(tabata.rounds)||8}};
+}
+function monitorCloneExercise(group,name,image,equipment,prescription){
+  const x={group:String(group||''),name:String(name||''),image:String(image||''),equipment:String(equipment||'')};
+  if(prescription)x.prescription=monitorPrescriptionFromItem({prescription});
+  return x;
+}
+function prescriptionHTML(item,key){
+  const p=monitorPrescriptionFromItem(item);
+  let h=`<div class="prescriptionBox" data-key="${key}">
+    <div class="prescriptionTitle">🎯 OBJETIVO DEL MONITOR</div>
+    <select id="presMode-${key}" onchange="togglePrescriptionMode('${key}')">
+      <option value="REPS_KG" ${p.mode==='REPS_KG'?'selected':''}>Repeticiones + peso</option>
+      <option value="TIEMPO" ${p.mode==='TIEMPO'?'selected':''}>Tiempo</option>
+      <option value="TABATA" ${p.mode==='TABATA'?'selected':''}>Tabata</option>
+    </select>
+    <div id="presReps-${key}" style="display:${p.mode==='REPS_KG'?'block':'none'}">
+      <table class="presTable"><thead><tr><th>SERIE</th><th>REPS</th><th>KG</th></tr></thead><tbody>`;
+  for(let j=0;j<3;j++)h+=`<tr><td>${j+1}</td><td><input type="number" min="0" id="pres-r-${key}-${j}" value="${esc(p.sets[j].reps??'')}" placeholder="—"></td><td><input type="number" min="0" step=".5" id="pres-w-${key}-${j}" value="${esc(p.sets[j].weight??'')}" placeholder="—"></td></tr>`;
+  h+=`</tbody></table></div>
+    <div id="presTime-${key}" style="display:${p.mode==='TIEMPO'?'block':'none'}">
+      <table class="presTable"><thead><tr><th>SERIE</th><th>SEGUNDOS</th></tr></thead><tbody>`;
+  for(let j=0;j<3;j++)h+=`<tr><td>${j+1}</td><td><input type="number" min="0" id="pres-t-${key}-${j}" value="${esc(p.times[j]??'')}" placeholder="Ej. 30"></td></tr>`;
+  h+=`</tbody></table></div>
+    <div id="presTabata-${key}" style="display:${p.mode==='TABATA'?'block':'none'}">
+      <div class="tabataPresGrid"><label>TRABAJO (s)<input type="number" min="1" id="pres-tw-${key}" value="${p.tabata.work}"></label><label>DESCANSO (s)<input type="number" min="0" id="pres-tr-${key}" value="${p.tabata.rest}"></label><label>RONDAS<input type="number" min="1" id="pres-to-${key}" value="${p.tabata.rounds}"></label></div>
+    </div>
+  </div>`;
+  return h;
+}
+function togglePrescriptionMode(key){
+  const m=document.getElementById('presMode-'+key)?.value||'REPS_KG';
+  const a=document.getElementById('presReps-'+key),b=document.getElementById('presTime-'+key),c=document.getElementById('presTabata-'+key);
+  if(a)a.style.display=m==='REPS_KG'?'block':'none';
+  if(b)b.style.display=m==='TIEMPO'?'block':'none';
+  if(c)c.style.display=m==='TABATA'?'block':'none';
+}
+function readPrescription(key){
+  const mode=document.getElementById('presMode-'+key)?.value||'REPS_KG';
+  const sets=[],times=[];
+  for(let j=0;j<3;j++){
+    sets.push({reps:document.getElementById(`pres-r-${key}-${j}`)?.value||'',weight:document.getElementById(`pres-w-${key}-${j}`)?.value||''});
+    times.push(document.getElementById(`pres-t-${key}-${j}`)?.value||'');
+  }
+  return {mode,sets,times,tabata:{work:Number(document.getElementById('pres-tw-'+key)?.value)||20,rest:Number(document.getElementById('pres-tr-'+key)?.value)||10,rounds:Number(document.getElementById('pres-to-'+key)?.value)||8}};
+}
 function openStudent(id){
 let s=students.find(x=>x.id===id);if(!s)return;
 normalizeStudentPrivateRoutine(s);monitorStudentId=id;
@@ -5046,16 +5048,22 @@ h+=`<div class="card"><h2>📅 Día ${d}</h2>`;
 (MONITOR_DAY_GROUPS[d]||[]).forEach(groupName=>{
 const list=getLibraryBaseForGroup(groupName),selected=(s.routine[d]||[]).filter(x=>x.group===groupName),names=new Set(selected.map(x=>x.name));
 h+=`<div class="groupEditor"><div class="groupEditorTitle"><strong>${esc(groupName)}</strong><span style="font-size:.68rem;color:var(--sub)">${list.length} disponibles</span></div>`;
-list.forEach(item=>{
+list.forEach((item,idx)=>{
 const checked=names.has(item[0]);
-h+=`<label class="check"><input type="checkbox" class="studentExercise" data-d="${d}" data-group="${esc(groupName)}" data-name="${esc(item[0])}" data-image="${esc(item[1])}" data-equipment="${esc(item[2]||'')}" ${checked?'checked':''}><span>${esc(item[0])}</span><span style="margin-left:auto;color:var(--sub);font-size:.62rem">${esc(item[2]||'')}</span></label>`;
+const current=selected.find(x=>x.name===item[0]);
+const key=`d${d}g${groupName.replace(/[^a-zA-Z0-9]/g,'') }x${idx}`;
+h+=`<div class="studentExerciseRow"><label class="check"><input type="checkbox" class="studentExercise" data-key="${key}" data-d="${d}" data-group="${esc(groupName)}" data-name="${esc(item[0])}" data-image="${esc(item[1])}" data-equipment="${esc(item[2]||'')}" ${checked?'checked':''} onchange="toggleStudentPrescription('${key}',this)"><span>${esc(item[0])}</span><span style="margin-left:auto;color:var(--sub);font-size:.62rem">${esc(item[2]||'')}</span></label><div id="studentPres-${key}" style="display:${checked?'block':'none'}">${prescriptionHTML(current||{group:groupName,name:item[0],image:item[1],equipment:item[2]||''},key)}</div></div>`;
 });
 h+=`</div>`;
 });
 h+=`</div>`;
 }
-h+=`<div class="card"><div class="backupBox">🔒 <b>Rutina privada.</b> Esta selección pertenece exclusivamente a <b>${esc(s.name)}</b> y no modifica las rutinas de otros alumnos.</div><button class="btn" onclick="saveStudent()">💾 GUARDAR RUTINA PRIVADA</button><br><br><button class="btn danger" onclick="deleteStudent()">🗑️ ELIMINAR ALUMNO</button></div>`;
+h+=`<div class="card"><div class="backupBox">🔒 <b>Rutina privada.</b> El monitor define aquí los ejercicios y el objetivo de cada uno. El alumno verá exactamente esta prescripción.</div><button class="btn" onclick="saveStudent()">💾 GUARDAR RUTINA PRIVADA</button><br><br><button class="btn danger" onclick="deleteStudent()">🗑️ ELIMINAR ALUMNO</button></div>`;
 e.innerHTML=h;
+}
+function toggleStudentPrescription(key,checkbox){
+ const box=document.getElementById('studentPres-'+key);if(!box)return;
+ if(checkbox.checked){box.style.display='block';togglePrescriptionMode(key)}else box.style.display='none';
 }
 function callStudent(phone){
 let p=String(phone||'').replace(/[^\d+]/g,'');
@@ -5070,14 +5078,17 @@ if(!Array.isArray(s.logs))s.logs=[];
 s.name=name;s.phone=phone;s.place=place;
 const checks=document.querySelectorAll('#monitorEditor .studentExercise');
 if(checks.length){
-const r={};
-checks.forEach(c=>{
-if(!c.checked)return;
-const d=Number(c.dataset.d);if(!r[d])r[d]=[];
-r[d].push(monitorCloneExercise(c.dataset.group,c.dataset.name,c.dataset.image,c.dataset.equipment));
-});
-Object.keys(r).forEach(d=>r[d]=r[d].filter((x,i,a)=>a.findIndex(y=>y.group===x.group&&y.name===x.name)===i));
-s.routine=r;
+ const r={};
+ checks.forEach(c=>{
+  if(!c.checked)return;
+  const d=Number(c.dataset.d);if(!r[d])r[d]=[];
+  const key=c.dataset.key;
+  const base=monitorCloneExercise(c.dataset.group,c.dataset.name,c.dataset.image,c.dataset.equipment);
+  base.prescription=readPrescription(key);
+  r[d].push(base);
+ });
+ Object.keys(r).forEach(d=>r[d]=r[d].filter((x,i,a)=>a.findIndex(y=>y.group===x.group&&y.name===x.name)===i));
+ s.routine=r;
 }
 normalizeStudentPrivateRoutine(s);saveMonitor();alert('Alumno y rutina privada guardados correctamente.');backToMonitor();
 }
@@ -5163,36 +5174,25 @@ const MONITOR_DAY_GROUPS={
 4:['PECHO','HOMBROS','TRÍCEPS','ABDOMINALES'],
 5:['ESPALDA','BÍCEPS','ABDOMINALES']
 };
-function monitorCloneExercise(group,name,image,equipment){
-return {group:String(group||''),name:String(name||''),image:String(image||''),equipment:String(equipment||'')};
-}
-function monitorFindMasterExercise(group,name){
-const groupKey=String(group||'').toUpperCase();
-const n=String(name||'').trim().toLowerCase();
-const master=(EXERCISE_DB[groupKey]||[]).find(x=>String(x[0]).trim().toLowerCase()===n);
-if(master)return master;
-const personal=personalExerciseBase.find(x=>String(x.group||'').toUpperCase()===groupKey && String(x.name||'').trim().toLowerCase()===n);
-return personal? [personal.name,personal.image,personal.equipment||getEquipmentLabel(personal.name)] : null;
-}
 function normalizeStudentPrivateRoutine(student){
 if(!student)return;
 const old=student.routine||{},result={};
 Object.keys(old).forEach(k=>{
-const d=Number(k);if(d<1||d>5)return;
-const arr=Array.isArray(old[k])?old[k]:[];result[d]=[];
-arr.forEach(item=>{
-if(item&&typeof item==='object'&&item.name){
-const master=monitorFindMasterExercise(item.group,item.name);
-result[d].push(monitorCloneExercise(item.group,item.name,item.image||item.img||(master?master[1]:''),item.equipment||(master?master[2]:'')));
-}else if(item&&Number.isFinite(Number(item.g))&&Number.isFinite(Number(item.i))&&routine[d]){
-const g=routine[d].groups&&routine[d].groups[Number(item.g)];
-if(!g)return;
-const name=g.exercises&&g.exercises[Number(item.i)];if(!name)return;
-const master=monitorFindMasterExercise(g.name,name);
-result[d].push(monitorCloneExercise(g.name,name,master?master[1]:((g.images||[])[Number(item.i)]||''),master?master[2]:''));
-}
-});
-result[d]=result[d].filter((x,i,a)=>a.findIndex(y=>y.group===x.group&&y.name===x.name)===i);
+ const d=Number(k);if(d<1||d>5)return;
+ const arr=Array.isArray(old[k])?old[k]:[];result[d]=[];
+ arr.forEach(item=>{
+  if(item&&typeof item==='object'&&item.name){
+   const master=monitorFindMasterExercise(item.group,item.name);
+   const x=monitorCloneExercise(item.group,item.name,item.image||item.img||(master?master[1]:''),item.equipment||(master?master[2]:''),item.prescription);
+   result[d].push(x);
+  }else if(item&&Number.isFinite(Number(item.g))&&Number.isFinite(Number(item.i))&&routine[d]){
+   const g=routine[d].groups&&routine[d].groups[Number(item.g)];if(!g)return;
+   const name=g.exercises&&g.exercises[Number(item.i)];if(!name)return;
+   const master=monitorFindMasterExercise(g.name,name);
+   result[d].push(monitorCloneExercise(g.name,name,master?master[1]:((g.images||[])[Number(item.i)]||''),master?master[2]:'',null));
+  }
+ });
+ result[d]=result[d].filter((x,i,a)=>a.findIndex(y=>y.group===x.group&&y.name===x.name)===i);
 });
 student.routine=result;
 }
@@ -5221,16 +5221,36 @@ let s=getMonitorStudent(),html='';
 selected.forEach((item,index)=>{
 let ex=item.name||'',groupName=item.group||'';if(!ex)return;
 let master=monitorFindMasterExercise(groupName,ex),img=item.image||(master?master[1]:''),equipment=item.equipment||(master?master[2]:'');
+let p=monitorPrescriptionFromItem(item);
 let old=previous?getStudentPreviousExercise(previous,ex):null,ps=old?(old.sets||[]).slice(0,3):[];
 while(ps.length<3)ps.push({reps:'',weight:''});
 let prefix='sg'+index+'e'+index;
 html+=`<div class="group">${esc(groupName)}</div><div class="ex"><div class="exhead"><span>${esc(ex)}</span>${equipment?`<span class="badge">${esc(equipment)}</span>`:''}</div>`;
 if(img)html+=`<div class="imgbox" style="display:block"><img src="${esc(img)}" alt="${esc(ex)}" onerror="this.style.display='none'"></div>`;
-html+=`<table><thead><tr><th colspan="2" style="color:var(--a)">HOY</th><th colspan="2" style="color:var(--gold)">ÚLTIMO</th></tr><tr><th>REPS</th><th>KG</th><th>REPS</th><th>KG</th></tr></thead><tbody>`;
-for(let j=0;j<3;j++)html+=`<tr><td><input type="number" min="0" id="${prefix}-r${j}" placeholder="—" onfocus="selectCell(this)" oninput="studentCalc('${prefix}')"></td><td><input type="number" min="0" step=".5" id="${prefix}-w${j}" placeholder="—" onfocus="selectCell(this)" oninput="studentCalc('${prefix}')"></td><td><input type="number" value="${ps[j].reps??''}" readonly tabindex="-1"></td><td><input type="number" value="${ps[j].weight??''}" readonly tabindex="-1"></td></tr>`;
-html+=`</tbody></table><div class="rm" id="rm-${prefix}">🔥 1RM estimado: --</div><div class="vol" id="vol-${prefix}">📦 Volumen: 0 kg</div><button class="restbtn" onclick="startTimer()">⏱️ Descanso 2:00</button><button class="tabataBtn" onclick="openTabata('${esc(ex)}','${esc(groupName)}')">🔥 TABATA · 20s / 10s · 8 rondas</button></div>`;
+if(p.mode==='REPS_KG'){
+ html+=`<div class="targetBox"><b>🎯 OBJETIVO DEL MONITOR</b><table class="workTable"><thead><tr><th>SERIE</th><th>REPS</th><th>KG</th></tr></thead><tbody>`;
+ for(let j=0;j<3;j++)html+=`<tr><td>${j+1}</td><td>${p.sets[j].reps||'—'}</td><td>${p.sets[j].weight||'—'}</td></tr>`;
+ html+=`</tbody></table></div>`;
+ html+=`<table><thead><tr><th colspan="2" style="color:var(--a)">REALIZADO HOY</th><th colspan="2" style="color:var(--gold)">ÚLTIMO</th></tr><tr><th>REPS</th><th>KG</th><th>REPS</th><th>KG</th></tr></thead><tbody>`;
+ for(let j=0;j<3;j++)html+=`<tr><td><input type="number" min="0" id="${prefix}-r${j}" placeholder="—" onfocus="selectCell(this)" oninput="studentCalc('${prefix}')"></td><td><input type="number" min="0" step=".5" id="${prefix}-w${j}" placeholder="—" onfocus="selectCell(this)" oninput="studentCalc('${prefix}')"></td><td><input type="number" value="${ps[j].reps??''}" readonly tabindex="-1"></td><td><input type="number" value="${ps[j].weight??''}" readonly tabindex="-1"></td></tr>`;
+ html+=`</tbody></table>`;
+}else if(p.mode==='TIEMPO'){
+ html+=`<div class="targetBox"><b>🎯 TIEMPO INDICADO POR EL MONITOR</b><div style="font-size:1.15rem;font-weight:800;text-align:center;margin-top:6px">${p.times.filter(Boolean).join(' · ')||'Sin tiempo indicado'}${p.times.some(Boolean)?' s':''}</div></div>`;
+ html+=`<div class="timeActualBox"><label>⏱️ TIEMPO REALIZADO (segundos)</label><div class="timeInputs">`;
+ for(let j=0;j<3;j++)html+=`<input type="number" min="0" id="${prefix}-t${j}" placeholder="Serie ${j+1}">`;
+ html+=`</div></div>`;
+}else{
+ html+=`<div class="targetBox"><b>🎯 TABATA INDICADO POR EL MONITOR</b><div style="font-size:1rem;font-weight:800;text-align:center;margin-top:6px">${p.tabata.work}s trabajo · ${p.tabata.rest}s descanso · ${p.tabata.rounds} rondas</div></div><button class="tabataBtn" onclick="openStudentTabata('${esc(ex)}','${esc(groupName)}',${p.tabata.work},${p.tabata.rest},${p.tabata.rounds})">🔥 INICIAR TABATA INDICADO</button>`;
+}
+html+=`<div class="rm" id="rm-${prefix}">🔥 1RM estimado: --</div><div class="vol" id="vol-${prefix}">📦 Volumen: 0 kg</div><button class="restbtn" onclick="startTimer()">⏱️ Descanso 2:00</button>${p.mode!=='TABATA'?`<button class="tabataBtn" onclick="openTabata('${esc(ex)}','${esc(groupName)}')">🔥 TABATA LIBRE · 20s / 10s · 8 rondas</button>`:''}</div>`;
 });
 document.getElementById('studentForm').innerHTML=html;
+}
+function openStudentTabata(name,group,work,rest,rounds){
+ const key=String(group||'')+'::'+String(name||'');
+ tabataConfigs[key]={work:Number(work)||20,rest:Number(rest)||10,rounds:Number(rounds)||8};
+ try{localStorage.setItem(TABATA_CONFIG_KEY,JSON.stringify(tabataConfigs))}catch(e){}
+ openTabata(name,group);
 }
 function getStudentPreviousExercise(log,name){
 if(!log)return null;
@@ -5258,17 +5278,28 @@ if(!log){log={id:Date.now(),date:new Date(cd+'T12:00:00').toISOString(),day:d,gr
 let selected=Array.isArray(s.routine&&s.routine[d])?s.routine[d]:[],totalVolume=0,totalSets=0,totalExercises=0;
 selected.forEach((item,index)=>{
 let ex=item.name;if(!ex)return;
-let p='sg'+index+'e'+index,sets=[];
-for(let j=0;j<3;j++){let r=document.getElementById(p+'-r'+j),w=document.getElementById(p+'-w'+j);sets.push({reps:r&&r.value!==''?num(r.value):0,weight:w&&w.value!==''?num(w.value):0})}
-let real=sets.filter(x=>x.reps>0);if(!real.length)return;
-let data={name:ex,sets,volume:volume(real),rm:maxSetRM(real),group:item.group||'Sin grupo'};
+let pfx='sg'+index+'e'+index;
+let prescription=monitorPrescriptionFromItem(item);
+let sets=[],times=[],completed=false;
+if(prescription.mode==='REPS_KG'){
+  for(let j=0;j<3;j++){let r=document.getElementById(pfx+'-r'+j),w=document.getElementById(pfx+'-w'+j);sets.push({reps:r&&r.value!==''?num(r.value):0,weight:w&&w.value!==''?num(w.value):0})}
+  completed=sets.some(x=>x.reps>0);
+}else if(prescription.mode==='TIEMPO'){
+  for(let j=0;j<3;j++){let t=document.getElementById(pfx+'-t'+j);times.push(t&&t.value!==''?num(t.value):0)}
+  completed=times.some(x=>x>0);
+}else{
+  completed=true;
+}
+if(!completed)return;
+let real=sets.filter(x=>x.reps>0);
+let data={name:ex,group:item.group||'Sin grupo',prescription:monitorPrescriptionFromItem(item),sets, times, tabataCompleted:prescription.mode==='TABATA', volume:volume(real),rm:maxSetRM(real)};
 let g=log.groups.find(x=>x.name===data.group);if(!g){g={name:data.group,exercises:[]};log.groups.push(g)}
 let old=g.exercises.find(x=>x.name===ex);if(old)Object.assign(old,data);else g.exercises.push(data);
 totalVolume+=data.volume;totalSets+=real.length;totalExercises++;
 });
 log.groups=(log.groups||[]).filter(g=>{g.exercises=(g.exercises||[]).filter(e=>(e.sets||[]).some(x=>num(x.reps)>0));return g.exercises.length});
 saveMonitor();
-document.getElementById('studentSummary').innerHTML=`<div class="summary"><h3>🎉 ENTRENAMIENTO GUARDADO</h3><div class="big">${esc(s.name)}</div><div>💪 <b>${totalExercises}</b> ejercicios realizados</div><div>🔢 <b>${totalSets}</b> series realizadas</div><div>📦 <b>${Math.round(totalVolume)}</b> kg de volumen</div><br><button class="btn" onclick="studentSelectDay(${d})">Seguir entrenando</button><br><br><button class="btn out" onclick="backToMonitor()">Volver a Monitor</button></div>`;
+document.getElementById('studentSummary').innerHTML=`<div class="summary"><h3>🎉 ENTRENAMIENTO GUARDADO</h3><div class="big">${esc(s.name)}</div><div>💪 <b>${totalExercises}</b> ejercicios realizados</div><div>🔢 <b>${totalSets}</b> series realizadas</div><div>📦 <b>${Math.round(totalVolume)}</b> kg de volumen</div><br><button class="btn" onclick="studentSelectDay(${d})">Seguir entrenando</button><br><br><button class="btn blue" onclick="sendStudentWorkoutToMonitor(${d})">📤 REENVIAR ENTRENAMIENTO AL MONITOR</button><br><br><button class="btn out" onclick="backToMonitor()">Volver a Monitor</button></div>`;
 }
 function studentRoutine(){
 let s=getMonitorStudent();if(!s)return;normalizeStudentPrivateRoutine(s);
@@ -5276,11 +5307,15 @@ let e=document.getElementById('monitorEditor'),h=`<div class="monitorBack"><butt
 for(let d=1;d<=5;d++){
 let assigned=s.routine&&s.routine[d]?s.routine[d]:[];if(!assigned.length)continue;any=true;
 h+=`<div class="card"><h2>📅 Día ${d}</h2>`;
-assigned.forEach(item=>h+=`<div class="ex"><div class="exhead"><span>${esc(item.name)}</span>${item.equipment?`<span class="badge">${esc(item.equipment)}</span>`:''}</div><div style="font-size:.72rem;color:var(--sub)">${esc(item.group)}</div></div>`);
+assigned.forEach(item=>{
+ const p=monitorPrescriptionFromItem(item);
+ let target=p.mode==='REPS_KG'?p.sets.map((x,i)=>`S${i+1}: ${x.reps||'—'} reps · ${x.weight||'—'} kg`).join(' | '):p.mode==='TIEMPO'?`⏱️ ${p.times.filter(Boolean).join(' · ')||'—'} s`:`🔥 ${p.tabata.work}s / ${p.tabata.rest}s · ${p.tabata.rounds} rondas`;
+ h+=`<div class="ex"><div class="exhead"><span>${esc(item.name)}</span>${item.equipment?`<span class="badge">${esc(item.equipment)}</span>`:''}</div><div style="font-size:.72rem;color:var(--sub)">${esc(item.group)}</div>${item.image?`<div class="imgbox" style="display:block"><img src="${esc(item.image)}" alt="${esc(item.name)}" onerror="this.style.display='none'"></div>`:''}<div class="targetBox"><b>🎯 ${target}</b></div></div>`;
+});
 h+='</div>';
 }
 if(!any)h+=`<div class="card empty">Este alumno todavía no tiene rutina privada asignada.</div>`;
-h+=`<div class="card"><div class="backupBox">🔒 Esta rutina es exclusiva de ${esc(s.name)}.</div><button class="btn" onclick="openStudent(${s.id})">⚙️ EDITAR RUTINA PRIVADA</button></div>`;
+h+=`<div class="card"><div class="backupBox">🔒 Esta rutina es exclusiva de ${esc(s.name)}. El monitor define los objetivos y el alumno los recibe tal cual.</div><button class="btn" onclick="openStudent(${s.id})">⚙️ EDITAR RUTINA PRIVADA</button></div>`;
 e.innerHTML=h;
 }
 function studentReports(){
@@ -5660,7 +5695,7 @@ renderMonitorSummary();
 renderStudents();
 
 
-/* ===== v10.9 · HISTORIAL PAGOS + PENDIENTES + RUTINAS PRIVADAS REFORZADAS ===== */
+/* ===== v10.10 · HISTORIAL PAGOS + PENDIENTES + RUTINAS PRIVADAS REFORZADAS ===== */
 (function(){
   function v108DateKey(d){
     const x=new Date(String(d||'')+'T12:00:00');
@@ -5833,6 +5868,7 @@ renderStudents();
         if(!name||!group)return;
         const master=v108FindExercise(group,name);
         const rec={group:String(group).trim().toUpperCase(),name:String(name),image:String(image||master?.image||''),equipment:String(equipment||master?.equipment||getEquipmentLabel(name)||'')};
+        if(item.prescription)rec.prescription=monitorPrescriptionFromItem(item);
         if(!out[d].some(x=>x.group===rec.group&&x.name.trim().toLowerCase()===rec.name.trim().toLowerCase()))out[d].push(rec);
       });
     }
@@ -5908,6 +5944,95 @@ renderStudents();
     }catch(e){if(e?.name==='AbortError')return}
     const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=file.name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
     alert('✓ Se ha generado la rutina en modo solo lectura. Puedes enviar el archivo descargado al alumno.');
+  };
+
+  /* ===== v10.11 · ENVÍO DEL ENTRENAMIENTO REALIZADO AL MONITOR ===== */
+  function currentStudentLogForDay(d){
+    const s=getMonitorStudent();
+    if(!s)return null;
+    const cd=(document.getElementById('studentDate')||{}).value||dateKey(new Date());
+    return (s.logs||[]).find(l=>Number(l.day)===Number(d)&&dateKey(l.date)===cd)||null;
+  }
+
+  window.sendStudentWorkoutToMonitor=async function(d){
+    const s=getMonitorStudent();
+    if(!s)return;
+    v108NormalizeRoutine(s);
+    const log=currentStudentLogForDay(d);
+    if(!log || !Array.isArray(log.groups) || !log.groups.some(g=>(g.exercises||[]).length)){
+      alert('Primero guarda el entrenamiento realizado.');
+      return;
+    }
+    const payload={
+      type:'MI_GIMNASIO_ALUMNO_ENTRENAMIENTO',
+      version:'10.11',
+      sentAt:new Date().toISOString(),
+      student:{id:s.id,name:s.name,phone:s.phone||'',place:s.place||'Gimnasio'},
+      day:Number(d),
+      date:log.date,
+      routine:s.routine&&s.routine[d]?clone(s.routine[d]):[],
+      log:clone(log)
+    };
+    const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+    const safeName=String(s.name||'alumno').replace(/[^a-z0-9áéíóúüñ _-]/gi,'').trim()||'alumno';
+    const file=new File([blob],`Entrenamiento_${safeName}_Día_${d}_${dateKey(log.date)}.json`,{type:'application/json'});
+    try{
+      if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
+        await navigator.share({title:`Entrenamiento de ${s.name}`,text:`Entrenamiento realizado · Día ${d} · ${dateKey(log.date)}`,files:[file]});
+        return;
+      }
+    }catch(e){if(e?.name==='AbortError')return;}
+    const url=URL.createObjectURL(blob),a=document.createElement('a');
+    a.href=url;a.download=file.name;document.body.appendChild(a);a.click();a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),1000);
+    alert('✓ Entrenamiento preparado. Envía este archivo al Monitor para cargarlo.');
+  };
+
+  window.receiveStudentWorkoutFile=function(event){
+    const input=event.target, file=input?.files?.[0];
+    if(!file)return;
+    const reader=new FileReader();
+    reader.onload=function(){
+      try{
+        const payload=JSON.parse(reader.result);
+        if(!payload || payload.type!=='MI_GIMNASIO_ALUMNO_ENTRENAMIENTO' || !payload.log || !payload.student){
+          throw new Error('Formato no válido');
+        }
+        const info=payload.student;
+        let s=(students||[]).find(x=>String(x.id)===String(info.id));
+        if(!s && info.phone){
+          const phone=String(info.phone).replace(/\D/g,'');
+          s=(students||[]).find(x=>String(x.phone||'').replace(/\D/g,'')===phone);
+        }
+        if(!s && info.name){
+          const n=String(info.name).trim().toLowerCase();
+          s=(students||[]).find(x=>String(x.name||'').trim().toLowerCase()===n);
+        }
+        if(!s){
+          s={id:Number(info.id)||Date.now(),name:String(info.name||'Alumno'),phone:String(info.phone||''),place:String(info.place||'Gimnasio'),routine:{1:[],2:[],3:[],4:[],5:[]},logs:[]};
+          students.push(s);
+        }
+        if(!Array.isArray(s.logs))s.logs=[];
+        if(payload.routine && Array.isArray(payload.routine)){
+          s.routine[Number(payload.day)]=clone(payload.routine);
+        }
+        const incoming=clone(payload.log);
+        const idx=s.logs.findIndex(l=>String(l.id)===String(incoming.id));
+        if(idx>=0)s.logs[idx]=incoming;else{
+          const same=s.logs.findIndex(l=>Number(l.day)===Number(incoming.day)&&dateKey(l.date)===dateKey(incoming.date));
+          if(same>=0)s.logs[same]=incoming;else s.logs.push(incoming);
+        }
+        v108NormalizeRoutine(s);
+        saveMonitor();createMonitorAutoBackup();
+        renderMonitorSummary();renderStudents(document.getElementById('studentSearch')?.value||'');
+        alert(`✓ Entrenamiento recibido y cargado en Monitor.\n\nAlumno: ${s.name}\nDía: ${incoming.day}\nFecha: ${dateKey(incoming.date)}`);
+        monitorStudentId=s.id;
+        openStudent(s.id);
+      }catch(err){
+        alert('⚠️ No se ha podido cargar el entrenamiento. El archivo no es válido.');
+      }finally{input.value='';}
+    };
+    reader.readAsText(file);
   };
 
   /* Evita que una rutina antigua por índices vuelva a romperse al entrar en Entrenar. */
