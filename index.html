@@ -6042,6 +6042,120 @@ renderStudents();
   window.studentSelectDay=function(d){const s=getMonitorStudent();if(s)v108NormalizeRoutine(s);return oldStudentSelectDay.apply(this,arguments)};
 })();
 
+
+
+/* ===== v10.13 · REVISION PROFUNDA MONITOR / ALUMNOS =====
+   Corrige el flujo de alta + rutina privada y evita que la compatibilidad
+   antigua de v10.8 sobrescriba las prescripciones de v10.10+. */
+(function(){
+  function monitorRoutineKey(d,group,idx){
+    return 'd'+d+'g'+String(group||'').replace(/[^a-zA-Z0-9]/g,'')+'x'+idx;
+  }
+
+  window.openStudent=function(id){
+    const s=students.find(x=>String(x.id)===String(id));
+    if(!s)return;
+    normalizeStudentPrivateRoutine(s);
+    monitorStudentId=s.id;
+    document.getElementById('monitorHome').style.display='none';
+    const e=document.getElementById('monitorEditor');
+    e.style.display='block';
+
+    let h=`<div class="monitorBack"><button class="btn out" onclick="backToMonitor()">← VOLVER A MONITOR</button></div>
+      <div class="card"><h2>👤 ${esc(s.name)}</h2>
+      <div style="font-size:.78rem;margin-bottom:8px">${s.phone?`📞 <span class="phone">${esc(s.phone)}</span>`:'📞 Sin teléfono'}<br>📍 <span class="place">${esc(s.place||'Gimnasio')}</span></div>
+      <div class="monitorMenu"><button class="btn" onclick="studentTraining()">🏋️ ENTRENAR</button><button class="btn blue" onclick="studentReports()">📊 INFORMES</button><button class="btn out" onclick="studentRoutine()">⚙️ RUTINA</button></div></div>
+      <div class="card"><label>Nombre del alumno</label><input id="studentName" value="${esc(s.name)}"><label>Teléfono</label><input id="studentPhone" type="tel" value="${esc(s.phone||'')}"><label>Lugar del entrenamiento</label><select id="studentPlace"><option value="Gimnasio" ${(s.place||'Gimnasio')==='Gimnasio'?'selected':''}>Gimnasio</option><option value="Domicilio" ${(s.place||'')==='Domicilio'?'selected':''}>Domicilio</option></select></div>`;
+
+    for(let d=1;d<=5;d++){
+      h+=`<div class="card"><h2>📅 Día ${d}</h2>`;
+      (MONITOR_DAY_GROUPS[d]||[]).forEach(groupName=>{
+        const list=getLibraryBaseForGroup(groupName)||[];
+        const selected=(s.routine[d]||[]).filter(x=>String(x.group||'').trim().toUpperCase()===String(groupName).trim().toUpperCase());
+        const names=new Set(selected.map(x=>String(x.name||'').trim().toLowerCase()));
+        h+=`<div class="groupEditor"><div class="groupEditorTitle"><strong>${esc(groupName)}</strong><span style="font-size:.68rem;color:var(--sub)">${list.length} disponibles</span></div>`;
+        list.forEach((item,idx)=>{
+          const name=String(item[0]||'');
+          if(!name)return;
+          const checked=names.has(name.trim().toLowerCase());
+          const current=selected.find(x=>String(x.name||'').trim().toLowerCase()===name.trim().toLowerCase());
+          const key=monitorRoutineKey(d,groupName,idx);
+          h+=`<div class="studentExerciseRow"><label class="check"><input type="checkbox" class="studentExercise" data-key="${key}" data-d="${d}" data-group="${esc(groupName)}" data-name="${esc(name)}" data-image="${esc(item[1]||'')}" data-equipment="${esc(item[2]||'')}" ${checked?'checked':''} onchange="toggleStudentPrescription('${key}',this)"><span>${esc(name)}</span><span style="margin-left:auto;color:var(--sub);font-size:.62rem">${esc(item[2]||'')}</span></label><div id="studentPres-${key}" style="display:${checked?'block':'none'}">${prescriptionHTML(current||{group:groupName,name,image:item[1]||'',equipment:item[2]||''},key)}</div></div>`;
+        });
+        h+='</div>';
+      });
+      h+='</div>';
+    }
+    h+=`<div class="card"><div class="backupBox">🔒 <b>Rutina privada.</b> Los ejercicios y objetivos marcados aquí pertenecen exclusivamente a <b>${esc(s.name)}</b>.</div><button class="btn" onclick="saveStudent()">💾 GUARDAR RUTINA PRIVADA</button><br><br><button class="btn danger" onclick="deleteStudent()">🗑️ ELIMINAR ALUMNO</button></div>`;
+    e.innerHTML=h;
+  };
+
+  window.saveStudent=function(){
+    const name=(document.getElementById('studentName')||{}).value?.trim()||'';
+    const phone=(document.getElementById('studentPhone')||{}).value?.trim()||'';
+    const place=(document.getElementById('studentPlace')||{}).value||'Gimnasio';
+    if(!name){alert('Escribe el nombre del alumno.');return;}
+
+    let s=monitorStudentId?students.find(x=>String(x.id)===String(monitorStudentId)):null;
+    const isNew=!s;
+    if(!s){
+      s={id:Date.now(),name:'',phone:'',place:'Gimnasio',routine:{1:[],2:[],3:[],4:[],5:[]},logs:[]};
+      students.push(s);
+    }
+    if(!Array.isArray(s.logs))s.logs=[];
+    if(!s.routine||typeof s.routine!=='object')s.routine={1:[],2:[],3:[],4:[],5:[]};
+    normalizeStudentPrivateRoutine(s);
+    s.name=name;s.phone=phone;s.place=place;
+
+    const checks=document.querySelectorAll('#monitorEditor .studentExercise');
+    if(checks.length){
+      const r={1:[],2:[],3:[],4:[],5:[]};
+      checks.forEach(c=>{
+        if(!c.checked)return;
+        const d=Number(c.dataset.d);
+        if(!r[d])r[d]=[];
+        const key=c.dataset.key;
+        const base=monitorCloneExercise(c.dataset.group,c.dataset.name,c.dataset.image,c.dataset.equipment);
+        base.prescription=readPrescription(key);
+        r[d].push(base);
+      });
+      Object.keys(r).forEach(d=>{
+        r[d]=r[d].filter((x,i,a)=>a.findIndex(y=>y.group===x.group&&y.name.trim().toLowerCase()===x.name.trim().toLowerCase())===i);
+      });
+      s.routine=r;
+    }
+
+    normalizeStudentPrivateRoutine(s);
+    saveMonitor();
+    createMonitorAutoBackup();
+
+    if(isNew){
+      monitorStudentId=s.id;
+      alert('✓ Alumno creado. Ahora puedes asignar su rutina privada.');
+      openStudent(s.id);
+    }else{
+      alert('✓ Alumno y rutina privada guardados correctamente.');
+      backToMonitor();
+    }
+  };
+
+  /* La ficha siempre muestra el número real de días con rutina. */
+  const _renderStudents13=window.renderStudents;
+  window.renderStudents=function(query=''){
+    const box=document.getElementById('monitorList');
+    if(!box)return;
+    const q=String(query||'').trim().toLowerCase();
+    const list=(students||[]).filter(s=>!q||String(s.name||'').toLowerCase().includes(q)||String(s.phone||'').toLowerCase().includes(q));
+    if(!students.length){box.innerHTML='<div class="card empty">Todavía no hay alumnos.</div>';return;}
+    if(!list.length){box.innerHTML='<div class="card empty">No hay alumnos que coincidan con la búsqueda.</div>';return;}
+    box.innerHTML=list.map(s=>{
+      normalizeStudentPrivateRoutine(s);
+      const days=[1,2,3,4,5].filter(d=>Array.isArray(s.routine[d])&&s.routine[d].length).length;
+      const exercises=[1,2,3,4,5].reduce((n,d)=>n+(Array.isArray(s.routine[d])?s.routine[d].length:0),0);
+      return `<div class="monitorStudent"><strong>👤 ${esc(s.name)}</strong><br><small>${s.phone?`📞 ${esc(s.phone)} `:'📞 Sin teléfono '} · 📍 ${esc(s.place||'Gimnasio')} · ${days} día(s) · ${exercises} ejercicio(s)</small><div class="row"><button class="btn sm" onclick="openStudent(${s.id})">Abrir ficha</button>${s.phone?`<button class="btn blue sm" onclick="callStudent('${esc(s.phone)}')">📞</button>`:''}<button class="btn danger sm" onclick="quickDeleteStudent(${s.id})">Eliminar</button></div></div>`;
+    }).join('');
+  };
+})();
 </script>
 
 </body>
