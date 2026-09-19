@@ -1096,6 +1096,20 @@ textarea{width:100%;box-sizing:border-box;resize:vertical}
 .accountPending{display:inline-block;padding:5px 8px;border-radius:8px;font-weight:900;background:rgba(255,82,82,.14);color:#ff5252}
 .pendingMoney{font-weight:900}
 @media(max-width:650px){.accountingPeriodTools{grid-template-columns:1fr}}
+
+.monitorDashboard{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:10px 0}
+.dashboardCard{border:1px solid rgba(127,127,127,.22);border-radius:14px;padding:12px;background:var(--card,#fff);box-shadow:0 3px 12px rgba(0,0,0,.06);cursor:pointer;transition:.15s}
+.dashboardCard:hover{transform:translateY(-1px)}
+.dashboardCard .dashIcon{font-size:1.35rem}
+.dashboardCard .dashValue{font-size:1.45rem;font-weight:900;margin-top:3px}
+.dashboardCard .dashLabel{font-size:.72rem;color:var(--sub);margin-top:2px}
+.monitorDashboardWide{display:grid;grid-template-columns:1.2fr 1fr;gap:10px;margin:10px 0}
+.dashboardList{max-height:210px;overflow:auto}
+.dashboardRow{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid rgba(127,127,127,.16);font-size:.78rem}
+.dashboardRow:last-child{border-bottom:0}
+.dashboardEmpty{padding:12px;text-align:center;color:var(--sub);font-size:.78rem}
+@media(max-width:850px){.monitorDashboard{grid-template-columns:repeat(2,minmax(0,1fr))}.monitorDashboardWide{grid-template-columns:1fr}}
+
 </style>
 
 </head>
@@ -1292,7 +1306,7 @@ Selecciona un periodo.
 <section id="tab-monitor" class="tab">
 <div id="monitorHome">
 <div class="card">
-<h2>👥 Monitor</h2>
+<h2>👥 MONITOR · PANEL DE CONTROL</h2>
 <div class="monitorMenu">
 <button class="btn" onclick="newStudent()">➕ NUEVO ALUMNO</button>
 <button id="btnMonitorAppointments" class="btn blue" type="button">📅 CITAS</button>
@@ -3715,7 +3729,7 @@ function saveConfig(){
 }
 
 function exportData(){
-let data={app:'Mi Gimnasio Pro Monitor',version:'10.6',exported:new Date().toISOString(),routine,logs,personalExerciseBase,students,appointments,accounting};
+let data={app:'Mi Gimnasio Pro Monitor',version:'10.12',exported:new Date().toISOString(),routine,logs,personalExerciseBase,students,appointments,accounting};
 let b=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),u=URL.createObjectURL(b),a=document.createElement('a');
 a.href=u;a.download='gym_v10.5_monitor_backup_'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);
 let e=document.getElementById('backupStatus');if(e)e.innerHTML='<span class="backupOk">✓ Copia completa creada correctamente.<br>Incluye rutina, entrenamientos, alumnos, citas y contabilidad.</span>';
@@ -4879,7 +4893,7 @@ try{
 let old=localStorage.getItem(MONITOR_AUTO_BACKUP);
 if(old)localStorage.setItem(MONITOR_PREV_BACKUP,old);
 saveMonitor();
-let d={app:'Mi Gimnasio Pro - Monitor',version:'10.9',backupType:'automatic',created:new Date().toISOString(),students:clone(students),appointments:clone(appointments),accounting:clone(accounting),remoteAssignments:clone(remoteAssignments),personalExerciseBase:clone(personalExerciseBase)};
+let d={app:'Mi Gimnasio Pro - Monitor',version:'10.12',backupType:'automatic',created:new Date().toISOString(),students:clone(students),appointments:clone(appointments),accounting:clone(accounting),remoteAssignments:clone(remoteAssignments),personalExerciseBase:clone(personalExerciseBase)};
 localStorage.setItem(MONITOR_AUTO_BACKUP,JSON.stringify(d));
 localStorage.setItem(MONITOR_BACKUP_DATE,d.created);
 updateMonitorBackupStatus();
@@ -4998,13 +5012,76 @@ saveMonitor();renderStudents();
 function renderStudents(){
 let box=document.getElementById('monitorList');
 const today=dateKey(new Date());
+const now=new Date();
 const pendingStudents=(students||[]).map(s=>({s,fin:getStudentFinance(s.id),next:getNextAppointmentForStudent(s.id)}));
-const pendingTotal=pendingStudents.reduce((a,x)=>a+x.fin.pending,0),pendingCount=pendingStudents.filter(x=>x.fin.pending>0).length;
-let top=`<div class="card" style="margin-bottom:10px"><h3>📊 RESUMEN DEL MONITOR</h3><div class="statgrid"><div class="stat"><b>${students.length}</b><span>Alumnos</span></div><div class="stat"><b>${pendingCount}</b><span>Con pagos pendientes</span></div><div class="stat"><b>${pendingTotal.toFixed(2)} €</b><span>Total pendiente</span></div><div class="stat"><b>${(appointments||[]).filter(a=>String(a.date)>=today).length}</b><span>Próximas citas</span></div></div>${pendingCount?`<button class="btn danger" style="margin-top:8px" onclick="showPendingPayments()">⚠️ ${pendingCount} alumnos tienen pagos pendientes — ${pendingTotal.toFixed(2)} €</button>`:''}</div>`;
+const pendingTotal=pendingStudents.reduce((a,x)=>a+x.fin.pending,0);
+const pendingCount=pendingStudents.filter(x=>x.fin.pending>0).length;
+
+const weekStart=new Date(now);
+weekStart.setHours(0,0,0,0);
+weekStart.setDate(weekStart.getDate()-6);
+
+let weekSessions=0;
+(students||[]).forEach(s=>{
+  const seen=new Set();
+  (s.logs||[]).forEach(l=>{
+    const d=new Date(l.date);
+    if(!isNaN(d.getTime()) && d>=weekStart && d<=now){
+      let real=false;
+      (l.groups||[]).forEach(g=>(g.exercises||[]).forEach(e=>{
+        if((e.sets||[]).some(x=>num(x.reps)>0||num(x.weight)>0)||e.completed)real=true;
+      }));
+      if(real)seen.add(dateKey(l.date));
+    }
+  });
+  weekSessions+=seen.size;
+});
+
+const todayAppointments=(appointments||[]).filter(a=>String(a.date)===today).sort((a,b)=>String(a.time||'').localeCompare(String(b.time||'')));
+const nextAppointments=(appointments||[])
+  .filter(a=>String(a.date)>=today)
+  .sort((a,b)=>(String(a.date)+' '+String(a.time||'')).localeCompare(String(b.date)+' '+String(b.time||'')))
+  .slice(0,5);
+
+const pendingTransfers=(remoteAssignments||[]).filter(x=>x&&x.type==='ROUTINE_ASSIGNMENT'&&!x.returned);
+const returnedTransfers=(remoteAssignments||[]).filter(x=>x&&x.type==='ROUTINE_ASSIGNMENT'&&x.returned);
+
+let top=`<div class="card" style="margin-bottom:10px">
+<h3>🏠 PANEL DE CONTROL</h3>
+<div class="monitorDashboard">
+<div class="dashboardCard" onclick="newStudent()"><div class="dashIcon">👥</div><div class="dashValue">${students.length}</div><div class="dashLabel">Alumnos activos</div></div>
+<div class="dashboardCard" onclick="showPendingPayments()"><div class="dashIcon">⚠️</div><div class="dashValue">${pendingTotal.toFixed(2)} €</div><div class="dashLabel">${pendingCount} alumno(s) con pagos pendientes</div></div>
+<div class="dashboardCard" onclick="showAppointments()"><div class="dashIcon">📅</div><div class="dashValue">${todayAppointments.length}</div><div class="dashLabel">Citas de hoy</div></div>
+<div class="dashboardCard" onclick="studentExchangePortal()"><div class="dashIcon">🏋️</div><div class="dashValue">${weekSessions}</div><div class="dashLabel">Sesiones esta semana</div></div>
+</div>
+<div class="monitorDashboardWide">
+<div class="card" style="margin:0">
+<h3>📅 PRÓXIMAS CITAS</h3>
+<div class="dashboardList">${nextAppointments.length?nextAppointments.map(a=>{
+ const st=students.find(x=>String(x.id)===String(a.studentId));
+ return `<div class="dashboardRow"><span>👤 <b>${esc(st?st.name:'Alumno')}</b><br><small>${esc(formatMonitorDate(a.date))} · ${esc(a.time||'')}</small></span><button class="btn sm" onclick="openStudent(${st?st.id:0})">Ficha</button></div>`;
+}).join(''):'<div class="dashboardEmpty">No hay próximas citas.</div>'}</div>
+</div>
+<div class="card" style="margin:0">
+<h3>🔔 AVISOS</h3>
+<div class="dashboardList">
+${pendingCount?`<div class="dashboardRow"><span>⚠️ Pagos pendientes</span><b>${pendingCount}</b></div>`:''}
+${pendingTransfers.length?`<div class="dashboardRow"><span>📥 Rutinas pendientes</span><b>${pendingTransfers.length}</b></div>`:''}
+${returnedTransfers.length?`<div class="dashboardRow"><span>↩️ Rutinas devueltas</span><b>${returnedTransfers.length}</b></div>`:''}
+${!pendingCount&&!pendingTransfers.length&&!returnedTransfers.length?'<div class="dashboardEmpty">✓ No hay avisos pendientes.</div>':''}
+</div>
+${pendingCount?`<button class="btn danger sm" onclick="showPendingPayments()">Ver pagos pendientes</button>`:''}
+${pendingTransfers.length||returnedTransfers.length?`<button class="btn blue sm" onclick="studentExchangePortal()">Ver intercambio</button>`:''}
+</div>
+</div>
+</div>`;
+
 if(!students.length){box.innerHTML=top+'<div class="card empty">Todavía no hay alumnos.</div>';return}
-box.innerHTML=top+pendingStudents.map(({s,fin,next})=>{
-let days=Object.keys(s.routine||{}).length;
-return`<div class="monitorStudent"><strong>👤 ${esc(s.name)}</strong><br><small>${s.phone?`📞 ${esc(s.phone)} `:'📞 Sin teléfono '} · 📍 ${esc(s.place||'Gimnasio')} · 🏋️ ${days} día(s)}<br><small>📅 Próxima cita: ${next?`${esc(formatMonitorDate(next.date))} · ${esc(next.time)}`:'—'} · 💶 ${fin.pending>0?`⚠️ ${fin.pending.toFixed(2)} € pendiente`:'✓ AL DÍA'}</small><div class="row"><button class="btn sm" onclick="openStudent(${s.id})">Abrir ficha</button>${s.phone?`<button class="btn blue sm" onclick="callStudent('${esc(s.phone)}')">📞</button>`:''}<button class="btn danger sm" onclick="quickDeleteStudent(${s.id})">Eliminar</button></div></div>`;
+
+box.innerHTML=top+`<div class="card" style="margin-bottom:8px"><h3>👥 ALUMNOS</h3></div>`+
+pendingStudents.map(({s,fin,next})=>{
+ let days=Object.keys(s.routine||{}).length;
+ return`<div class="monitorStudent"><strong>👤 ${esc(s.name)}</strong><br><small>${s.phone?`📞 ${esc(s.phone)} `:'📞 Sin teléfono '} · 📍 ${esc(s.place||'Gimnasio')} · 🏋️ ${days} día(s)}<br><small>📅 Próxima cita: ${next?`${esc(formatMonitorDate(next.date))} · ${esc(next.time)}`:'—'} · 💶 ${fin.pending>0?`⚠️ ${fin.pending.toFixed(2)} € pendiente`:'✓ AL DÍA'}</small><div class="row"><button class="btn sm" onclick="openStudent(${s.id})">Abrir ficha</button>${s.phone?`<button class="btn blue sm" onclick="callStudent('${esc(s.phone)}')">📞</button>`:''}<button class="btn danger sm" onclick="quickDeleteStudent(${s.id})">Eliminar</button></div></div>`;
 }).join('');
 }
 
@@ -5175,7 +5252,7 @@ function exportRoutineAssignment(d){
  const s=getMonitorStudent();if(!s)return;normalizeStudentPrivateRoutine(s);const routineDay=Array.isArray(s.routine&&s.routine[d])?s.routine[d]:[];
  if(!routineDay.length){alert('Este alumno no tiene rutina asignada para el Día '+d+'.');return}
  const transferId=makeTransferId(),date=(document.getElementById('studentDate')||{}).value||new Date().toISOString().slice(0,10);
- const data={app:'Mi Gimnasio Monitor',exchangeType:'ROUTINE_ASSIGNMENT',version:'10.9',transferId,created:new Date().toISOString(),studentId:s.id,studentName:s.name,day:d,date,routine:clone(routineDay)};
+ const data={app:'Mi Gimnasio Monitor',exchangeType:'ROUTINE_ASSIGNMENT',version:'10.12',transferId,created:new Date().toISOString(),studentId:s.id,studentName:s.name,day:d,date,routine:clone(routineDay)};
  exchangeDownload(data,`RUTINA_${String(s.name).replace(/[^a-z0-9áéíóúüñ]+/gi,'_')}_DIA_${d}.json`);
  alert('✓ Rutina preparada. Envía este archivo al alumno.');
 }
