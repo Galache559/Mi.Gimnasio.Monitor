@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>MI GIMNASIO PRO MONITOR v10.14</title>
+<title>MI GIMNASIO PRO MONITOR v10.15</title>
 <meta name="theme-color" content="#121212">
 
 <style>
@@ -1126,6 +1126,18 @@ textarea{width:100%;box-sizing:border-box;resize:vertical}
 .alertItemMeta{font-size:.7rem;color:var(--sub);margin-top:5px}
 @media(max-width:700px){.alertSummary{grid-template-columns:1fr}}
 
+
+/* ===== v10.15 · FICHA DEL ALUMNO MEJORADA ===== */
+.studentFichaNav{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:10px 0}
+.studentFichaNav button{min-height:48px;padding:7px 5px;font-size:.68rem;border-radius:9px;font-weight:800}
+.studentFichaNav button.active{background:var(--a);color:#000;border-color:var(--a)}
+.studentFichaStatus{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.studentFichaPill{display:inline-flex;align-items:center;gap:4px;padding:5px 8px;border-radius:999px;background:#191919;border:1px solid var(--bor);font-size:.65rem;font-weight:800}
+.studentFichaPill.ok{color:var(--a);border-color:#176b43;background:#07351f}
+.studentFichaPill.warn{color:var(--gold);border-color:#705d00;background:#292400}
+.studentFichaSectionHidden{display:none!important}
+@media(max-width:430px){.studentFichaNav{grid-template-columns:repeat(2,1fr)}.studentFichaNav button{font-size:.65rem}}
+
 </style>
 
 </head>
@@ -1133,7 +1145,7 @@ textarea{width:100%;box-sizing:border-box;resize:vertical}
 <body>
 
 <header>
-<h1>MI GIMNASIO PRO MONITOR v10.14</h1>
+<h1>MI GIMNASIO PRO MONITOR v10.15</h1>
 </header>
 
 <div class="container">
@@ -3745,9 +3757,9 @@ function saveConfig(){
 }
 
 function exportData(){
-let data={app:'Mi Gimnasio Pro Monitor',version:'10.14',exported:new Date().toISOString(),routine,logs,personalExerciseBase,students,appointments,accounting};
+let data={app:'Mi Gimnasio Pro Monitor',version:'10.15',exported:new Date().toISOString(),routine,logs,personalExerciseBase,students,appointments,accounting};
 let b=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),u=URL.createObjectURL(b),a=document.createElement('a');
-a.href=u;a.download='gym_v10.14_monitor_backup_'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);
+a.href=u;a.download='gym_v10.15_monitor_backup_'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);
 let e=document.getElementById('backupStatus');if(e)e.innerHTML='<span class="backupOk">✓ Copia completa creada correctamente.<br>Incluye rutina, entrenamientos, alumnos, citas y contabilidad.</span>';
 }
 
@@ -4909,7 +4921,7 @@ try{
 let old=localStorage.getItem(MONITOR_AUTO_BACKUP);
 if(old)localStorage.setItem(MONITOR_PREV_BACKUP,old);
 saveMonitor();
-let d={app:'Mi Gimnasio Pro - Monitor',version:'10.14',backupType:'automatic',created:new Date().toISOString(),students:clone(students),appointments:clone(appointments),accounting:clone(accounting),remoteAssignments:clone(remoteAssignments),personalExerciseBase:clone(personalExerciseBase)};
+let d={app:'Mi Gimnasio Pro - Monitor',version:'10.15',backupType:'automatic',created:new Date().toISOString(),students:clone(students),appointments:clone(appointments),accounting:clone(accounting),remoteAssignments:clone(remoteAssignments),personalExerciseBase:clone(personalExerciseBase)};
 localStorage.setItem(MONITOR_AUTO_BACKUP,JSON.stringify(d));
 localStorage.setItem(MONITOR_BACKUP_DATE,d.created);
 updateMonitorBackupStatus();
@@ -4984,7 +4996,51 @@ h+=`</div>`;
 }
 h+=`<div class="card"><div class="backupBox">🔒 <b>Rutina privada.</b> El monitor define aquí los ejercicios y el objetivo de cada uno. El alumno verá exactamente esta prescripción.</div><button class="btn" onclick="saveStudent()">💾 GUARDAR RUTINA PRIVADA</button><br><br><button class="btn danger" onclick="deleteStudent()">🗑️ ELIMINAR ALUMNO</button></div>`;
 e.innerHTML=h;
+
+/* ===== v10.15 · Navegación de la ficha ===== */
+const fichaCards=[...e.querySelectorAll('.card')];
+const fichaNav=document.createElement('div');
+fichaNav.className='studentFichaNav';
+fichaNav.innerHTML=`
+<button type="button" class="active" onclick="activateStudentFichaTab('datos',this)">👤 DATOS</button>
+<button type="button" onclick="activateStudentFichaTab('rutina',this)">🏋️ RUTINA</button>
+<button type="button" onclick="activateStudentFichaTab('entrenamientos',this)">📊 ENTRENAMIENTOS</button>
+<button type="button" onclick="activateStudentFichaTab('pagos',this)">💶 PAGOS</button>
+<button type="button" onclick="activateStudentFichaTab('citas',this)">📅 CITAS</button>
+<button type="button" onclick="activateStudentFichaTab('evolucion',this)">📈 EVOLUCIÓN</button>`;
+e.insertBefore(fichaNav,e.firstChild);
+
+/* Clasificamos las tarjetas existentes sin alterar su contenido ni sus funciones. */
+fichaCards.forEach((card,i)=>{
+  card.dataset.fichaCard=String(i);
+  card.classList.add('studentFichaCard');
+});
+
+activateStudentFichaTab('datos',fichaNav.querySelector('button'));
 }
+
+function activateStudentFichaTab(tabName,button){
+  const e=document.getElementById('monitorEditor');
+  if(!e)return;
+  const cards=[...e.querySelectorAll('.studentFichaCard')];
+  const groups={
+    datos:[0,1,2,3,4,5],
+    rutina:[6,7,8,9,10,11],
+    entrenamientos:[],
+    pagos:[],
+    citas:[],
+    evolucion:[]
+  };
+  if(tabName==='entrenamientos'){studentHistory();return;}
+  if(tabName==='pagos'){studentFinance();return;}
+  if(tabName==='citas'){studentAppointments();return;}
+  if(tabName==='evolucion'){studentEvolution();return;}
+  const visible=new Set(groups[tabName]||[]);
+  cards.forEach((card,i)=>card.classList.toggle('studentFichaSectionHidden',!visible.has(i)));
+  e.querySelectorAll('.studentFichaNav button').forEach(b=>b.classList.remove('active'));
+  if(button)button.classList.add('active');
+}
+
 function toggleStudentPrescription(key,checkbox){const box=document.getElementById('studentPres-'+key);if(!box)return;if(checkbox.checked){box.style.display='block';togglePrescriptionMode(key)}else box.style.display='none'}
 function callStudent(phone){
 let p=String(phone||'').replace(/[^\d+]/g,'');
@@ -5374,7 +5430,7 @@ function exportRoutineAssignment(d){
  const s=getMonitorStudent();if(!s)return;normalizeStudentPrivateRoutine(s);const routineDay=Array.isArray(s.routine&&s.routine[d])?s.routine[d]:[];
  if(!routineDay.length){alert('Este alumno no tiene rutina asignada para el Día '+d+'.');return}
  const transferId=makeTransferId(),date=(document.getElementById('studentDate')||{}).value||new Date().toISOString().slice(0,10);
- const data={app:'Mi Gimnasio Monitor',exchangeType:'ROUTINE_ASSIGNMENT',version:'10.14',transferId,created:new Date().toISOString(),studentId:s.id,studentName:s.name,day:d,date,routine:clone(routineDay)};
+ const data={app:'Mi Gimnasio Monitor',exchangeType:'ROUTINE_ASSIGNMENT',version:'10.15',transferId,created:new Date().toISOString(),studentId:s.id,studentName:s.name,day:d,date,routine:clone(routineDay)};
  exchangeDownload(data,`RUTINA_${String(s.name).replace(/[^a-z0-9áéíóúüñ]+/gi,'_')}_DIA_${d}.json`);
  alert('✓ Rutina preparada. Envía este archivo al alumno.');
 }
@@ -6151,19 +6207,17 @@ window.backToMonitor = backToMonitor;
 
 
 /* ===== v10.14: ABRIR MONITOR AUTOMÁTICAMENTE AL CARGAR ===== */
-/*
-   En esta versión la función real de entrada al Monitor es tab('monitor').
-   Las versiones anteriores intentaban llamar a openMonitor()/showMonitor(),
-   funciones que no existen en este código y por eso la aplicación se quedaba
-   en ENTRENAR al abrirse.
-*/
-try{
-  if(typeof tab==='function'){
-    tab('monitor');
+document.addEventListener('DOMContentLoaded',()=>{
+  try{
+    if(typeof openMonitor==='function'){
+      openMonitor();
+    }else if(typeof showMonitor==='function'){
+      showMonitor();
+    }
+  }catch(e){
+    console.error('No se pudo abrir Monitor automáticamente',e);
   }
-}catch(e){
-  console.error('No se pudo abrir Monitor automáticamente',e);
-}
+});
 
 </script>
 
