@@ -4739,7 +4739,7 @@ renderCalendar();
 loadConfig();
 
 
-/* ===== MONITOR PRIVADO ENLAZADO A v10.4 ===== */
+/* ===== MONITOR PRIVADO ENLAZADO A v10.6 ===== */
 let students=safeParse(localStorage.getItem(MK+'students'),[]);
 let appointments=safeParse(localStorage.getItem(MK+'appointments'),[]);
 let accounting=safeParse(localStorage.getItem(MK+'accounting'),[]);
@@ -5306,6 +5306,24 @@ function deleteAccounting(id){
   renderAccounting();
 }
 
+function toggleAccountingPaid(id){
+  const item=accounting.find(x=>String(x.id)===String(id));
+  if(!item)return;
+
+  const wasPaid=String(item.status||'').toUpperCase()==='PAGADO';
+
+  if(wasPaid){
+    item.status='PENDIENTE';
+  }else{
+    item.status='PAGADO';
+    item.paidDate=new Date().toISOString();
+  }
+
+  saveMonitor();
+  createMonitorAutoBackup();
+  renderAccounting();
+}
+
 function renderAccounting(){
   const rows=document.getElementById('accountingRows');
   const summary=document.getElementById('accountingSummary');
@@ -5343,9 +5361,14 @@ function renderAccounting(){
       <td>${esc(monitorStudentName(x.studentId))}</td>
       <td>${esc(x.concept||'')}</td>
       <td class="money">${num(x.amount).toFixed(2)} €</td>
-      <td>${String(x.status).toUpperCase()==='PAGADO'
-        ?'<span class="money">PAGADO</span>'
-        :'<span class="place">PENDIENTE</span>'}</td>
+      <td>
+        <button class="btn sm ${String(x.status).toUpperCase()==='PAGADO'?'':'blue'}"
+          onclick="toggleAccountingPaid(${x.id})">
+          ${String(x.status).toUpperCase()==='PAGADO'
+            ?'✓ PAGADO'
+            :'💶 MARCAR PAGADO'}
+        </button>
+      </td>
       <td>
         <button class="btn danger sm" onclick="deleteAccounting(${x.id})">🗑️</button>
       </td>
