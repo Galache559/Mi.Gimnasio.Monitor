@@ -6262,7 +6262,7 @@ function saveStudentTraining(){
   const log=buildStudentLog();
   if(!log.groups.length){alert('No hay resultados anotados.');return false}
   state.savedLog=log;
-  alert('✓ ENTRENAMIENTO GUARDADO.\n\nYa puedes pulsar DEVOLVER AL MONITOR.');
+  alert('✓ ENTRENAMIENTO GUARDADO.\\n\\nYa puedes pulsar DEVOLVER AL MONITOR.');
   return true;
 }
 
@@ -6270,7 +6270,7 @@ function sendStudentTrainingToMonitor(){
   const log=buildStudentLog();
   if(!log.groups.length){alert('Primero introduce al menos un resultado.');return}
   state.savedLog=log;
-  const payload={type:'MI_GIMNASIO_ALUMNO_ENTRENAMIENTO',version:'10.26',sentAt:new Date().toISOString(),student:DATA.student,day:Number(state.day),date:log.date,routine:JSON.parse(JSON.stringify(DATA.routine[state.day]||[])),log};
+  const payload={type:'MI_GIMNASIO_ALUMNO_ENTRENAMIENTO',version:'10.27',sentAt:new Date().toISOString(),student:DATA.student,day:Number(state.day),date:log.date,routine:JSON.parse(JSON.stringify(DATA.routine[state.day]||[])),log};
   const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
   const name=String(DATA.student.name||'alumno').replace(/[^a-z0-9áéíóúüñ _-]/gi,'').trim()||'alumno';
   const file=new File([blob],'Entrenamiento_'+name+'_Día_'+state.day+'_'+String(log.date).slice(0,10)+'.json',{type:'application/json'});
@@ -6285,7 +6285,7 @@ function downloadStudent(blob,name){
   const url=URL.createObjectURL(blob),a=document.createElement('a');
   a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();
   setTimeout(()=>URL.revokeObjectURL(url),1000);
-  alert('✓ ARCHIVO PREPARADO.\n\nEnvía este archivo al Monitor mediante RECIBIR ENTRENAMIENTO.');
+  alert('✓ ARCHIVO PREPARADO.\\n\\nEnvía este archivo al Monitor mediante RECIBIR ENTRENAMIENTO.');
 }
 
 function startStudentRest(){
