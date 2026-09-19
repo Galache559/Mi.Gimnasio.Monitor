@@ -6156,6 +6156,99 @@ renderStudents();
     }).join('');
   };
 })();
+
+/* ===== v10.14 · MONITOR ESTABLE / FLUJO ALUMNO ===== */
+(function(){
+  function ensureStudentRoutine(s){
+    if(!s)return;
+    if(!s.routine||typeof s.routine!=='object'||Array.isArray(s.routine))s.routine={};
+    for(let d=1;d<=5;d++)if(!Array.isArray(s.routine[d]))s.routine[d]=[];
+    for(let d=1;d<=5;d++){
+      s.routine[d]=s.routine[d].filter(x=>x&&typeof x==='object'&&String(x.name||'').trim()).map(x=>{
+        const master=monitorFindMasterExercise(x.group,x.name);
+        const y={group:String(x.group||'').trim().toUpperCase(),name:String(x.name||'').trim(),image:String(x.image||x.img||(master?master[1]:'')),equipment:String(x.equipment||(master?master[2]:'')||'')};
+        y.prescription=monitorPrescriptionFromItem(x);
+        return y;
+      }).filter((x,i,a)=>a.findIndex(y=>y.group===x.group&&y.name.toLowerCase()===x.name.toLowerCase())===i);
+    }
+  }
+
+  window.openStudent=function(id){
+    const s=(students||[]).find(x=>String(x.id)===String(id));
+    if(!s)return;
+    ensureStudentRoutine(s);
+    monitorStudentId=s.id;
+    saveMonitor();
+    document.getElementById('monitorHome').style.display='none';
+    const e=document.getElementById('monitorEditor');
+    e.style.display='block';
+    let h=`<div class="monitorBack"><button class="btn out" onclick="backToMonitor()">← VOLVER A MONITOR</button></div>
+      <div class="card"><h2>👤 ${esc(s.name)}</h2><div style="font-size:.78rem;margin-bottom:8px">${s.phone?`📞 <span class="phone">${esc(s.phone)}</span>`:'📞 Sin teléfono'}<br>📍 <span class="place">${esc(s.place||'Gimnasio')}</span></div>
+      <div class="monitorMenu"><button class="btn" type="button" onclick="studentTraining()">🏋️ ENTRENAR</button><button class="btn blue" type="button" onclick="studentReports()">📊 INFORMES</button><button class="btn out" type="button" onclick="studentRoutine()">⚙️ RUTINA</button></div></div>
+      <div class="card"><label>Nombre del alumno</label><input id="studentName" value="${esc(s.name)}"><label>Teléfono</label><input id="studentPhone" type="tel" value="${esc(s.phone||'')}"><label>Lugar del entrenamiento</label><select id="studentPlace"><option value="Gimnasio" ${(s.place||'Gimnasio')==='Gimnasio'?'selected':''}>Gimnasio</option><option value="Domicilio" ${(s.place||'')==='Domicilio'?'selected':''}>Domicilio</option></select></div>`;
+    for(let d=1;d<=5;d++){
+      h+=`<div class="card"><h2>📅 Día ${d}</h2>`;
+      (MONITOR_DAY_GROUPS[d]||[]).forEach(groupName=>{
+        const list=getLibraryBaseForGroup(groupName)||[];
+        const selected=s.routine[d].filter(x=>String(x.group||'').trim().toUpperCase()===String(groupName).trim().toUpperCase());
+        const names=new Set(selected.map(x=>String(x.name||'').trim().toLowerCase()));
+        h+=`<div class="groupEditor"><div class="groupEditorTitle"><strong>${esc(groupName)}</strong><span style="font-size:.68rem;color:var(--sub)">${list.length} disponibles</span></div>`;
+        list.forEach((item,idx)=>{
+          const name=String(item[0]||'').trim(); if(!name)return;
+          const checked=names.has(name.toLowerCase());
+          const current=selected.find(x=>String(x.name||'').trim().toLowerCase()===name.toLowerCase());
+          const key=`d${d}g${String(groupName).replace(/[^a-zA-Z0-9]/g,'')}x${idx}`;
+          h+=`<div class="studentExerciseRow"><label class="check"><input type="checkbox" class="studentExercise" data-key="${key}" data-d="${d}" data-group="${esc(groupName)}" data-name="${esc(name)}" data-image="${esc(item[1]||'')}" data-equipment="${esc(item[2]||'')}" ${checked?'checked':''} onchange="toggleStudentPrescription('${key}',this)"><span>${esc(name)}</span><span style="margin-left:auto;color:var(--sub);font-size:.62rem">${esc(item[2]||'')}</span></label><div id="studentPres-${key}" style="display:${checked?'block':'none'}">${prescriptionHTML(current||{group:groupName,name:name,image:item[1]||'',equipment:item[2]||''},key)}</div></div>`;
+        });
+        h+='</div>';
+      });
+      h+='</div>';
+    }
+    h+=`<div class="card"><div class="backupBox">🔒 <b>Rutina privada.</b> Los ejercicios y objetivos marcados aquí pertenecen exclusivamente a <b>${esc(s.name)}</b>.</div><button class="btn" type="button" onclick="saveStudent()">💾 GUARDAR RUTINA PRIVADA</button><br><br><button class="btn danger" type="button" onclick="deleteStudent()">🗑️ ELIMINAR ALUMNO</button></div>`;
+    e.innerHTML=h;
+  };
+
+  window.saveStudent=function(){
+    const name=(document.getElementById('studentName')||{}).value?.trim()||'';
+    const phone=(document.getElementById('studentPhone')||{}).value?.trim()||'';
+    const place=(document.getElementById('studentPlace')||{}).value||'Gimnasio';
+    if(!name){alert('Escribe el nombre del alumno.');return;}
+    let s=monitorStudentId!=null?(students||[]).find(x=>String(x.id)===String(monitorStudentId)):null;
+    if(!s){s={id:Date.now(),name:'',phone:'',place:'Gimnasio',routine:{1:[],2:[],3:[],4:[],5:[]},logs:[]};students.push(s);}
+    s.name=name;s.phone=phone;s.place=place;if(!Array.isArray(s.logs))s.logs=[];
+    const r={1:[],2:[],3:[],4:[],5:[]};
+    document.querySelectorAll('#monitorEditor .studentExercise').forEach(c=>{
+      if(!c.checked)return;
+      const d=Number(c.dataset.d);if(!r[d])r[d]=[];
+      const base=monitorCloneExercise(c.dataset.group,c.dataset.name,c.dataset.image,c.dataset.equipment,readPrescription(c.dataset.key));
+      r[d].push(base);
+    });
+    for(let d=1;d<=5;d++)r[d]=r[d].filter((x,i,a)=>a.findIndex(y=>y.group===x.group&&y.name.toLowerCase()===x.name.toLowerCase())===i);
+    s.routine=r;ensureStudentRoutine(s);monitorStudentId=s.id;saveMonitor();createMonitorAutoBackup();
+    alert('✓ Alumno y rutina privada guardados correctamente.');
+    openStudent(s.id);
+  };
+
+  window.getMonitorStudent=function(){return (students||[]).find(x=>String(x.id)===String(monitorStudentId));};
+
+  window.studentTraining=function(){
+    const s=getMonitorStudent();if(!s)return;
+    ensureStudentRoutine(s);saveMonitor();
+    const e=document.getElementById('monitorEditor');
+    e.innerHTML=`<div class="monitorBack"><button class="btn out" type="button" onclick="openStudent(${s.id})">← VOLVER A FICHA</button></div><div class="monitorTitle">🏋️ ENTRENAMIENTO — ${esc(s.name)}</div><div class="card"><div class="days">${[1,2,3,4,5].map(d=>`<button class="btn out" type="button" onclick="studentSelectDay(${d})">Día ${d}</button>`).join('')}</div></div><div id="studentWork"></div>`;
+  };
+
+  window.studentSelectDay=function(d){
+    const s=getMonitorStudent();if(!s)return;ensureStudentRoutine(s);saveMonitor();
+    const selected=s.routine[d]||[];
+    const work=document.getElementById('studentWork');if(!work)return;
+    if(!selected.length){work.innerHTML=`<div class="card"><div class="empty">Este alumno no tiene ejercicios asignados para el Día ${d}.</div></div>`;return;}
+    let previous=null,a=(s.logs||[]).filter(l=>Number(l.day)===Number(d));if(a.length){a.sort((x,y)=>new Date(x.date)-new Date(y.date));previous=a[a.length-1];}
+    work.innerHTML=`<div class="card"><h2>🏋️ ${esc(s.name)} — Día ${d}</h2><div class="monitorBack"><button class="btn out" type="button" onclick="openStudent(${s.id})">← VOLVER A FICHA</button></div><label>Fecha</label><input type="date" id="studentDate" value="${new Date().toISOString().slice(0,10)}"><div id="studentForm"></div><button class="btn" type="button" onclick="saveStudentWorkout(${d})">💾 GUARDAR ENTRENAMIENTO</button><div id="studentSummary"></div></div>`;
+    renderStudentWorkout(d,selected,previous);
+  };
+})();
+
 </script>
 
 </body>
