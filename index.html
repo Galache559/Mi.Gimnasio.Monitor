@@ -6182,9 +6182,9 @@ renderStudents();
             for(let j=0;j<3;j++)dayHtml+=`<input type="number" min="0" id="${key}-t${j}" class="todayInput" placeholder="Serie ${j+1} (seg)">`;
             dayHtml+=`</div>`;
           }else{
-            dayHtml+=`<table class="workTable targetTable"><thead><tr><th>TRABAJO</th><th>DESCANSO</th><th>RONDAS</th></tr></thead><tbody><tr><td>${p.tabata.work}s</td><td>${p.tabata.rest}s</td><td>${p.tabata.rounds}</td></tr></tbody></table><button class="tabataBtn" onclick="runStudentTabata('${key}',${p.tabata.work},${p.tabata.rest},${p.tabata.rounds})">🔥 INICIAR TABATA</button><div class="tabataState" id="tabata-${key}">No realizado</div>`;
+            dayHtml+=`<table class="workTable targetTable"><thead><tr><th>TRABAJO</th><th>DESCANSO</th><th>RONDAS</th></tr></thead><tbody><tr><td>${p.tabata.work}s</td><td>${p.tabata.rest}s</td><td>${p.tabata.rounds}</td></tr></tbody></table><button class="tabataBtn" data-tabata-key="${key}" data-tabata-work="${p.tabata.work}" data-tabata-rest="${p.tabata.rest}" data-tabata-rounds="${p.tabata.rounds}">🔥 INICIAR TABATA</button><div class="tabataState" id="tabata-${key}">No realizado</div>`;
           }
-          dayHtml+=`<button class="restbtn" onclick="startStudentRest()">⏱️ DESCANSO 2:00</button></div>`;
+          dayHtml+=`<button class="restbtn" type="button" data-rest="1">⏱️ DESCANSO 2:00</button></div>`;
         });
       });
       dayHtml+=`</section>`;
@@ -6193,20 +6193,142 @@ renderStudents();
 
     const html=`<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="format-detection" content="telephone=no"><title>Mi Gimnasio · Entrenamiento · ${escStudent(s.name)}</title><style>
 :root{--bg:#121212;--card:#1d1d1d;--item:#252525;--a:#00e676;--blue:#29b6f6;--sub:#aaa;--bor:#3a3a3a;--red:#ff5252;--gold:#ffd54f}*{box-sizing:border-box;font-family:Arial,sans-serif}body{margin:0;background:var(--bg);color:#fff;padding:12px 12px 40px}main{max-width:780px;margin:auto}header{background:var(--card);border:1px solid var(--bor);border-radius:14px;padding:16px;text-align:center;margin-bottom:10px}h1{color:var(--a);font-size:1.18rem;margin:0}header .sub{color:var(--sub);font-size:.75rem;margin-top:5px}.days{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:10px}.dayBtn{background:#252525;color:#fff;border:1px solid var(--bor);border-radius:7px;padding:9px 4px;font-weight:bold}.dayBtn.on{background:var(--a);color:#000}.dateBox{background:var(--card);border:1px solid var(--bor);border-radius:11px;padding:10px;margin-bottom:10px}.dateBox label{display:block;color:var(--sub);font-size:.68rem;margin-bottom:5px}.dateBox input{background:#292929;color:#fff;border:1px solid var(--bor);border-radius:7px;padding:8px}.trainingHero{background:#171717;border:1px solid var(--bor);border-radius:11px;padding:10px;margin-bottom:10px}.trainingHeroTop{display:flex;justify-content:space-between;align-items:center;gap:10px}.trainingHeroTitle{font-weight:bold;color:var(--blue);font-size:1rem}.trainingHeroSub{color:var(--sub);font-size:.68rem;margin-top:4px}.trainingPill{border:1px solid var(--a);color:var(--a);border-radius:20px;padding:5px 8px;font-size:.62rem;font-weight:bold}.group{font-weight:bold;padding:8px 10px;margin:10px 0 6px;border-left:4px solid var(--blue);background:#191919;border-radius:6px}.ex{background:var(--card);border:1px solid var(--bor);border-radius:11px;padding:10px;margin-bottom:10px}.exhead{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:7px;font-size:.8rem;font-weight:bold}.exerciseNo{font-size:.62rem;color:var(--a);border:1px solid #176b46;border-radius:5px;padding:3px 5px}.badge{margin-left:auto;color:var(--sub);font-size:.6rem;border:1px solid var(--bor);padding:3px 5px;border-radius:5px}.gifPreview{width:100%;max-height:280px;object-fit:contain;background:#0b0b0b;border-radius:8px;border:1px solid var(--bor);margin:4px 0 8px}.gifLabel{color:var(--red);font-size:.68rem;margin:5px}.monitorTargetTitle,.actualTitle{background:#062d3c;color:var(--blue);border:1px solid #17607c;border-radius:7px;padding:8px;font-size:.72rem;font-weight:bold;margin:7px 0}.workTable{width:100%;border-collapse:separate;border-spacing:3px;margin:4px 0 7px}.workTable th{font-size:.59rem;color:var(--sub);padding:5px}.targetTable td{text-align:center;background:#252525;padding:7px;font-size:.7rem;border:1px solid #333;border-radius:4px}.studentTable th[colspan]{font-size:.7rem}.todayHead{color:var(--a)!important;background:#07351f;border-radius:5px}.lastHead{color:var(--blue)!important;background:#092632;border-radius:5px}.studentTable td{padding:3px}.studentTable input,.timeGrid input{width:100%;background:#292929;color:#fff;border:1px solid var(--bor);border-radius:5px;padding:8px;text-align:center}.studentTable .lastCell input{background:#092632;color:var(--blue)}.rm,.vol{font-size:.68rem;margin-top:5px}.rm{color:var(--gold)}.vol{color:var(--a)}.timeGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin:6px 0 8px}.tabataBtn,.restbtn{width:100%;border-radius:7px;padding:9px;font-weight:bold;margin-top:7px}.tabataBtn{background:#4a1730;color:#ff80ab;border:1px solid #9b315f}.restbtn{background:#333;color:#fff;border:1px solid var(--bor)}.tabataState{text-align:center;color:var(--sub);font-size:.7rem;margin-top:6px}.bottomActions{display:grid;gap:8px;margin-top:12px}.saveBtn,.sendBtn{border-radius:9px;padding:13px;font-weight:bold;font-size:.86rem}.saveBtn{background:var(--a);color:#000;border:0}.sendBtn{background:#062d3c;color:var(--blue);border:1px solid #17607c}.note{color:var(--sub);font-size:.65rem;text-align:center;margin-top:8px}.overlay{position:fixed;inset:0;background:rgba(0,0,0,.88);display:flex;align-items:center;justify-content:center;z-index:100}.timerBox{background:var(--card);border:1px solid var(--bor);border-radius:14px;padding:24px;text-align:center;width:90%;max-width:320px}.timerBox strong{display:block;font-size:4rem;margin:12px}.timerBox button{background:#333;color:#fff;border:1px solid var(--bor);border-radius:7px;padding:8px 16px}@media(max-width:600px){.days{grid-template-columns:repeat(3,1fr)}.trainingHeroTop{display:block}.trainingPill{display:inline-block;margin-top:7px}.gifPreview{max-height:240px}}
-</style></head><body><main><header><h1>🏋️ MI GIMNASIO · ENTRENAMIENTO</h1><div class="sub">${escStudent(s.name)}</div><div class="sub">${escStudent(s.place||'Gimnasio')}</div></header><div id="days" class="days">${selectedDays.map((d,i)=>`<button class="dayBtn ${i===0?'on':''}" type="button" onclick="selectStudentDay(${d})">Día ${d}</button>`).join('')}</div><div class="dateBox"><label>FECHA DEL ENTRENAMIENTO</label><input id="studentDate" type="date" value="${new Date().toISOString().slice(0,10)}"></div>${daysHtml}<div class="bottomActions"><button class="saveBtn" type="button" onclick="saveStudentTraining()">💾 GUARDAR ENTRENAMIENTO</button><button class="sendBtn" type="button" onclick="sendStudentTrainingToMonitor()">📤 DEVOLVER AL MONITOR</button></div><div class="note">Cuando termines, pulsa GUARDAR ENTRENAMIENTO y después DEVOLVER AL MONITOR.</div></main>
+</style></head><body><main><header><h1>🏋️ MI GIMNASIO · ENTRENAMIENTO</h1><div class="sub">${escStudent(s.name)}</div><div class="sub">${escStudent(s.place||'Gimnasio')}</div></header><div id="days" class="days">${selectedDays.map((d,i)=>`<button class="dayBtn ${i===0?'on':''}" type="button" data-student-day="${d}">Día ${d}</button>`).join('')}</div><div class="dateBox"><label>FECHA DEL ENTRENAMIENTO</label><input id="studentDate" type="date" value="${new Date().toISOString().slice(0,10)}"></div>${daysHtml}<div class="bottomActions"><button class="saveBtn" type="button" id="saveStudentBtn">💾 GUARDAR ENTRENAMIENTO</button><button class="sendBtn" type="button" id="sendStudentBtn">📤 DEVOLVER AL MONITOR</button></div><div class="note">Cuando termines, pulsa GUARDAR ENTRENAMIENTO y después DEVOLVER AL MONITOR.</div></main>
 <script>
 const DATA=${jsonSafe};
-const state={day:${selectedDays[0]},results:{},tabata:{}};
+const state={day:${selectedDays[0]},results:{},tabata:{},savedLog:null};
+
 function num(v){const n=Number(String(v??'').replace(',','.'));return Number.isFinite(n)?n:0}
-function selectStudentDay(d){state.day=Number(d);document.querySelectorAll('.dayBtn').forEach(b=>b.classList.toggle('on',b.textContent.trim()==='Día '+d));document.querySelectorAll('.dayPanel').forEach(p=>p.style.display=Number(p.dataset.day)===Number(d)?'block':'none')}
-function calcStudent(key){let vol=0;for(let j=0;j<3;j++){const r=document.getElementById(key+'-r'+j),w=document.getElementById(key+'-w'+j);vol+=num(r?.value)*num(w?.value)}const v=document.getElementById('vol-'+key);if(v)v.textContent='📦 Volumen: '+Math.round(vol*10)/10+' kg';let best=0;for(let j=0;j<3;j++){const r=num(document.getElementById(key+'-r'+j)?.value),w=num(document.getElementById(key+'-w'+j)?.value);if(r>0&&w>0){const rm=w*(1+r/30);if(rm>best)best=rm}}const rm=document.getElementById('rm-'+key);if(rm)rm.textContent='🔥 1RM estimado: '+(best?Math.round(best*10)/10+' kg':'--')}
-function collectDay(d){const selected=DATA.routine[d]||[],out=[];let any=false;selected.forEach((item,i)=>{const key='d'+d+'e'+(i+1),p=item.prescription||{mode:'REPS_KG',sets:[]},mode=['REPS_KG','TIEMPO','TABATA'].includes(String(p.mode||'REPS_KG'))?String(p.mode||'REPS_KG'):'REPS_KG';if(mode==='REPS_KG'){const sets=[];for(let j=0;j<3;j++){const reps=num(document.getElementById(key+'-r'+j)?.value),weight=num(document.getElementById(key+'-w'+j)?.value);sets.push({reps,weight});if(reps>0)any=true}out.push({name:item.name,group:item.group,prescription:p,sets,volume:sets.reduce((a,x)=>a+x.reps*x.weight,0),rm:0})}else if(mode==='TIEMPO'){const times=[];for(let j=0;j<3;j++){const t=num(document.getElementById(key+'-t'+j)?.value);times.push(t);if(t>0)any=true}out.push({name:item.name,group:item.group,prescription:p,times,sets:[],tabataCompleted:false})}else{const done=!!state.tabata[key];if(done)any=true;out.push({name:item.name,group:item.group,prescription:p,times:[],sets:[],tabataCompleted:done})}});return {out,any}}
-function buildStudentLog(){const c=collectDay(state.day),groups=[];c.out.forEach(e=>{const has=e.prescription?.mode==='REPS_KG'?e.sets.some(x=>x.reps>0):e.prescription?.mode==='TIEMPO'?e.times.some(x=>x>0):e.tabataCompleted;if(!has)return;let g=groups.find(x=>x.name===e.group);if(!g){g={name:e.group,exercises:[]};groups.push(g)}g.exercises.push(e)});const date=document.getElementById('studentDate')?.value||new Date().toISOString().slice(0,10);return {id:Date.now(),date:new Date(date+'T12:00:00').toISOString(),day:Number(state.day),groups}}
-function saveStudentTraining(){const log=buildStudentLog();if(!log.groups.length){alert('No hay resultados anotados.');return}state.savedLog=log;alert('✓ Entrenamiento guardado. Ya puedes DEVOLVER AL MONITOR.')}
-function sendStudentTrainingToMonitor(){const log=buildStudentLog();if(!log.groups.length){alert('Primero introduce al menos un resultado y pulsa GUARDAR ENTRENAMIENTO.');return}const payload={type:'MI_GIMNASIO_ALUMNO_ENTRENAMIENTO',version:'10.25',sentAt:new Date().toISOString(),student:DATA.student,day:Number(state.day),date:log.date,routine:JSON.parse(JSON.stringify(DATA.routine[state.day]||[])),log};const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});const name=String(DATA.student.name||'alumno').replace(/[^a-z0-9áéíóúüñ _-]/gi,'').trim()||'alumno';const file=new File([blob],'Entrenamiento_'+name+'_Día_'+state.day+'_'+String(log.date).slice(0,10)+'.json',{type:'application/json'});if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){navigator.share({title:'Entrenamiento de '+DATA.student.name,text:'Entrenamiento realizado · Día '+state.day,files:[file]}).catch(e=>{if(e?.name!=='AbortError')downloadStudent(blob,file.name)});return}downloadStudent(blob,file.name)}
-function downloadStudent(blob,name){const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);alert('✓ Archivo preparado. Envíalo al Monitor mediante RECIBIR ENTRENAMIENTO.')}
-function startStudentRest(){let s=120;const o=document.createElement('div');o.className='overlay';o.innerHTML='<div class="timerBox"><b>⏱️ DESCANSO</b><strong id="studentRestCount">02:00</strong><button type="button" onclick="this.closest(\'.overlay\').remove()">Cerrar</button></div>';document.body.appendChild(o);const i=setInterval(()=>{if(!document.body.contains(o)){clearInterval(i);return}s--;if(s<=0){clearInterval(i);o.querySelector('#studentRestCount').textContent='00:00';return}o.querySelector('#studentRestCount').textContent=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')},1000)}
-function runStudentTabata(key,work,rest,rounds){let r=0,working=true,s=Number(work),timer;const box=document.getElementById('tabata-'+key);if(!box)return;state.tabata[key]=false;function tick(){if(!document.body.contains(box)){clearInterval(timer);return}box.textContent=(working?'TRABAJO':'DESCANSO')+' · '+s+' s';s--;if(s<0){if(working){working=false;s=Number(rest)}else{r++;if(r>=Number(rounds)){clearInterval(timer);state.tabata[key]=true;box.textContent='✓ TABATA COMPLETADO';return}working=true;s=Number(work)}}}tick();timer=setInterval(tick,1000)}
+
+function selectStudentDay(d){
+  state.day=Number(d);
+  document.querySelectorAll('.dayBtn').forEach(b=>b.classList.toggle('on',String(b.dataset.studentDay)===String(d)));
+  document.querySelectorAll('.dayPanel').forEach(p=>p.style.display=Number(p.dataset.day)===Number(d)?'block':'none');
+}
+
+function calcStudent(key){
+  let vol=0;
+  for(let j=0;j<3;j++){
+    const r=document.getElementById(key+'-r'+j),w=document.getElementById(key+'-w'+j);
+    vol+=num(r?.value)*num(w?.value);
+  }
+  const v=document.getElementById('vol-'+key);if(v)v.textContent='📦 Volumen: '+Math.round(vol*10)/10+' kg';
+  let best=0;
+  for(let j=0;j<3;j++){
+    const r=num(document.getElementById(key+'-r'+j)?.value),w=num(document.getElementById(key+'-w'+j)?.value);
+    if(r>0&&w>0){const rm=w*(1+r/30);if(rm>best)best=rm}
+  }
+  const rm=document.getElementById('rm-'+key);if(rm)rm.textContent='🔥 1RM estimado: '+(best?Math.round(best*10)/10+' kg':'--');
+}
+
+function collectDay(d){
+  const selected=DATA.routine[d]||[],out=[];let any=false;
+  selected.forEach((item,i)=>{
+    const key='d'+d+'e'+(i+1),p=item.prescription||{mode:'REPS_KG',sets:[]};
+    const mode=['REPS_KG','TIEMPO','TABATA'].includes(String(p.mode||'REPS_KG'))?String(p.mode||'REPS_KG'):'REPS_KG';
+    if(mode==='REPS_KG'){
+      const sets=[];
+      for(let j=0;j<3;j++){
+        const reps=num(document.getElementById(key+'-r'+j)?.value),weight=num(document.getElementById(key+'-w'+j)?.value);
+        sets.push({reps,weight});if(reps>0||weight>0)any=true;
+      }
+      out.push({name:item.name,group:item.group,prescription:p,sets,volume:sets.reduce((a,x)=>a+x.reps*x.weight,0),rm:0});
+    }else if(mode==='TIEMPO'){
+      const times=[];
+      for(let j=0;j<3;j++){const t=num(document.getElementById(key+'-t'+j)?.value);times.push(t);if(t>0)any=true}
+      out.push({name:item.name,group:item.group,prescription:p,times,sets:[],tabataCompleted:false});
+    }else{
+      const done=!!state.tabata[key];if(done)any=true;
+      out.push({name:item.name,group:item.group,prescription:p,times:[],sets:[],tabataCompleted:done});
+    }
+  });
+  return {out,any};
+}
+
+function buildStudentLog(){
+  const c=collectDay(state.day),groups=[];
+  c.out.forEach(e=>{
+    const has=e.prescription?.mode==='REPS_KG'?e.sets.some(x=>x.reps>0||x.weight>0):e.prescription?.mode==='TIEMPO'?e.times.some(x=>x>0):e.tabataCompleted;
+    if(!has)return;
+    let g=groups.find(x=>x.name===e.group);
+    if(!g){g={name:e.group,exercises:[]};groups.push(g)}
+    g.exercises.push(e);
+  });
+  const date=document.getElementById('studentDate')?.value||new Date().toISOString().slice(0,10);
+  return {id:Date.now(),date:new Date(date+'T12:00:00').toISOString(),day:Number(state.day),groups};
+}
+
+function saveStudentTraining(){
+  const log=buildStudentLog();
+  if(!log.groups.length){alert('No hay resultados anotados.');return false}
+  state.savedLog=log;
+  alert('✓ ENTRENAMIENTO GUARDADO.\n\nYa puedes pulsar DEVOLVER AL MONITOR.');
+  return true;
+}
+
+function sendStudentTrainingToMonitor(){
+  const log=buildStudentLog();
+  if(!log.groups.length){alert('Primero introduce al menos un resultado.');return}
+  state.savedLog=log;
+  const payload={type:'MI_GIMNASIO_ALUMNO_ENTRENAMIENTO',version:'10.26',sentAt:new Date().toISOString(),student:DATA.student,day:Number(state.day),date:log.date,routine:JSON.parse(JSON.stringify(DATA.routine[state.day]||[])),log};
+  const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+  const name=String(DATA.student.name||'alumno').replace(/[^a-z0-9áéíóúüñ _-]/gi,'').trim()||'alumno';
+  const file=new File([blob],'Entrenamiento_'+name+'_Día_'+state.day+'_'+String(log.date).slice(0,10)+'.json',{type:'application/json'});
+  if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
+    navigator.share({title:'Entrenamiento de '+DATA.student.name,text:'Entrenamiento realizado · Día '+state.day,files:[file]}).catch(e=>{if(e?.name!=='AbortError')downloadStudent(blob,file.name)});
+    return;
+  }
+  downloadStudent(blob,file.name);
+}
+
+function downloadStudent(blob,name){
+  const url=URL.createObjectURL(blob),a=document.createElement('a');
+  a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+  alert('✓ ARCHIVO PREPARADO.\n\nEnvía este archivo al Monitor mediante RECIBIR ENTRENAMIENTO.');
+}
+
+function startStudentRest(){
+  let s=120;
+  const o=document.createElement('div');o.className='overlay';
+  o.innerHTML='<div class="timerBox"><b>⏱️ DESCANSO</b><strong id="studentRestCount">02:00</strong><button type="button" id="closeRestBtn">Cerrar</button></div>';
+  document.body.appendChild(o);
+  o.querySelector('#closeRestBtn').addEventListener('click',()=>o.remove());
+  const i=setInterval(()=>{
+    if(!document.body.contains(o)){clearInterval(i);return}
+    s--;
+    if(s<=0){clearInterval(i);o.querySelector('#studentRestCount').textContent='00:00';return}
+    o.querySelector('#studentRestCount').textContent=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
+  },1000);
+}
+
+function runStudentTabata(key,work,rest,rounds){
+  let r=0,working=true,s=Number(work),timer;
+  const box=document.getElementById('tabata-'+key);if(!box)return;
+  state.tabata[key]=false;
+  function tick(){
+    if(!document.body.contains(box)){clearInterval(timer);return}
+    box.textContent=(working?'TRABAJO':'DESCANSO')+' · '+s+' s';
+    s--;
+    if(s<0){
+      if(working){working=false;s=Number(rest)}
+      else{r++;if(r>=Number(rounds)){clearInterval(timer);state.tabata[key]=true;box.textContent='✓ TABATA COMPLETADO';return}working=true;s=Number(work)}
+    }
+  }
+  tick();timer=setInterval(tick,1000);
+}
+
+function bindStudentControls(){
+  document.querySelectorAll('[data-student-day]').forEach(b=>b.addEventListener('click',()=>selectStudentDay(Number(b.dataset.studentDay))));
+  document.querySelectorAll('.todayInput').forEach(i=>i.addEventListener('input',()=>calcStudent(i.dataset.key||i.id.replace(/-(r|w)\d+$/,''))));
+  document.querySelectorAll('[data-rest]').forEach(b=>b.addEventListener('click',startStudentRest));
+  document.querySelectorAll('[data-tabata-key]').forEach(b=>b.addEventListener('click',()=>runStudentTabata(b.dataset.tabataKey,Number(b.dataset.tabataWork),Number(b.dataset.tabataRest),Number(b.dataset.tabataRounds))));
+  const save=document.getElementById('saveStudentBtn');if(save)save.addEventListener('click',saveStudentTraining);
+  const send=document.getElementById('sendStudentBtn');if(send)send.addEventListener('click',sendStudentTrainingToMonitor);
+  selectStudentDay(state.day);
+}
+
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bindStudentControls,{once:true});else bindStudentControls();
 <\/script></body></html>`;
 
     const blob=new Blob([html],{type:'text/html'}),file=new File([blob],`Entrenamiento_${safeName}.html`,{type:'text/html'});
