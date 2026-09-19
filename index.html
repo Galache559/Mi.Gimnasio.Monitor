@@ -4949,26 +4949,6 @@ function beep(freq=900,duration=.18){
 }
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&timerOrTabataActive()){keepScreenOn();unlockAudio();}});
 
-/* ===== ARRANQUE: ABRIR SIEMPRE EN MONITOR ===== */
-function openMonitorOnStartup(){
-  try{
-    if(typeof tab==='function'){
-      tab('monitor');
-      return;
-    }
-    if(typeof showMonitorHome==='function') showMonitorHome();
-  }catch(e){
-    console.error('No se pudo abrir Monitor automáticamente',e);
-  }
-}
-
-if(document.readyState==='loading'){
-  document.addEventListener('DOMContentLoaded',openMonitorOnStartup,{once:true});
-}else{
-  openMonitorOnStartup();
-}
-window.addEventListener('load',openMonitorOnStartup,{once:true});
-
 restoreAutoBackupIfNeeded();
 
 save();
@@ -6458,39 +6438,4 @@ function monitorFindMasterExercise(group,name){
 </script>
 
 </body>
-</html>/* ===== v10.23 · BORRADO LIMPIO DE ALUMNOS ===== */
-(function(){
-  window.__deleteStudentFromButton=function(btn){
-    try{
-      const card=btn && btn.closest ? btn.closest('.monitorStudent') : null;
-      const nameEl=card ? card.querySelector('strong') : null;
-      const shownName=String(nameEl ? nameEl.textContent : '').replace(/^👤\s*/,'').trim();
-      const all=Array.isArray(students)?students:[];
-      const student=all.find(x=>{
-        const n=String(x.name||'').trim();
-        return n===shownName;
-      });
-      if(!student){ alert('No se ha podido localizar este alumno.'); return false; }
-      const sid=String(student.id);
-      if(!window.confirm('¿Eliminar definitivamente a «'+student.name+'»?')) return false;
-      const keptStudents=all.filter(x=>String(x.id)!==sid);
-      const keptAppointments=Array.isArray(appointments)?appointments.filter(x=>String(x.studentId)!==sid):[];
-      const keptAccounting=Array.isArray(accounting)?accounting.filter(x=>String(x.studentId)!==sid):[];
-      students.splice(0,students.length,...keptStudents);
-      appointments.splice(0,appointments.length,...keptAppointments);
-      accounting.splice(0,accounting.length,...keptAccounting);
-      if(String(monitorStudentId)===sid) monitorStudentId=null;
-      saveMonitor();
-      createMonitorAutoBackup();
-      if(card) card.remove();
-      const list=document.getElementById('monitorList');
-      if(list && !list.querySelector('.monitorStudent')) list.innerHTML='<div class="card empty">Todavía no hay alumnos.</div>';
-      renderMonitorSummary();
-      alert('✓ Alumno «'+student.name+'» eliminado correctamente.');
-    }catch(err){
-      alert('ERROR AL ELIMINAR: '+(err&&err.message?err.message:err));
-    }
-    return false;
-  };
-})();
-
+</html>
