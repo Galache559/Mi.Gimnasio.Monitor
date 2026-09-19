@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>MI GIMNASIO PRO MONITOR v10.15</title>
+<title>MI GIMNASIO PRO MONITOR v10.16</title>
 <meta name="theme-color" content="#121212">
 
 <style>
@@ -1127,7 +1127,7 @@ textarea{width:100%;box-sizing:border-box;resize:vertical}
 @media(max-width:700px){.alertSummary{grid-template-columns:1fr}}
 
 
-/* ===== v10.15 · FICHA DEL ALUMNO MEJORADA ===== */
+/* ===== v10.16 · FICHA DEL ALUMNO MEJORADA ===== */
 .studentFichaNav{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:10px 0}
 .studentFichaNav button{min-height:48px;padding:7px 5px;font-size:.68rem;border-radius:9px;font-weight:800}
 .studentFichaNav button.active{background:var(--a);color:#000;border-color:var(--a)}
@@ -1145,7 +1145,7 @@ textarea{width:100%;box-sizing:border-box;resize:vertical}
 <body>
 
 <header>
-<h1>MI GIMNASIO PRO MONITOR v10.15</h1>
+<h1>MI GIMNASIO PRO MONITOR v10.16</h1>
 </header>
 
 <div class="container">
@@ -3757,9 +3757,9 @@ function saveConfig(){
 }
 
 function exportData(){
-let data={app:'Mi Gimnasio Pro Monitor',version:'10.15',exported:new Date().toISOString(),routine,logs,personalExerciseBase,students,appointments,accounting};
+let data={app:'Mi Gimnasio Pro Monitor',version:'10.16',exported:new Date().toISOString(),routine,logs,personalExerciseBase,students,appointments,accounting};
 let b=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),u=URL.createObjectURL(b),a=document.createElement('a');
-a.href=u;a.download='gym_v10.15_monitor_backup_'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);
+a.href=u;a.download='gym_v10.16_monitor_backup_'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);
 let e=document.getElementById('backupStatus');if(e)e.innerHTML='<span class="backupOk">✓ Copia completa creada correctamente.<br>Incluye rutina, entrenamientos, alumnos, citas y contabilidad.</span>';
 }
 
@@ -4921,7 +4921,7 @@ try{
 let old=localStorage.getItem(MONITOR_AUTO_BACKUP);
 if(old)localStorage.setItem(MONITOR_PREV_BACKUP,old);
 saveMonitor();
-let d={app:'Mi Gimnasio Pro - Monitor',version:'10.15',backupType:'automatic',created:new Date().toISOString(),students:clone(students),appointments:clone(appointments),accounting:clone(accounting),remoteAssignments:clone(remoteAssignments),personalExerciseBase:clone(personalExerciseBase)};
+let d={app:'Mi Gimnasio Pro - Monitor',version:'10.16',backupType:'automatic',created:new Date().toISOString(),students:clone(students),appointments:clone(appointments),accounting:clone(accounting),remoteAssignments:clone(remoteAssignments),personalExerciseBase:clone(personalExerciseBase)};
 localStorage.setItem(MONITOR_AUTO_BACKUP,JSON.stringify(d));
 localStorage.setItem(MONITOR_BACKUP_DATE,d.created);
 updateMonitorBackupStatus();
@@ -4997,7 +4997,7 @@ h+=`</div>`;
 h+=`<div class="card"><div class="backupBox">🔒 <b>Rutina privada.</b> El monitor define aquí los ejercicios y el objetivo de cada uno. El alumno verá exactamente esta prescripción.</div><button class="btn" onclick="saveStudent()">💾 GUARDAR RUTINA PRIVADA</button><br><br><button class="btn danger" onclick="deleteStudent()">🗑️ ELIMINAR ALUMNO</button></div>`;
 e.innerHTML=h;
 
-/* ===== v10.15 · Navegación de la ficha ===== */
+/* ===== v10.16 · Navegación de la ficha ===== */
 const fichaCards=[...e.querySelectorAll('.card')];
 const fichaNav=document.createElement('div');
 fichaNav.className='studentFichaNav';
@@ -5430,7 +5430,7 @@ function exportRoutineAssignment(d){
  const s=getMonitorStudent();if(!s)return;normalizeStudentPrivateRoutine(s);const routineDay=Array.isArray(s.routine&&s.routine[d])?s.routine[d]:[];
  if(!routineDay.length){alert('Este alumno no tiene rutina asignada para el Día '+d+'.');return}
  const transferId=makeTransferId(),date=(document.getElementById('studentDate')||{}).value||new Date().toISOString().slice(0,10);
- const data={app:'Mi Gimnasio Monitor',exchangeType:'ROUTINE_ASSIGNMENT',version:'10.15',transferId,created:new Date().toISOString(),studentId:s.id,studentName:s.name,day:d,date,routine:clone(routineDay)};
+ const data={app:'Mi Gimnasio Monitor',exchangeType:'ROUTINE_ASSIGNMENT',version:'10.16',transferId,created:new Date().toISOString(),studentId:s.id,studentName:s.name,day:d,date,routine:clone(routineDay)};
  exchangeDownload(data,`RUTINA_${String(s.name).replace(/[^a-z0-9áéíóúüñ]+/gi,'_')}_DIA_${d}.json`);
  alert('✓ Rutina preparada. Envía este archivo al alumno.');
 }
@@ -5509,16 +5509,81 @@ function showPendingPayments(){
  const e=document.getElementById('monitorEditor');document.getElementById('monitorHome').style.display='none';e.style.display='block';const data=(students||[]).map(s=>({s,f:getStudentFinance(s.id)})).filter(x=>x.f.pending>0).sort((a,b)=>b.f.pending-a.f.pending);const total=data.reduce((a,x)=>a+x.f.pending,0);e.innerHTML=`<div class="monitorBack"><button class="btn out" onclick="backToMonitor()">← VOLVER A MONITOR</button></div><div class="monitorTitle">⚠️ PAGOS PENDIENTES</div><div class="card"><h3>Total pendiente: ${total.toFixed(2)} €</h3></div>${data.map(x=>`<div class="monitorStudent"><strong>👤 ${esc(x.s.name)}</strong><br><small>⚠️ Pendiente: <b>${x.f.pending.toFixed(2)} €</b></small><div class="row"><button class="btn sm" onclick="openStudent(${x.s.id})">Abrir ficha</button><button class="btn out sm" onclick="monitorStudentId=${x.s.id};studentFinance()">Ver economía</button></div></div>`).join('')}`;
 }
 function studentEvolution(){
- const s=getMonitorStudent();if(!s)return;const e=document.getElementById('monitorEditor');e.innerHTML=`<div class="monitorBack"><button class="btn out" onclick="openStudent(${s.id})">← VOLVER A FICHA</button></div><div class="monitorTitle">📈 EVOLUCIÓN — ${esc(s.name)}</div><div class="card"><div class="backupBox">Elige un ejercicio para ver la evolución del peso utilizado y del 1RM estimado.</div><select id="evolutionExercise" onchange="renderStudentEvolutionChart()"><option value="">Selecciona ejercicio</option>${getStudentExerciseNames(s).map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join('')}</select><div id="evolutionChart" style="margin-top:10px"></div></div>`;
+ const s=getMonitorStudent();
+ if(!s)return;
+ const e=document.getElementById('monitorEditor');
+ const names=getStudentExerciseNames(s);
+ e.innerHTML=`
+ <div class="monitorBack"><button class="btn out" onclick="openStudent(${s.id})">← VOLVER A FICHA</button></div>
+ <div class="monitorTitle">📈 EVOLUCIÓN AVANZADA — ${esc(s.name)}</div>
+ <div class="card">
+   <div class="backupBox">Selecciona un ejercicio y un periodo. Puedes consultar peso utilizado, 1RM estimado, volumen y el detalle de cada registro.</div>
+   <div style="display:grid;grid-template-columns:2fr 1fr;gap:7px">
+     <div><label>Ejercicio</label><select id="evolutionExercise" onchange="renderStudentEvolutionChart()"><option value="">Selecciona ejercicio</option>${names.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join('')}</select></div>
+     <div><label>Periodo</label><select id="evolutionPeriod" onchange="renderStudentEvolutionChart()"><option value="30">30 días</option><option value="90">90 días</option><option value="180">6 meses</option><option value="365" selected>1 año</option><option value="0">Todo</option></select></div>
+   </div>
+   <div id="evolutionSummary" style="margin-top:10px"></div>
+   <div id="evolutionChart" style="margin-top:10px"></div>
+   <div id="evolutionTable" style="margin-top:10px"></div>
+ </div>`;
 }
-function getStudentExerciseNames(s){const set=new Set();(s.logs||[]).forEach(l=>(l.groups||[]).forEach(g=>(g.exercises||[]).forEach(e=>{if(e.name)set.add(e.name)})));return [...set].sort((a,b)=>a.localeCompare(b,'es'));}
-function estimate1RM(weight,reps){weight=num(weight);reps=num(reps);if(weight<=0||reps<=0)return 0;return reps===1?weight:weight*(1+reps/30)}
+function getStudentExerciseNames(s){
+ const set=new Set();
+ (s.logs||[]).forEach(l=>(l.groups||[]).forEach(g=>(g.exercises||[]).forEach(e=>{if(e.name)set.add(e.name)})));
+ return [...set].sort((a,b)=>a.localeCompare(b,'es'));
+}
+function estimate1RM(weight,reps){
+ weight=num(weight);reps=num(reps);
+ if(weight<=0||reps<=0)return 0;
+ return reps===1?weight:weight*(1+reps/30);
+}
+function getStudentEvolutionData(s,name,days){
+ const now=new Date();
+ const cut=days>0?new Date(now.getFullYear(),now.getMonth(),now.getDate()-(days-1)):null;
+ const rows=[];
+ (s.logs||[]).slice().sort((a,b)=>String(a.date).localeCompare(String(b.date))).forEach(l=>{
+   const dk=dateKey(l.date);
+   if(cut && dk<dateKey(cut))return;
+   (l.groups||[]).forEach(g=>(g.exercises||[]).forEach(e=>{
+     if(e.name!==name)return;
+     let sets=(e.sets||[]).filter(x=>num(x.reps)>0||num(x.weight)>0);
+     if(!sets.length)return;
+     let bestWeight=0,bestRM=0,vol=0,reps=0;
+     sets.forEach(x=>{
+       const w=num(x.weight),r=num(x.reps);
+       if(w>bestWeight)bestWeight=w;
+       const rm=estimate1RM(w,r);if(rm>bestRM)bestRM=rm;
+       if(w>0&&r>0)vol+=w*r;
+       if(r>0)reps+=r;
+     });
+     rows.push({date:dk,day:l.day||'',sets:sets.length,bestWeight,bestRM,volume:vol,reps});
+   }));
+ });
+ return rows;
+}
 function renderStudentEvolutionChart(){
- const s=getMonitorStudent(),name=document.getElementById('evolutionExercise')?.value,box=document.getElementById('evolutionChart');if(!s||!box)return;if(!name){box.innerHTML='<div class="empty">Selecciona un ejercicio.</div>';return}
- const pts=[];(s.logs||[]).slice().sort((a,b)=>String(a.date).localeCompare(String(b.date))).forEach(l=>{(l.groups||[]).forEach(g=>{(g.exercises||[]).forEach(e=>{if(e.name!==name)return;(e.sets||[]).forEach(set=>{const w=num(set.weight),r=num(set.reps);if(w>0&&r>0)pts.push({date:l.date,w,rm:estimate1RM(w,r)})})})})});
- if(!pts.length){box.innerHTML='<div class="empty">No hay datos de peso/repeticiones para este ejercicio.</div>';return}
- const W=760,H=300,pad=42,max=Math.max(...pts.map(x=>Math.max(x.w,x.rm))),min=Math.min(...pts.map(x=>Math.min(x.w,x.rm)));const span=max-min||1;const x=i=>pad+i*((W-2*pad)/Math.max(1,pts.length-1)),y=v=>H-pad-(v-min)*((H-2*pad)/span);const poly=a=>a.map((v,i)=>`${x(i)},${y(v)}`).join(' ');
- box.innerHTML=`<div style="overflow:auto"><svg viewBox="0 0 ${W} ${H}" width="100%" height="300" role="img"><line x1="${pad}" y1="${H-pad}" x2="${W-pad}" y2="${H-pad}" stroke="currentColor" opacity=".35"/><line x1="${pad}" y1="${pad}" x2="${pad}" y2="${H-pad}" stroke="currentColor" opacity=".35"/><polyline fill="none" stroke="currentColor" stroke-width="3" points="${poly(pts.map(p=>p.w))}"/><polyline fill="none" stroke="currentColor" stroke-width="3" stroke-dasharray="7 5" opacity=".65" points="${poly(pts.map(p=>p.rm))}"/>${pts.map((p,i)=>`<circle cx="${x(i)}" cy="${y(p.w)}" r="4" fill="currentColor"/><circle cx="${x(i)}" cy="${y(p.rm)}" r="3" fill="currentColor" opacity=".6"/>`).join('')}</svg></div><div style="font-size:.68rem;line-height:1.8">━━ Peso utilizado &nbsp;&nbsp; <span style="opacity:.65">┅┅</span> 1RM estimado · ${pts.length} registros</div>`;
+ const s=getMonitorStudent(),name=document.getElementById('evolutionExercise')?.value,box=document.getElementById('evolutionChart'),sum=document.getElementById('evolutionSummary'),table=document.getElementById('evolutionTable');
+ if(!s||!box)return;
+ if(!name){box.innerHTML='<div class="empty">Selecciona un ejercicio.</div>';if(sum)sum.innerHTML='';if(table)table.innerHTML='';return}
+ const days=Number(document.getElementById('evolutionPeriod')?.value||365);
+ const rows=getStudentEvolutionData(s,name,days);
+ if(!rows.length){box.innerHTML='<div class="empty">No hay datos de peso/repeticiones para este ejercicio en el periodo seleccionado.</div>';if(sum)sum.innerHTML='';if(table)table.innerHTML='';return}
+ const latest=rows[rows.length-1],first=rows[0];
+ const maxWeight=Math.max(...rows.map(x=>x.bestWeight)),maxRM=Math.max(...rows.map(x=>x.bestRM)),maxVol=Math.max(...rows.map(x=>x.volume));
+ const totalVol=rows.reduce((a,x)=>a+x.volume,0),totalSets=rows.reduce((a,x)=>a+x.sets,0);
+ if(sum)sum.innerHTML=`<div class="statgrid"><div class="stat"><b>${maxWeight.toFixed(1)} kg</b><span>Mejor peso registrado</span></div><div class="stat"><b>${maxRM.toFixed(1)} kg</b><span>Mejor 1RM estimado</span></div><div class="stat"><b>${Math.round(totalVol)} kg</b><span>Volumen del periodo</span></div><div class="stat"><b>${rows.length}</b><span>Registros</span></div></div>`;
+ const W=820,H=330,padL=48,padR=18,padT=25,padB=45;
+ const values=[...rows.map(x=>x.bestWeight),...rows.map(x=>x.bestRM),...rows.map(x=>x.volume>0?x.volume:0)];
+ const max=Math.max(...values,1),min=0;
+ const x=i=>padL+i*((W-padL-padR)/Math.max(1,rows.length-1));
+ const y=v=>H-padB-(v-min)*((H-padT-padB)/(max-min||1));
+ const poly=(field)=>rows.map((r,i)=>`${x(i)},${y(r[field])}`).join(' ');
+ const points=(field,opacity)=>rows.map((r,i)=>`<circle cx="${x(i)}" cy="${y(r[field])}" r="3.5" fill="currentColor" opacity="${opacity}"/>`).join('');
+ const labels=rows.map((r,i)=>i===0||i===rows.length-1||i%Math.max(1,Math.ceil(rows.length/7))===0?`<text x="${x(i)}" y="${H-18}" font-size="10" text-anchor="middle" fill="currentColor">${r.date.slice(8,10)}/${r.date.slice(5,7)}</text>`:'').join('');
+ box.innerHTML=`<div style="overflow:auto"><svg viewBox="0 0 ${W} ${H}" width="100%" height="330" role="img" aria-label="Evolución de ${esc(name)}"><line x1="${padL}" y1="${H-padB}" x2="${W-padR}" y2="${H-padB}" stroke="currentColor" opacity=".25"/><line x1="${padL}" y1="${padT}" x2="${padL}" y2="${H-padB}" stroke="currentColor" opacity=".25"/><polyline fill="none" stroke="currentColor" stroke-width="3" points="${poly('bestWeight')}"/><polyline fill="none" stroke="currentColor" stroke-width="3" stroke-dasharray="8 5" opacity=".65" points="${poly('bestRM')}"/>${points('bestWeight',1)}${points('bestRM',.55)}${labels}</svg></div><div style="font-size:.68rem;line-height:1.8">━━ Peso máximo de las series &nbsp;&nbsp; <span style="opacity:.65">┅┅</span> 1RM estimado<br>📦 Volumen máximo de una sesión: <b>${Math.round(maxVol)} kg</b></div>`;
+ const lastVsFirst=latest.bestWeight-first.bestWeight;
+ const lastRmVsFirst=latest.bestRM-first.bestRM;
+ if(table)table.innerHTML=`<div style="overflow:auto"><table class="accountTable"><thead><tr><th>Fecha</th><th>Día</th><th>Series</th><th>Mejor peso</th><th>1RM estimado</th><th>Volumen</th></tr></thead><tbody>${rows.slice().reverse().map(r=>`<tr><td>${esc(formatMonitorDate(r.date))}</td><td>${esc(r.day)}</td><td>${r.sets}</td><td>${r.bestWeight.toFixed(1)} kg</td><td>${r.bestRM.toFixed(1)} kg</td><td>${Math.round(r.volume)} kg</td></tr>`).join('')}</tbody></table></div><div class="backupBox" style="margin-top:8px">Último registro: <b>${esc(formatMonitorDate(latest.date))}</b> · Peso máximo ${latest.bestWeight.toFixed(1)} kg · 1RM estimado ${latest.bestRM.toFixed(1)} kg. Diferencia respecto al primer registro del periodo: ${lastVsFirst>=0?'+':''}${lastVsFirst.toFixed(1)} kg de peso y ${lastRmVsFirst>=0?'+':''}${lastRmVsFirst.toFixed(1)} kg de 1RM estimado.</div>`;
 }
 function studentReports(){
 let s=getMonitorStudent();
