@@ -1110,6 +1110,22 @@ textarea{width:100%;box-sizing:border-box;resize:vertical}
 .dashboardEmpty{padding:12px;text-align:center;color:var(--sub);font-size:.78rem}
 @media(max-width:850px){.monitorDashboard{grid-template-columns:repeat(2,minmax(0,1fr))}.monitorDashboardWide{grid-template-columns:1fr}}
 
+
+.monitorBottomBtn{font-size:1.05rem!important;font-weight:900!important;min-width:120px!important;padding:12px 18px!important;transform:scale(1.06);box-shadow:0 4px 12px rgba(0,0,0,.12)}
+.monitorBottomBtn span{font-size:1.08em}
+@media(max-width:600px){.monitorBottomBtn{min-width:135px!important;padding:13px 20px!important;transform:scale(1.04)}}
+
+
+.alertSummary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:10px 0}
+.alertStat{border:1px solid rgba(127,127,127,.22);border-radius:14px;padding:12px;background:var(--card,#fff);text-align:center}
+.alertStat b{display:block;font-size:1.45rem;font-weight:900}
+.alertStat span{font-size:.72rem;color:var(--sub)}
+.alertItem{border:1px solid rgba(127,127,127,.20);border-left:5px solid currentColor;border-radius:12px;padding:11px;margin:8px 0;background:var(--card,#fff)}
+.alertItemTitle{font-weight:900;font-size:.9rem}
+.alertItemText{font-size:.78rem;margin-top:3px}
+.alertItemMeta{font-size:.7rem;color:var(--sub);margin-top:5px}
+@media(max-width:700px){.alertSummary{grid-template-columns:1fr}}
+
 </style>
 
 </head>
@@ -3729,7 +3745,7 @@ function saveConfig(){
 }
 
 function exportData(){
-let data={app:'Mi Gimnasio Pro Monitor',version:'10.12',exported:new Date().toISOString(),routine,logs,personalExerciseBase,students,appointments,accounting};
+let data={app:'Mi Gimnasio Pro Monitor',version:'10.14',exported:new Date().toISOString(),routine,logs,personalExerciseBase,students,appointments,accounting};
 let b=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),u=URL.createObjectURL(b),a=document.createElement('a');
 a.href=u;a.download='gym_v10.5_monitor_backup_'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);
 let e=document.getElementById('backupStatus');if(e)e.innerHTML='<span class="backupOk">✓ Copia completa creada correctamente.<br>Incluye rutina, entrenamientos, alumnos, citas y contabilidad.</span>';
@@ -4893,7 +4909,7 @@ try{
 let old=localStorage.getItem(MONITOR_AUTO_BACKUP);
 if(old)localStorage.setItem(MONITOR_PREV_BACKUP,old);
 saveMonitor();
-let d={app:'Mi Gimnasio Pro - Monitor',version:'10.12',backupType:'automatic',created:new Date().toISOString(),students:clone(students),appointments:clone(appointments),accounting:clone(accounting),remoteAssignments:clone(remoteAssignments),personalExerciseBase:clone(personalExerciseBase)};
+let d={app:'Mi Gimnasio Pro - Monitor',version:'10.14',backupType:'automatic',created:new Date().toISOString(),students:clone(students),appointments:clone(appointments),accounting:clone(accounting),remoteAssignments:clone(remoteAssignments),personalExerciseBase:clone(personalExerciseBase)};
 localStorage.setItem(MONITOR_AUTO_BACKUP,JSON.stringify(d));
 localStorage.setItem(MONITOR_BACKUP_DATE,d.created);
 updateMonitorBackupStatus();
@@ -5009,6 +5025,111 @@ appointments=appointments.filter(x=>x.studentId!==id);
 accounting=accounting.filter(x=>x.studentId!==id);
 saveMonitor();renderStudents();
 }
+
+function getMonitorAlerts(){
+ const alerts=[];
+ const todayKey=dateKey(new Date());
+ const now=new Date();
+ const tomorrow=new Date(now); tomorrow.setDate(tomorrow.getDate()+1);
+ const tomorrowKey=dateKey(tomorrow);
+
+ // 1) Pagos pendientes
+ (students||[]).forEach(s=>{
+   const f=getStudentFinance(s.id);
+   if(f.pending>0){
+     alerts.push({type:'PAGO',icon:'💶',level:'danger',studentId:s.id,
+       title:'Pago pendiente',text:`${s.name} tiene ${f.pending.toFixed(2)} € pendientes.`,
+       meta:'Revisar situación económica'});
+   }
+ });
+
+ // 2) Citas de hoy y de mañana
+ (appointments||[]).forEach(a=>{
+   if(String(a.date)!==todayKey && String(a.date)!==tomorrowKey)return;
+   const st=(students||[]).find(x=>String(x.id)===String(a.studentId));
+   if(!st)return;
+   const when=String(a.date)===todayKey?'HOY':'MAÑANA';
+   alerts.push({type:'CITA',icon:'📅',level:String(a.date)===todayKey?'danger':'warn',studentId:st.id,
+     title:`Cita ${when}`,text:`${st.name} · ${a.time||'Sin hora'}`,
+     meta:a.note||'Cita programada'});
+ });
+
+ // 3) Rutinas devueltas por alumnos, pendientes de revisar
+ (remoteAssignments||[]).filter(x=>x&&x.type==='ROUTINE_ASSIGNMENT'&&x.returned).forEach(x=>{
+   const st=(students||[]).find(s=>String(s.id)===String(x.studentId));
+   alerts.push({type:'DEVUELTA',icon:'📥',level:'ok',studentId:st?st.id:null,
+     title:'Rutina devuelta',text:`${x.studentName|| (st?st.name:'Alumno')} ha devuelto una rutina.`,
+     meta:`Día ${x.day||'—'} · ${x.date||'—'}`});
+ });
+
+ // 4) Rutinas enviadas y aún no devueltas
+ (remoteAssignments||[]).filter(x=>x&&x.type==='ROUTINE_ASSIGNMENT'&&!x.returned).forEach(x=>{
+   const st=(students||[]).find(s=>String(s.id)===String(x.studentId));
+   alerts.push({type:'RUTINA',icon:'📤',level:'warn',studentId:st?st.id:null,
+     title:'Rutina pendiente de devolución',text:`${x.studentName|| (st?st.name:'Alumno')} tiene una rutina pendiente.`,
+     meta:`Enviada: ${x.date||'—'} · Día ${x.day||'—'}`});
+ });
+
+ // 5) Alumno sin entrenamiento en los últimos 7 días
+ (students||[]).forEach(s=>{
+   const last=getLastStudentTraining(s);
+   if(!last){
+     alerts.push({type:'INACTIVO',icon:'🏋️',level:'warn',studentId:s.id,
+       title:'Sin entrenamientos registrados',text:`${s.name} todavía no tiene entrenamientos registrados.`,
+       meta:'Conviene revisar su actividad'});
+     return;
+   }
+   const d=new Date(last.date);
+   if(isNaN(d.getTime()))return;
+   const days=Math.floor((now-d)/(1000*60*60*24));
+   if(days>=7){
+     alerts.push({type:'INACTIVO',icon:'🏋️',level:'warn',studentId:s.id,
+       title:'Alumno sin entrenar',text:`${s.name} lleva ${days} días sin registrar entrenamiento.`,
+       meta:`Último entrenamiento: ${formatMonitorDate(last.date)}`});
+   }
+ });
+
+ // 6) Alumno sin rutina asignada
+ (students||[]).forEach(s=>{
+   normalizeStudentPrivateRoutine(s);
+   const hasRoutine=Object.values(s.routine||{}).some(day=>Array.isArray(day)&&day.length);
+   if(!hasRoutine){
+     alerts.push({type:'SIN_RUTINA',icon:'📋',level:'warn',studentId:s.id,
+       title:'Sin rutina asignada',text:`${s.name} no tiene ninguna rutina asignada.`,
+       meta:'Revisar ficha del alumno'});
+   }
+ });
+
+ const order={danger:0,warn:1,ok:2};
+ return alerts.sort((a,b)=>(order[a.level]??9)-(order[b.level]??9));
+}
+
+function showMonitorAlerts(){
+ const e=document.getElementById('monitorEditor');
+ document.getElementById('monitorHome').style.display='none';
+ e.style.display='block';
+ const alerts=getMonitorAlerts();
+ const payments=alerts.filter(x=>x.type==='PAGO').length;
+ const appointmentsToday=alerts.filter(x=>x.type==='CITA'&&x.title.includes('HOY')).length;
+ const returned=alerts.filter(x=>x.type==='DEVUELTA').length;
+
+ e.innerHTML=`<div class="monitorBack"><button class="btn out" onclick="backToMonitor()">← VOLVER A MONITOR</button></div>
+ <div class="monitorTitle">🔔 AVISOS AUTOMÁTICOS</div>
+ <div class="card">
+   <div class="alertSummary">
+     <div class="alertStat"><b>${alerts.length}</b><span>Avisos activos</span></div>
+     <div class="alertStat"><b>${payments}</b><span>Pagos pendientes</span></div>
+     <div class="alertStat"><b>${appointmentsToday}</b><span>Citas de hoy</span></div>
+   </div>
+   ${alerts.length?alerts.map(a=>`<div class="alertItem" style="color:${a.level==='danger'?'#c62828':a.level==='ok'?'#2e7d32':'#b26a00'}">
+      <div class="alertItemTitle">${a.icon} ${esc(a.title)}</div>
+      <div class="alertItemText">${esc(a.text)}</div>
+      <div class="alertItemMeta">${esc(a.meta||'')}</div>
+      ${a.studentId?`<div class="row" style="margin-top:7px"><button class="btn sm" onclick="openStudent(${a.studentId})">👤 Abrir ficha</button></div>`:''}
+    </div>`).join(''):'<div class="empty">✓ No hay avisos pendientes.</div>'}
+ </div>`;
+}
+
 function renderStudents(){
 let box=document.getElementById('monitorList');
 const today=dateKey(new Date());
@@ -5052,7 +5173,7 @@ let top=`<div class="card" style="margin-bottom:10px">
 <div class="dashboardCard" onclick="newStudent()"><div class="dashIcon">👥</div><div class="dashValue">${students.length}</div><div class="dashLabel">Alumnos activos</div></div>
 <div class="dashboardCard" onclick="showPendingPayments()"><div class="dashIcon">⚠️</div><div class="dashValue">${pendingTotal.toFixed(2)} €</div><div class="dashLabel">${pendingCount} alumno(s) con pagos pendientes</div></div>
 <div class="dashboardCard" onclick="showAppointments()"><div class="dashIcon">📅</div><div class="dashValue">${todayAppointments.length}</div><div class="dashLabel">Citas de hoy</div></div>
-<div class="dashboardCard" onclick="studentExchangePortal()"><div class="dashIcon">🏋️</div><div class="dashValue">${weekSessions}</div><div class="dashLabel">Sesiones esta semana</div></div>
+<div class="dashboardCard" onclick="showMonitorAlerts()"><div class="dashIcon">🔔</div><div class="dashValue">${getMonitorAlerts().length}</div><div class="dashLabel">Avisos automáticos</div></div>
 </div>
 <div class="monitorDashboardWide">
 <div class="card" style="margin:0">
@@ -5063,12 +5184,13 @@ let top=`<div class="card" style="margin-bottom:10px">
 }).join(''):'<div class="dashboardEmpty">No hay próximas citas.</div>'}</div>
 </div>
 <div class="card" style="margin:0">
-<h3>🔔 AVISOS</h3>
+<h3 style="display:flex;justify-content:space-between;align-items:center">🔔 AVISOS <button class="btn sm" onclick="showMonitorAlerts()">Ver todos</button></h3>
 <div class="dashboardList">
 ${pendingCount?`<div class="dashboardRow"><span>⚠️ Pagos pendientes</span><b>${pendingCount}</b></div>`:''}
 ${pendingTransfers.length?`<div class="dashboardRow"><span>📥 Rutinas pendientes</span><b>${pendingTransfers.length}</b></div>`:''}
 ${returnedTransfers.length?`<div class="dashboardRow"><span>↩️ Rutinas devueltas</span><b>${returnedTransfers.length}</b></div>`:''}
-${!pendingCount&&!pendingTransfers.length&&!returnedTransfers.length?'<div class="dashboardEmpty">✓ No hay avisos pendientes.</div>':''}
+${(()=>{const aa=getMonitorAlerts();const ina=aa.filter(x=>x.type==='INACTIVO').length;const sr=aa.filter(x=>x.type==='SIN_RUTINA').length;return `${ina?`<div class="dashboardRow"><span>🏋️ Sin actividad reciente</span><b>${ina}</b></div>`:''}${sr?`<div class="dashboardRow"><span>📋 Sin rutina asignada</span><b>${sr}</b></div>`:''}`})()}
+${!getMonitorAlerts().length?'<div class="dashboardEmpty">✓ No hay avisos pendientes.</div>':''}
 </div>
 ${pendingCount?`<button class="btn danger sm" onclick="showPendingPayments()">Ver pagos pendientes</button>`:''}
 ${pendingTransfers.length||returnedTransfers.length?`<button class="btn blue sm" onclick="studentExchangePortal()">Ver intercambio</button>`:''}
@@ -5252,7 +5374,7 @@ function exportRoutineAssignment(d){
  const s=getMonitorStudent();if(!s)return;normalizeStudentPrivateRoutine(s);const routineDay=Array.isArray(s.routine&&s.routine[d])?s.routine[d]:[];
  if(!routineDay.length){alert('Este alumno no tiene rutina asignada para el Día '+d+'.');return}
  const transferId=makeTransferId(),date=(document.getElementById('studentDate')||{}).value||new Date().toISOString().slice(0,10);
- const data={app:'Mi Gimnasio Monitor',exchangeType:'ROUTINE_ASSIGNMENT',version:'10.12',transferId,created:new Date().toISOString(),studentId:s.id,studentName:s.name,day:d,date,routine:clone(routineDay)};
+ const data={app:'Mi Gimnasio Monitor',exchangeType:'ROUTINE_ASSIGNMENT',version:'10.14',transferId,created:new Date().toISOString(),studentId:s.id,studentName:s.name,day:d,date,routine:clone(routineDay)};
  exchangeDownload(data,`RUTINA_${String(s.name).replace(/[^a-z0-9áéíóúüñ]+/gi,'_')}_DIA_${d}.json`);
  alert('✓ Rutina preparada. Envía este archivo al alumno.');
 }
@@ -6026,6 +6148,20 @@ window.backToMonitor = backToMonitor;
     });
   }
 })();
+
+
+/* ===== v10.14: ABRIR MONITOR AUTOMÁTICAMENTE AL CARGAR ===== */
+document.addEventListener('DOMContentLoaded',()=>{
+  try{
+    if(typeof openMonitor==='function'){
+      openMonitor();
+    }else if(typeof showMonitor==='function'){
+      showMonitor();
+    }
+  }catch(e){
+    console.error('No se pudo abrir Monitor automáticamente',e);
+  }
+});
 
 </script>
 
