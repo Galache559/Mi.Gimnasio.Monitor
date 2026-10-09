@@ -1,0 +1,11 @@
+{
+  "name": "Mi Gimnasio PRO Monitor",
+  "short_name": "Gym Monitor",
+  "description": "Entrenamientos, alumnos, rutinas y seguimiento del monitor.",
+  "lang": "es",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#121212",
+  "theme_color": "#121212"
+}
