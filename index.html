@@ -4,9 +4,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>MI GIMNASIO PRO MONITOR v10.25</title>
+<title>MI GIMNASIO PRO MONITOR v10.28</title>
 <meta name="theme-color" content="#121212">
-<link rel="manifest" href="./manifest.webmanifest">
 
 <style>
 :root{
@@ -1014,6 +1013,9 @@ color:#000;
 .daybox{background:#191919;border:1px solid var(--bor);border-radius:8px;padding:9px;margin:7px 0}
 .daybox h3{color:var(--a);font-size:.85rem;margin-bottom:7px}
 .check{display:flex;align-items:center;gap:7px;background:var(--item);padding:7px;border-radius:6px;margin:4px 0;font-size:.75rem}
+.studentExerciseThumb{width:58px;height:58px;min-width:58px;object-fit:contain;border-radius:7px;background:#fff;border:1px solid var(--line);padding:2px;display:block}
+.studentExerciseName{flex:1;min-width:0}
+@media(max-width:520px){.studentExerciseThumb{width:50px;height:50px;min-width:50px}.studentExerciseRow .check{align-items:center;gap:6px}}
 .check input{width:auto;margin:0}
 .monitorBack{margin-bottom:10px}
 .monitorBack button{font-size:.78rem}
@@ -1180,7 +1182,7 @@ td input{font-size:.7rem;padding:5px 1px}.muscleStats{grid-template-columns:1fr 
 
 <header>
 <h1>MI GIMNASIO PRO MONITOR v10.25</h1>
-<div style="text-align:center;color:#00ff88;font-weight:800;font-size:.8rem;margin:6px 0">CONTROL MONITOR v10.25</div>
+<div style="text-align:center;color:#00ff88;font-weight:800;font-size:.8rem;margin:6px 0">CONTROL MONITOR v10.28</div>
 </header>
 
 <div class="container">
@@ -1189,11 +1191,11 @@ td input{font-size:.7rem;padding:5px 1px}.muscleStats{grid-template-columns:1fr 
 
 <div class="card">
 
-<h2>Selecciona el día</h2>
+<h2>Selecciona la rutina</h2>
 
 <div class="days">
 
-<button class="btn out" onclick="selectDay(1)">Día 1</button> <button class="btn out" onclick="selectDay(2)">Día 2</button> <button class="btn out" onclick="selectDay(3)">Día 3</button> <button class="btn out" onclick="selectDay(4)">Día 4</button> <button class="btn out" onclick="selectDay(5)">Día 5</button>
+<button class="btn out" onclick="selectDay(1)">Rutina 1</button> <button class="btn out" onclick="selectDay(2)">Rutina 2</button> <button class="btn out" onclick="selectDay(3)">Rutina 3</button> <button class="btn out" onclick="selectDay(4)">Rutina 4</button> <button class="btn out" onclick="selectDay(5)">Rutina 5</button>
 
 </div>
 
@@ -1235,13 +1237,13 @@ td input{font-size:.7rem;padding:5px 1px}.muscleStats{grid-template-columns:1fr 
 <div class="card">
 <h2>⚙️ Configurar rutina</h2>
 
-<label>Día</label>
+<label>Rutina</label>
 <select id="cfgday" onchange="loadConfig()">
-<option value="1">Día 1</option>
-<option value="2">Día 2</option>
-<option value="3">Día 3</option>
-<option value="4">Día 4</option>
-<option value="5">Día 5</option>
+<option value="1">Rutina 1</option>
+<option value="2">Rutina 2</option>
+<option value="3">Rutina 3</option>
+<option value="4">Rutina 4</option>
+<option value="5">Rutina 5</option>
 </select>
 
 <div id="editor"></div>
@@ -5191,7 +5193,7 @@ list.forEach((item,idx)=>{
 const checked=names.has(item[0]);
 const current=selected.find(x=>x.name===item[0]);
 const key=`d${d}g${groupName.replace(/[^a-zA-Z0-9]/g,'') }x${idx}`;
-h+=`<div class="studentExerciseRow"><label class="check"><input type="checkbox" class="studentExercise" data-key="${key}" data-d="${d}" data-group="${esc(groupName)}" data-name="${esc(item[0])}" data-image="${esc(item[1])}" data-equipment="${esc(item[2]||'')}" ${checked?'checked':''} onchange="toggleStudentPrescription('${key}',this)"><span>${esc(item[0])}</span><span style="margin-left:auto;color:var(--sub);font-size:.62rem">${esc(item[2]||'')}</span></label><div id="studentPres-${key}" style="display:${checked?'block':'none'}">${prescriptionHTML(current||{group:groupName,name:item[0],image:item[1],equipment:item[2]||''},key)}</div></div>`;
+h+=`<div class="studentExerciseRow"><label class="check"><input type="checkbox" class="studentExercise" data-key="${key}" data-d="${d}" data-group="${esc(groupName)}" data-name="${esc(item[0])}" data-image="${esc(item[1])}" data-equipment="${esc(item[2]||'')}" ${checked?'checked':''} onchange="toggleStudentPrescription('${key}',this)"><img class="studentExerciseThumb" src="${esc(item[1]||'')}" alt="GIF ${esc(item[0])}" loading="lazy" onerror="this.style.display='none'"><span class="studentExerciseName">${esc(item[0])}</span><span style="color:var(--sub);font-size:.62rem">${esc(item[2]||'')}</span></label><div id="studentPres-${key}" style="display:${checked?'block':'none'}">${prescriptionHTML(current||{group:groupName,name:item[0],image:item[1],equipment:item[2]||''},key)}</div></div>`;
 });
 h+=`</div>`;
 });
@@ -6069,10 +6071,11 @@ renderStudents();
       h+=`<div class="card"><h2>📅 Día ${d}</h2>`;
       (MONITOR_DAY_GROUPS[d]||[]).forEach(groupName=>{
         const list=getLibraryBaseForGroup(groupName), selected=(s.routine[d]||[]).filter(x=>String(x.group).toUpperCase()===String(groupName).toUpperCase()), names=new Set(selected.map(x=>String(x.name).trim().toLowerCase()));
-        h+=`<div class="groupEditor"><div class="groupEditorTitle"><strong>${esc(groupName)}</strong><span style="font-size:.68rem;color:var(--sub)">${list.length} disponibles</span></div>`;
+        const groupToken=`d${d}g${String(groupName).replace(/[^a-zA-Z0-9]/g,'')}`;
+        h+=`<div class="groupEditor" id="studentGroup-${groupToken}"><div class="groupEditorTitle"><strong>${esc(groupName)}</strong><span style="font-size:.68rem;color:var(--sub)">${list.length} disponibles en la base</span></div><div style="display:flex;gap:6px;flex-wrap:wrap;margin:7px 0"><button class="btn sm blue" type="button" onclick="monitorSearchMoreExercises(${d},'${esc(groupName)}')">🔎 BUSCAR Y AÑADIR EJERCICIOS</button><button class="btn sm out" type="button" onclick="monitorClearGroupSelection(${d},'${esc(groupName)}')">✖ QUITAR MARCADOS</button></div><div id="monitorSearchStatus-${groupToken}" style="font-size:.75rem;color:var(--sub);margin:4px 0"></div><div id="monitorSearchResults-${groupToken}" class="monitorSearchResults"></div>`;
         list.forEach(item=>{
           const checked=names.has(String(item[0]).trim().toLowerCase());
-          h+=`<label class="check"><input type="checkbox" class="studentExercise" data-d="${d}" data-group="${esc(groupName)}" data-name="${esc(item[0])}" data-image="${esc(item[1])}" data-equipment="${esc(item[2]||'')}" ${checked?'checked':''}><span>${esc(item[0])}</span><span style="margin-left:auto;color:var(--sub);font-size:.62rem">${esc(item[2]||'')}</span></label>`;
+          h+=`<label class="check"><input type="checkbox" class="studentExercise" data-d="${d}" data-group="${esc(groupName)}" data-name="${esc(item[0])}" data-image="${esc(item[1])}" data-equipment="${esc(item[2]||'')}" ${checked?'checked':''}><img class="studentExerciseThumb" src="${esc(item[1]||'')}" alt="GIF ${esc(item[0])}" loading="lazy" onerror="this.style.display='none'"><span class="studentExerciseName">${esc(item[0])}</span><span style="color:var(--sub);font-size:.62rem">${esc(item[2]||'')}</span></label>`;
         });
         h+='</div>';
       });
@@ -6080,6 +6083,74 @@ renderStudents();
     }
     h+=`<div class="card"><div class="backupBox">🔒 <b>Rutina privada.</b> La selección pertenece exclusivamente a <b>${esc(s.name)}</b>.</div><button class="btn" onclick="saveStudent()">💾 GUARDAR RUTINA PRIVADA</button><br><br><button class="btn danger" data-delete-current-student="1">🗑️ ELIMINAR ALUMNO</button></div>`;
     e.innerHTML=h;
+  };
+
+  // Busca ejercicios adicionales en la misma ExerciseGymGifsDB usada por Mi Gimnasio Pro.
+  window.monitorSearchMoreExercises=async function(day,groupName){
+    const token=`d${Number(day)}g${String(groupName).replace(/[^a-zA-Z0-9]/g,'')}`;
+    const box=document.getElementById(`monitorSearchResults-${token}`);
+    const status=document.getElementById(`monitorSearchStatus-${token}`);
+    if(!box||!status)return;
+    const muscles=(REMOTE_GROUPS||{})[String(groupName||'').trim().toUpperCase()]||[];
+    if(!muscles.length){status.textContent='No hay correspondencia para buscar este grupo en la biblioteca.';return;}
+    box.innerHTML='';status.textContent='Buscando ejercicios y GIF animados en ExerciseGymGifsDB…';
+    try{
+      const responses=await Promise.allSettled(muscles.map(fetchRemoteMuscleExercises));
+      const merged=[],seen=new Set();
+      responses.forEach(r=>{if(r.status!=='fulfilled')return;r.value.forEach(x=>{
+        const name=String(x?.name||'').trim(),image=String(x?.gifUrl||'').trim();
+        if(!name||!image)return;
+        const id=String(x?.id||image).toLowerCase();if(seen.has(id))return;seen.add(id);
+        merged.push({name,image,equipment:String(x?.equipment||'').trim()});
+      });});
+      merged.sort((a,b)=>a.name.localeCompare(b.name,'es'));
+      if(!merged.length){status.textContent='No se encontraron ejercicios. Comprueba la conexión a Internet.';return;}
+      const editor=document.getElementById('monitorEditor');
+      const currentNames=new Set(Array.from(editor.querySelectorAll('.studentExercise')).filter(c=>Number(c.dataset.d)===Number(day)&&String(c.dataset.group).toUpperCase()===String(groupName).toUpperCase()).map(c=>String(c.dataset.name||'').trim().toLowerCase()));
+      const available=merged.filter(x=>!currentNames.has(x.name.toLowerCase()));
+      status.textContent=`${available.length} ejercicios nuevos encontrados en la biblioteca original. Pulsa AÑADIR en los que quieras.`;
+      if(!available.length){box.innerHTML='<div class="empty">Todos los ejercicios encontrados ya están en la lista de este día.</div>';return;}
+      window.monitorSearchCache=window.monitorSearchCache||{};window.monitorSearchCache[token]=available;
+      box.innerHTML=available.map((x,i)=>`<div class="exerciseCard" style="display:flex;gap:8px;align-items:center;margin:6px 0;padding:7px;border:1px solid var(--border);border-radius:10px"><img src="${esc(x.image)}" alt="GIF ${esc(x.name)}" loading="lazy" onerror="this.style.opacity='.25'" style="width:58px;height:58px;object-fit:contain;flex-shrink:0"><div style="min-width:0;flex:1"><div class="exerciseCardName">${esc(x.name)}</div><div class="exerciseCardMeta">${esc(x.equipment||'Equipo no especificado')} · ExerciseGymGifsDB</div><button type="button" class="btn sm" onclick="monitorAddSearchedExerciseFromResult(${Number(day)},'${esc(groupName)}',${i},this)">＋ AÑADIR A LA RUTINA</button></div></div>`).join('');
+    }catch(err){console.error('Búsqueda de ejercicios Monitor',err);status.textContent='No se pudo consultar la biblioteca. Comprueba la conexión a Internet.';}
+  };
+
+  window.monitorAddSearchedExerciseFromResult=function(day,groupName,index,button){
+    const token=`d${Number(day)}g${String(groupName).replace(/[^a-zA-Z0-9]/g,'')}`;
+    const item=(window.monitorSearchCache||{})[token]?.[Number(index)];if(!item)return;
+    window.monitorAddSearchedExercise(day,groupName,item.name,item.image,item.equipment,button);
+  };
+
+  window.monitorAddSearchedExercise=function(day,groupName,name,image,equipment,button){
+    const token=`d${Number(day)}g${String(groupName).replace(/[^a-zA-Z0-9]/g,'')}`;
+    const host=document.getElementById(`studentGroup-${token}`);if(!host)return;
+    const existing=Array.from(host.querySelectorAll('.studentExercise')).find(c=>String(c.dataset.name||'').trim().toLowerCase()===String(name).trim().toLowerCase());
+    if(existing){existing.checked=true;existing.dispatchEvent(new Event('change'));if(button)button.textContent='✓ AÑADIDO';return;}
+    const key=`custom${Number(day)}${Date.now()}${Math.floor(Math.random()*10000)}`;
+    const row=document.createElement('div');row.className='studentExerciseRow';
+    row.innerHTML=`<label class="check"><input type="checkbox" class="studentExercise" data-key="${key}" data-d="${Number(day)}" data-group="${esc(groupName)}" data-name="${esc(name)}" data-image="${esc(image)}" data-equipment="${esc(equipment||'')}" checked onchange="toggleStudentPrescription('${key}',this)"><img class="studentExerciseThumb" src="${esc(image)}" alt="GIF ${esc(name)}" loading="lazy" onerror="this.style.display='none'"><span class="studentExerciseName">${esc(name)}</span><span style="color:var(--sub);font-size:.62rem">${esc(equipment||'')}</span></label><div id="studentPres-${key}" style="display:block">${prescriptionHTML({group:groupName,name,image,equipment:equipment||''},key)}</div>`;
+    const results=document.getElementById(`monitorSearchResults-${token}`);
+    host.insertBefore(row,results||null);
+    if(button){button.textContent='✓ AÑADIDO';button.disabled=true;}
+    const status=document.getElementById(`monitorSearchStatus-${token}`);if(status)status.textContent=`${name} añadido y marcado para este día. Guarda la rutina para conservarlo.`;
+  };
+
+  window.monitorClearGroupSelection=function(day,groupName){
+    const token=`d${Number(day)}g${String(groupName).replace(/[^a-zA-Z0-9]/g,'')}`;
+    const host=document.getElementById(`studentGroup-${token}`);if(!host)return;
+    const marked=Array.from(host.querySelectorAll('.studentExercise:checked'));
+    if(!marked.length){
+      const status=document.getElementById(`monitorSearchStatus-${token}`);
+      if(status)status.textContent='No hay ejercicios marcados para quitar en este grupo y día.';
+      return;
+    }
+    marked.forEach(c=>{
+      const row=c.closest('.studentExerciseRow');
+      if(row)row.remove();
+      else c.closest('label')?.remove();
+    });
+    const status=document.getElementById(`monitorSearchStatus-${token}`);
+    if(status)status.textContent=`Se han quitado ${marked.length} ejercicio(s) marcado(s) de este grupo y día. Guarda la rutina para conservar los cambios.`;
   };
 
   window.saveStudent=function(){
@@ -6194,7 +6265,7 @@ renderStudents();
 
     const html=`<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="format-detection" content="telephone=no"><title>Mi Gimnasio · Entrenamiento · ${escStudent(s.name)}</title><style>
 :root{--bg:#121212;--card:#1d1d1d;--item:#252525;--a:#00e676;--blue:#29b6f6;--sub:#aaa;--bor:#3a3a3a;--red:#ff5252;--gold:#ffd54f}*{box-sizing:border-box;font-family:Arial,sans-serif}body{margin:0;background:var(--bg);color:#fff;padding:12px 12px 40px}main{max-width:780px;margin:auto}header{background:var(--card);border:1px solid var(--bor);border-radius:14px;padding:16px;text-align:center;margin-bottom:10px}h1{color:var(--a);font-size:1.18rem;margin:0}header .sub{color:var(--sub);font-size:.75rem;margin-top:5px}.days{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:10px}.dayBtn{background:#252525;color:#fff;border:1px solid var(--bor);border-radius:7px;padding:9px 4px;font-weight:bold}.dayBtn.on{background:var(--a);color:#000}.dateBox{background:var(--card);border:1px solid var(--bor);border-radius:11px;padding:10px;margin-bottom:10px}.dateBox label{display:block;color:var(--sub);font-size:.68rem;margin-bottom:5px}.dateBox input{background:#292929;color:#fff;border:1px solid var(--bor);border-radius:7px;padding:8px}.trainingHero{background:#171717;border:1px solid var(--bor);border-radius:11px;padding:10px;margin-bottom:10px}.trainingHeroTop{display:flex;justify-content:space-between;align-items:center;gap:10px}.trainingHeroTitle{font-weight:bold;color:var(--blue);font-size:1rem}.trainingHeroSub{color:var(--sub);font-size:.68rem;margin-top:4px}.trainingPill{border:1px solid var(--a);color:var(--a);border-radius:20px;padding:5px 8px;font-size:.62rem;font-weight:bold}.group{font-weight:bold;padding:8px 10px;margin:10px 0 6px;border-left:4px solid var(--blue);background:#191919;border-radius:6px}.ex{background:var(--card);border:1px solid var(--bor);border-radius:11px;padding:10px;margin-bottom:10px}.exhead{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:7px;font-size:.8rem;font-weight:bold}.exerciseNo{font-size:.62rem;color:var(--a);border:1px solid #176b46;border-radius:5px;padding:3px 5px}.badge{margin-left:auto;color:var(--sub);font-size:.6rem;border:1px solid var(--bor);padding:3px 5px;border-radius:5px}.gifPreview{width:100%;max-height:280px;object-fit:contain;background:#0b0b0b;border-radius:8px;border:1px solid var(--bor);margin:4px 0 8px}.gifLabel{color:var(--red);font-size:.68rem;margin:5px}.monitorTargetTitle,.actualTitle{background:#062d3c;color:var(--blue);border:1px solid #17607c;border-radius:7px;padding:8px;font-size:.72rem;font-weight:bold;margin:7px 0}.workTable{width:100%;border-collapse:separate;border-spacing:3px;margin:4px 0 7px}.workTable th{font-size:.59rem;color:var(--sub);padding:5px}.targetTable td{text-align:center;background:#252525;padding:7px;font-size:.7rem;border:1px solid #333;border-radius:4px}.studentTable th[colspan]{font-size:.7rem}.todayHead{color:var(--a)!important;background:#07351f;border-radius:5px}.lastHead{color:var(--blue)!important;background:#092632;border-radius:5px}.studentTable td{padding:3px}.studentTable input,.timeGrid input{width:100%;background:#292929;color:#fff;border:1px solid var(--bor);border-radius:5px;padding:8px;text-align:center}.studentTable .lastCell input{background:#092632;color:var(--blue)}.rm,.vol{font-size:.68rem;margin-top:5px}.rm{color:var(--gold)}.vol{color:var(--a)}.timeGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin:6px 0 8px}.tabataBtn,.restbtn{width:100%;border-radius:7px;padding:9px;font-weight:bold;margin-top:7px}.tabataBtn{background:#4a1730;color:#ff80ab;border:1px solid #9b315f}.restbtn{background:#333;color:#fff;border:1px solid var(--bor)}.tabataState{text-align:center;color:var(--sub);font-size:.7rem;margin-top:6px}.bottomActions{display:grid;gap:8px;margin-top:12px}.saveBtn,.sendBtn{border-radius:9px;padding:13px;font-weight:bold;font-size:.86rem}.saveBtn{background:var(--a);color:#000;border:0}.sendBtn{background:#062d3c;color:var(--blue);border:1px solid #17607c}.note{color:var(--sub);font-size:.65rem;text-align:center;margin-top:8px}.overlay{position:fixed;inset:0;background:rgba(0,0,0,.88);display:flex;align-items:center;justify-content:center;z-index:100}.timerBox{background:var(--card);border:1px solid var(--bor);border-radius:14px;padding:24px;text-align:center;width:90%;max-width:320px}.timerBox strong{display:block;font-size:4rem;margin:12px}.timerBox button{background:#333;color:#fff;border:1px solid var(--bor);border-radius:7px;padding:8px 16px}@media(max-width:600px){.days{grid-template-columns:repeat(3,1fr)}.trainingHeroTop{display:block}.trainingPill{display:inline-block;margin-top:7px}.gifPreview{max-height:240px}}
-</style></head><body><main><header><h1>🏋️ MI GIMNASIO · ENTRENAMIENTO</h1><div class="sub">${escStudent(s.name)}</div><div class="sub">${escStudent(s.place||'Gimnasio')}</div></header><div id="days" class="days">${selectedDays.map((d,i)=>`<button class="dayBtn ${i===0?'on':''}" type="button" data-student-day="${d}">Día ${d}</button>`).join('')}</div><div class="dateBox"><label>FECHA DEL ENTRENAMIENTO</label><input id="studentDate" type="date" value="${new Date().toISOString().slice(0,10)}"></div>${daysHtml}<div class="bottomActions"><button class="saveBtn" type="button" id="saveStudentBtn">💾 GUARDAR ENTRENAMIENTO</button><button class="sendBtn" type="button" id="sendStudentBtn">📤 DEVOLVER AL MONITOR</button></div><div class="note">Cuando termines, pulsa GUARDAR ENTRENAMIENTO y después DEVOLVER AL MONITOR.</div></main>
+</style></head><body><main><header><h1>🏋️ MI GIMNASIO · ENTRENAMIENTO</h1><div class="sub">${escStudent(s.name)}</div><div class="sub">${escStudent(s.place||'Gimnasio')}</div></header><div id="days" class="days">${selectedDays.map((d,i)=>`<button class="dayBtn ${i===0?'on':''}" type="button" data-student-day="${d}">Rutina ${d}</button>`).join('')}</div><div class="dateBox"><label>FECHA DEL ENTRENAMIENTO</label><input id="studentDate" type="date" value="${new Date().toISOString().slice(0,10)}"></div>${daysHtml}<div class="bottomActions"><button class="saveBtn" type="button" id="saveStudentBtn">💾 GUARDAR ENTRENAMIENTO</button><button class="sendBtn" type="button" id="sendStudentBtn">📤 DEVOLVER AL MONITOR</button></div><div class="note">Cuando termines, pulsa GUARDAR ENTRENAMIENTO y después DEVOLVER AL MONITOR.</div></main>
 <script>
 const DATA=${jsonSafe};
 const state={day:${selectedDays[0]},results:{},tabata:{},savedLog:null};
@@ -6474,7 +6545,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
           const checked=names.has(name.trim().toLowerCase());
           const current=selected.find(x=>String(x.name||'').trim().toLowerCase()===name.trim().toLowerCase());
           const key=monitorRoutineKey(d,groupName,idx);
-          h+=`<div class="studentExerciseRow"><label class="check"><input type="checkbox" class="studentExercise" data-key="${key}" data-d="${d}" data-group="${esc(groupName)}" data-name="${esc(name)}" data-image="${esc(item[1]||'')}" data-equipment="${esc(item[2]||'')}" ${checked?'checked':''} onchange="toggleStudentPrescription('${key}',this)"><span>${esc(name)}</span><span style="margin-left:auto;color:var(--sub);font-size:.62rem">${esc(item[2]||'')}</span></label><div id="studentPres-${key}" style="display:${checked?'block':'none'}">${prescriptionHTML(current||{group:groupName,name,image:item[1]||'',equipment:item[2]||''},key)}</div></div>`;
+          h+=`<div class="studentExerciseRow"><label class="check"><input type="checkbox" class="studentExercise" data-key="${key}" data-d="${d}" data-group="${esc(groupName)}" data-name="${esc(name)}" data-image="${esc(item[1]||'')}" data-equipment="${esc(item[2]||'')}" ${checked?'checked':''} onchange="toggleStudentPrescription('${key}',this)"><img class="studentExerciseThumb" src="${esc(item[1]||'')}" alt="GIF ${esc(name)}" loading="lazy" onerror="this.style.display='none'"><span class="studentExerciseName">${esc(name)}</span><span style="color:var(--sub);font-size:.62rem">${esc(item[2]||'')}</span></label><div id="studentPres-${key}" style="display:${checked?'block':'none'}">${prescriptionHTML(current||{group:groupName,name,image:item[1]||'',equipment:item[2]||''},key)}</div></div>`;
         });
         h+='</div>';
       });
@@ -6604,16 +6675,19 @@ function monitorFindMasterExercise(group,name){
     for(let d=1;d<=5;d++){
       h+=`<div class="card"><h2>📅 Día ${d}</h2>`;
       (MONITOR_DAY_GROUPS[d]||[]).forEach(groupName=>{
-        const list=getLibraryBaseForGroup(groupName)||[];
+        const baseList=getLibraryBaseForGroup(groupName)||[];
         const selected=s.routine[d].filter(x=>String(x.group||'').trim().toUpperCase()===String(groupName).trim().toUpperCase());
+        const extraSelected=selected.filter(x=>!baseList.some(item=>String(item[0]||'').trim().toLowerCase()===String(x.name||'').trim().toLowerCase())).map(x=>[x.name,x.image||'',x.equipment||'']);
+        const list=baseList.concat(extraSelected);
         const names=new Set(selected.map(x=>String(x.name||'').trim().toLowerCase()));
-        h+=`<div class="groupEditor"><div class="groupEditorTitle"><strong>${esc(groupName)}</strong><span style="font-size:.68rem;color:var(--sub)">${list.length} disponibles</span></div>`;
+        const groupToken=`d${d}g${String(groupName).replace(/[^a-zA-Z0-9]/g,'')}`;
+        h+=`<div class="groupEditor" id="studentGroup-${groupToken}"><div class="groupEditorTitle"><strong>${esc(groupName)}</strong><span style="font-size:.68rem;color:var(--sub)">${list.length} ejercicios disponibles</span></div><div style="display:flex;gap:6px;flex-wrap:wrap;margin:7px 0"><button class="btn sm blue" type="button" onclick="monitorSearchMoreExercises(${d},'${esc(groupName)}')">🔎 BUSCAR Y AÑADIR</button><button class="btn sm out" type="button" onclick="monitorClearGroupSelection(${d},'${esc(groupName)}')">✖ QUITAR MARCADOS</button></div><div id="monitorSearchStatus-${groupToken}" style="font-size:.75rem;color:var(--sub);margin:4px 0"></div><div id="monitorSearchResults-${groupToken}" class="monitorSearchResults"></div>`;
         list.forEach((item,idx)=>{
           const name=String(item[0]||'').trim(); if(!name)return;
           const checked=names.has(name.toLowerCase());
           const current=selected.find(x=>String(x.name||'').trim().toLowerCase()===name.toLowerCase());
           const key=`d${d}g${String(groupName).replace(/[^a-zA-Z0-9]/g,'')}x${idx}`;
-          h+=`<div class="studentExerciseRow"><label class="check"><input type="checkbox" class="studentExercise" data-key="${key}" data-d="${d}" data-group="${esc(groupName)}" data-name="${esc(name)}" data-image="${esc(item[1]||'')}" data-equipment="${esc(item[2]||'')}" ${checked?'checked':''} onchange="toggleStudentPrescription('${key}',this)"><span>${esc(name)}</span><span style="margin-left:auto;color:var(--sub);font-size:.62rem">${esc(item[2]||'')}</span></label><div id="studentPres-${key}" style="display:${checked?'block':'none'}">${prescriptionHTML(current||{group:groupName,name:name,image:item[1]||'',equipment:item[2]||''},key)}</div></div>`;
+          h+=`<div class="studentExerciseRow"><label class="check"><input type="checkbox" class="studentExercise" data-key="${key}" data-d="${d}" data-group="${esc(groupName)}" data-name="${esc(name)}" data-image="${esc(item[1]||'')}" data-equipment="${esc(item[2]||'')}" ${checked?'checked':''} onchange="toggleStudentPrescription('${key}',this)"><img class="studentExerciseThumb" src="${esc(item[1]||'')}" alt="GIF ${esc(name)}" loading="lazy" onerror="this.style.display='none'"><span class="studentExerciseName">${esc(name)}</span><span style="color:var(--sub);font-size:.62rem">${esc(item[2]||'')}</span></label><div id="studentPres-${key}" style="display:${checked?'block':'none'}">${prescriptionHTML(current||{group:groupName,name:name,image:item[1]||'',equipment:item[2]||''},key)}</div></div>`;
         });
         h+='</div>';
       });
@@ -6650,7 +6724,7 @@ function monitorFindMasterExercise(group,name){
     const s=getMonitorStudent();if(!s)return;
     ensureStudentRoutine(s);saveMonitor();
     const e=document.getElementById('monitorEditor');
-    e.innerHTML=`<div class="monitorBack"><button class="btn out" type="button" onclick="openStudent(${s.id})">← VOLVER A FICHA</button></div><div class="monitorTitle">🏋️ ENTRENAMIENTO — ${esc(s.name)}</div><div class="card"><div class="days">${[1,2,3,4,5].map(d=>`<button class="btn out" type="button" onclick="studentSelectDay(${d})">Día ${d}</button>`).join('')}</div></div><div id="studentWork"></div>`;
+    e.innerHTML=`<div class="monitorBack"><button class="btn out" type="button" onclick="openStudent(${s.id})">← VOLVER A FICHA</button></div><div class="monitorTitle">🏋️ ENTRENAMIENTO — ${esc(s.name)}</div><div class="card"><div class="days">${[1,2,3,4,5].map(d=>`<button class="btn out" type="button" onclick="studentSelectDay(${d})">Rutina ${d}</button>`).join('')}</div></div><div id="studentWork"></div>`;
   };
 
   window.studentSelectDay=function(d){
@@ -6756,18 +6830,6 @@ if(document.readyState==='loading'){
   openMonitorOnStartup();
 }
 window.addEventListener('load',openMonitorOnStartup,{once:true});
-</script>
-
-
-<script>
-/* Instalación de funcionamiento sin conexión para GitHub Pages */
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', function () {
-    navigator.serviceWorker.register('./service-worker.js').catch(function (err) {
-      console.warn('No se pudo registrar el modo sin conexión:', err);
-    });
-  });
-}
 </script>
 
 </body>
