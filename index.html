@@ -6210,10 +6210,11 @@ renderStudents();
       if(logs.length)history[d]=clone(logs[logs.length-1]);
     });
 
-    // FIX10.28.6: incrustar los GIF cuando el navegador permite leerlos.
-    // Si el service worker devuelve una respuesta opaca (opaque), no bloquear
-    // el envío: se conserva la URL original para que el dispositivo receptor
-    // intente mostrar el GIF directamente.
+    // FIX10.28.7: evitar la caché opaca del service worker al descargar GIF.
+    // El service worker antiguo intercepta URLs terminadas en .gif y puede
+    // devolver respuestas opaque desde CacheStorage. Añadimos un parámetro
+    // terminado en .txt para que esa regla no intercepte la descarga; el CDN
+    // ignora el parámetro y el navegador realiza una petición CORS normal.
     const exportRoutine=clone(s.routine);
     const imageCache=new Map();
     let embeddedBytes=0;
@@ -6224,36 +6225,33 @@ renderStudents();
       reader.onerror=()=>reject(new Error('No se pudo convertir un GIF.'));
       reader.readAsDataURL(blob);
     });
-    let embeddedCount=0,externalCount=0;
+    const imageUrls=[];
     for(const d of selectedDays){
       for(const item of (exportRoutine[d]||[])){
-        const imageUrl=String(item.image||'').trim();
-        if(!imageUrl || imageUrl.startsWith('data:') || imageCache.has(imageUrl))continue;
-        if(!/^https?:\/\//i.test(imageUrl)){externalCount++;continue}
-        try{
-          const response=await fetch(imageUrl,{mode:'cors',credentials:'omit',cache:'no-store'});
-          if(!response.ok || response.type==='opaque'){
-            externalCount++;
-            continue;
-          }
-          const blob=await response.blob();
-          if(!blob.size || (!/^image\//i.test(blob.type||'') && !/\.(gif|png|jpe?g|webp)(?:[?#]|$)/i.test(imageUrl))){
-            externalCount++;
-            continue;
-          }
-          if(embeddedBytes+(blob.size||0)>MAX_EMBED_BYTES){
-            externalCount++;
-            continue;
-          }
-          const dataUrl=await readBlobAsDataURL(blob);
-          imageCache.set(imageUrl,dataUrl);
-          embeddedBytes+=blob.size||0;
-          embeddedCount++;
-        }catch(imageError){
-          // Un GIF externo no debe impedir generar ni compartir el entrenamiento.
-          externalCount++;
-        }
+        const u=String(item.image||'').trim();
+        if(u && /^https?:\/\//i.test(u) && !u.startsWith('data:') && !imageUrls.includes(u))imageUrls.push(u);
       }
+    }
+    try{
+      for(const imageUrl of imageUrls){
+        const separator=imageUrl.includes('?')?'&':'?';
+        const fetchUrl=imageUrl+separator+'abu-export=10.28.7.txt';
+        const response=await fetch(fetchUrl,{mode:'cors',credentials:'omit',cache:'no-store'});
+        if(!response.ok)throw new Error('El servidor no ha entregado el GIF ('+response.status+'): '+imageUrl);
+        if(response.type==='opaque')throw new Error('El GIF sigue llegando como respuesta opaca. No se ha generado un entrenamiento incompleto.');
+        const blob=await response.blob();
+        if(!blob.size || !/^image\//i.test(blob.type||'')){
+          throw new Error('El archivo descargado no es una imagen válida: '+imageUrl);
+        }
+        if(embeddedBytes+blob.size>MAX_EMBED_BYTES){
+          throw new Error('Los GIF de esta rutina superan 24 MB. Reduce el número de ejercicios para poder incorporarlos.');
+        }
+        imageCache.set(imageUrl,await readBlobAsDataURL(blob));
+        embeddedBytes+=blob.size;
+      }
+    }catch(imageError){
+      alert('⚠️ No se ha preparado el entrenamiento porque no se pudieron incorporar los GIF.\\n\\n'+(imageError.message||imageError)+'\\n\\nNo se ha enviado un archivo con imágenes incompletas.');
+      return;
     }
     selectedDays.forEach(d=>{
       (exportRoutine[d]||[]).forEach(item=>{
@@ -6264,7 +6262,7 @@ renderStudents();
 
     const trainingData={
       type:'MI_GIMNASIO_ENTRENAMIENTO_ALUMNO',
-      version:'10.28.6',
+      version:'10.28.7',
       generatedAt:new Date().toISOString(),
       student:{id:s.id,name:s.name,phone:s.phone||'',place:s.place||'Gimnasio'},
       routine:exportRoutine,
