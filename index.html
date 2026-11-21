@@ -6210,8 +6210,10 @@ renderStudents();
       if(logs.length)history[d]=clone(logs[logs.length-1]);
     });
 
-    // FIX10.28.3: incrustar los GIF en el HTML que se envía.
-    // Así el alumno no depende de que Mail/Safari/iOS permita cargar el CDN externo.
+    // FIX10.28.6: incrustar los GIF cuando el navegador permite leerlos.
+    // Si el service worker devuelve una respuesta opaca (opaque), no bloquear
+    // el envío: se conserva la URL original para que el dispositivo receptor
+    // intente mostrar el GIF directamente.
     const exportRoutine=clone(s.routine);
     const imageCache=new Map();
     let embeddedBytes=0;
@@ -6222,27 +6224,36 @@ renderStudents();
       reader.onerror=()=>reject(new Error('No se pudo convertir un GIF.'));
       reader.readAsDataURL(blob);
     });
-    try{
-      for(const d of selectedDays){
-        for(const item of (exportRoutine[d]||[])){
-          const imageUrl=String(item.image||'').trim();
-          if(!imageUrl || imageUrl.startsWith('data:') || imageCache.has(imageUrl))continue;
-          if(!/^https?:\/\//i.test(imageUrl))continue;
-          const response=await fetch(imageUrl,{mode:'cors',credentials:'omit',cache:'force-cache'});
-          if(!response.ok)throw new Error('No se pudo descargar el GIF de '+(item.name||'un ejercicio')+'.');
-          const blob=await response.blob();
-          if(!/^image\//i.test(blob.type||'') && !/\.(gif|png|jpe?g|webp)(?:[?#]|$)/i.test(imageUrl)){
-            throw new Error('El archivo recibido no es una imagen válida: '+(item.name||'ejercicio'));
+    let embeddedCount=0,externalCount=0;
+    for(const d of selectedDays){
+      for(const item of (exportRoutine[d]||[])){
+        const imageUrl=String(item.image||'').trim();
+        if(!imageUrl || imageUrl.startsWith('data:') || imageCache.has(imageUrl))continue;
+        if(!/^https?:\/\//i.test(imageUrl)){externalCount++;continue}
+        try{
+          const response=await fetch(imageUrl,{mode:'cors',credentials:'omit',cache:'no-store'});
+          if(!response.ok || response.type==='opaque'){
+            externalCount++;
+            continue;
           }
-          embeddedBytes+=blob.size||0;
-          if(embeddedBytes>MAX_EMBED_BYTES)throw new Error('Los GIF de esta rutina superan 24 MB. Reduce los ejercicios o envía las rutinas por separado.');
+          const blob=await response.blob();
+          if(!blob.size || (!/^image\//i.test(blob.type||'') && !/\.(gif|png|jpe?g|webp)(?:[?#]|$)/i.test(imageUrl))){
+            externalCount++;
+            continue;
+          }
+          if(embeddedBytes+(blob.size||0)>MAX_EMBED_BYTES){
+            externalCount++;
+            continue;
+          }
           const dataUrl=await readBlobAsDataURL(blob);
           imageCache.set(imageUrl,dataUrl);
+          embeddedBytes+=blob.size||0;
+          embeddedCount++;
+        }catch(imageError){
+          // Un GIF externo no debe impedir generar ni compartir el entrenamiento.
+          externalCount++;
         }
       }
-    }catch(imageError){
-      alert('⚠️ No se ha preparado el entrenamiento porque no se pudieron incorporar todos los GIF.\\n\\n'+(imageError.message||imageError)+'\\n\\nComprueba la conexión del Monitor y vuelve a intentarlo. No se ha enviado un archivo con imágenes incompletas.');
-      return;
     }
     selectedDays.forEach(d=>{
       (exportRoutine[d]||[]).forEach(item=>{
@@ -6253,7 +6264,7 @@ renderStudents();
 
     const trainingData={
       type:'MI_GIMNASIO_ENTRENAMIENTO_ALUMNO',
-      version:'10.28.3',
+      version:'10.28.6',
       generatedAt:new Date().toISOString(),
       student:{id:s.id,name:s.name,phone:s.phone||'',place:s.place||'Gimnasio'},
       routine:exportRoutine,
@@ -6401,7 +6412,7 @@ async function sendStudentTrainingToMonitor(){
   if(!Array.isArray(log.groups)||!log.groups.length){alert('El entrenamiento guardado no contiene resultados.');return}
   state.savedLog=log;
   persistStudentDraft();
-  const payload={type:'MI_GIMNASIO_ALUMNO_ENTRENAMIENTO',version:'10.28.5',sentAt:new Date().toISOString(),student:DATA.student,day:Number(state.day),date:log.date,routine:JSON.parse(JSON.stringify(DATA.routine[state.day]||[])),log};
+  const payload={type:'MI_GIMNASIO_ALUMNO_ENTRENAMIENTO',version:'10.28.6',sentAt:new Date().toISOString(),student:DATA.student,day:Number(state.day),date:log.date,routine:JSON.parse(JSON.stringify(DATA.routine[state.day]||[])),log};
   const json=JSON.stringify(payload,null,2);
   const blob=new Blob([json],{type:'application/json'});
   const name=String(DATA.student.name||'alumno').replace(/[^a-z0-9áéíóúüñ _-]/gi,'').trim()||'alumno';
