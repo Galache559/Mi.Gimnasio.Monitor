@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>MI GIMNASIO PRO MONITOR v10.28</title>
+<title>MI GIMNASIO PRO MONITOR v10.28.1</title>
 <meta name="theme-color" content="#121212">
 
 <style>
@@ -1182,7 +1182,7 @@ td input{font-size:.7rem;padding:5px 1px}.muscleStats{grid-template-columns:1fr 
 
 <header>
 <h1>MI GIMNASIO PRO MONITOR v10.25</h1>
-<div style="text-align:center;color:#00ff88;font-weight:800;font-size:.8rem;margin:6px 0">CONTROL MONITOR v10.28</div>
+<div style="text-align:center;color:#00ff88;font-weight:800;font-size:.8rem;margin:6px 0">CONTROL MONITOR v10.28.1</div>
 </header>
 
 <div class="container">
@@ -5475,12 +5475,14 @@ if(prescription.mode==='REPS_KG'){
 }
 if(!completed)return;
 let real=sets.filter(x=>x.reps>0);
+let hasResult=prescription.mode==='REPS_KG'?sets.some(x=>x.reps>0||x.weight>0):prescription.mode==='TIEMPO'?times.some(x=>x>0):true;
+if(!hasResult)return;
 let data={name:ex,group:item.group||'Sin grupo',prescription:monitorPrescriptionFromItem(item),sets, times, tabataCompleted:prescription.mode==='TABATA', volume:volume(real),rm:maxSetRM(real)};
 let g=log.groups.find(x=>x.name===data.group);if(!g){g={name:data.group,exercises:[]};log.groups.push(g)}
 let old=g.exercises.find(x=>x.name===ex);if(old)Object.assign(old,data);else g.exercises.push(data);
 totalVolume+=data.volume;totalSets+=real.length;totalExercises++;
 });
-log.groups=(log.groups||[]).filter(g=>{g.exercises=(g.exercises||[]).filter(e=>(e.sets||[]).some(x=>num(x.reps)>0));return g.exercises.length});
+log.groups=(log.groups||[]).filter(g=>{g.exercises=(g.exercises||[]).filter(e=>{const mode=e.prescription?.mode||'REPS_KG';return mode==='REPS_KG'?(e.sets||[]).some(x=>num(x.reps)>0||num(x.weight)>0):mode==='TIEMPO'?(e.times||[]).some(x=>num(x)>0):!!e.tabataCompleted});return g.exercises.length});
 saveMonitor();
 document.getElementById('studentSummary').innerHTML=`<div class="summary"><h3>🎉 ENTRENAMIENTO GUARDADO</h3><div class="big">${esc(s.name)}</div><div>💪 <b>${totalExercises}</b> ejercicios realizados</div><div>🔢 <b>${totalSets}</b> series realizadas</div><div>📦 <b>${Math.round(totalVolume)}</b> kg de volumen</div><br><button class="btn" onclick="studentSelectDay(${d})">Seguir entrenando</button><br><br><button class="btn blue" onclick="sendStudentWorkoutToMonitor(${d})">📤 REENVIAR ENTRENAMIENTO AL MONITOR</button><br><br><button class="btn out" onclick="backToMonitor()">Volver a Monitor</button></div>`;
 }
@@ -6203,7 +6205,7 @@ renderStudents();
 
     const trainingData={
       type:'MI_GIMNASIO_ENTRENAMIENTO_ALUMNO',
-      version:'10.25',
+      version:'10.28.1',
       generatedAt:new Date().toISOString(),
       student:{id:s.id,name:s.name,phone:s.phone||'',place:s.place||'Gimnasio'},
       routine:clone(s.routine),
@@ -6269,6 +6271,10 @@ renderStudents();
 <script>
 const DATA=${jsonSafe};
 const state={day:${selectedDays[0]},results:{},tabata:{},savedLog:null};
+const DRAFT_KEY='MI_GIMNASIO_DRAFT_'+String(DATA.student?.id||DATA.student?.name||'alumno');
+function draftKey(){return DRAFT_KEY+'_'+String(state.day)+'_'+String(document.getElementById('studentDate')?.value||'');}
+function persistStudentDraft(){try{const key=draftKey(),draft={day:state.day,date:document.getElementById('studentDate')?.value||'',values:{},tabata:state.tabata,savedLog:state.savedLog};document.querySelectorAll('.dayPanel input.todayInput').forEach(i=>{if(i.id)draft.values[i.id]=i.value});localStorage.setItem(key,JSON.stringify(draft));return true}catch(e){return false}}
+function restoreStudentDraft(){try{const raw=localStorage.getItem(draftKey());if(!raw)return;const d=JSON.parse(raw);if(d&&d.values)Object.keys(d.values).forEach(id=>{const el=document.getElementById(id);if(el)el.value=d.values[id]});if(d&&d.tabata)Object.assign(state.tabata,d.tabata);if(d&&d.savedLog)state.savedLog=d.savedLog;document.querySelectorAll('.todayInput').forEach(i=>calcStudent(i.dataset.key||i.id.replace(/-(r|w)\d+$/,'')))}catch(e){console.warn('No se pudo recuperar el borrador',e)}}
 
 function num(v){const n=Number(String(v??'').replace(',','.'));return Number.isFinite(n)?n:0}
 
@@ -6327,22 +6333,27 @@ function buildStudentLog(){
     g.exercises.push(e);
   });
   const date=document.getElementById('studentDate')?.value||new Date().toISOString().slice(0,10);
-  return {id:Date.now(),date:new Date(date+'T12:00:00').toISOString(),day:Number(state.day),groups};
+  const previous=state.savedLog&&Number(state.savedLog.day)===Number(state.day)&&String(state.savedLog.date||'').slice(0,10)===date?state.savedLog:null;
+  return {id:previous?previous.id:(String(DATA.student?.id||'alumno')+'-'+state.day+'-'+date+'-'+Date.now()),date:new Date(date+'T12:00:00').toISOString(),day:Number(state.day),groups};
 }
 
 function saveStudentTraining(){
   const log=buildStudentLog();
   if(!log.groups.length){alert('No hay resultados anotados.');return false}
   state.savedLog=log;
-  alert('✓ ENTRENAMIENTO GUARDADO.\\n\\nYa puedes pulsar DEVOLVER AL MONITOR.');
+  const persisted=persistStudentDraft();
+  alert(persisted?'✓ ENTRENAMIENTO GUARDADO EN ESTE DISPOSITIVO.\n\nPuedes cerrar y volver a abrir el archivo. Después pulsa DEVOLVER AL MONITOR.':'⚠️ El navegador no permite guardar el borrador de forma permanente. Mantén esta página abierta hasta devolver el entrenamiento.');
   return true;
 }
 
 function sendStudentTrainingToMonitor(){
-  const log=buildStudentLog();
-  if(!log.groups.length){alert('Primero introduce al menos un resultado.');return}
+  const currentDate=document.getElementById('studentDate')?.value||'';
+  const log=state.savedLog&&Number(state.savedLog.day)===Number(state.day)&&String(state.savedLog.date||'').slice(0,10)===currentDate?state.savedLog:null;
+  if(!log){alert('Primero pulsa GUARDAR ENTRENAMIENTO y después DEVOLVER AL MONITOR.');return}
+  if(!Array.isArray(log.groups)||!log.groups.length){alert('El entrenamiento guardado no contiene resultados.');return}
   state.savedLog=log;
-  const payload={type:'MI_GIMNASIO_ALUMNO_ENTRENAMIENTO',version:'10.27',sentAt:new Date().toISOString(),student:DATA.student,day:Number(state.day),date:log.date,routine:JSON.parse(JSON.stringify(DATA.routine[state.day]||[])),log};
+  persistStudentDraft();
+  const payload={type:'MI_GIMNASIO_ALUMNO_ENTRENAMIENTO',version:'10.28.1',sentAt:new Date().toISOString(),student:DATA.student,day:Number(state.day),date:log.date,routine:JSON.parse(JSON.stringify(DATA.routine[state.day]||[])),log};
   const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
   const name=String(DATA.student.name||'alumno').replace(/[^a-z0-9áéíóúüñ _-]/gi,'').trim()||'alumno';
   const file=new File([blob],'Entrenamiento_'+name+'_Día_'+state.day+'_'+String(log.date).slice(0,10)+'.json',{type:'application/json'});
@@ -6392,12 +6403,13 @@ function runStudentTabata(key,work,rest,rounds){
 
 function bindStudentControls(){
   document.querySelectorAll('[data-student-day]').forEach(b=>b.addEventListener('click',()=>selectStudentDay(Number(b.dataset.studentDay))));
-  document.querySelectorAll('.todayInput').forEach(i=>i.addEventListener('input',()=>calcStudent(i.dataset.key||i.id.replace(/-(r|w)\d+$/,''))));
+  document.querySelectorAll('.todayInput').forEach(i=>i.addEventListener('input',()=>{calcStudent(i.dataset.key||i.id.replace(/-(r|w)\d+$/,''));persistStudentDraft()}));
   document.querySelectorAll('[data-rest]').forEach(b=>b.addEventListener('click',startStudentRest));
   document.querySelectorAll('[data-tabata-key]').forEach(b=>b.addEventListener('click',()=>runStudentTabata(b.dataset.tabataKey,Number(b.dataset.tabataWork),Number(b.dataset.tabataRest),Number(b.dataset.tabataRounds))));
   const save=document.getElementById('saveStudentBtn');if(save)save.addEventListener('click',saveStudentTraining);
   const send=document.getElementById('sendStudentBtn');if(send)send.addEventListener('click',sendStudentTrainingToMonitor);
-  selectStudentDay(state.day);
+  const dateInput=document.getElementById('studentDate');if(dateInput)dateInput.addEventListener('change',()=>{state.savedLog=null;restoreStudentDraft()});
+  selectStudentDay(state.day);restoreStudentDraft();
 }
 
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bindStudentControls,{once:true});else bindStudentControls();
@@ -6457,49 +6469,42 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     const input=event.target, file=input?.files?.[0];
     if(!file)return;
     const reader=new FileReader();
+    reader.onerror=function(){alert('⚠️ No se pudo leer el archivo seleccionado.');input.value='';};
     reader.onload=function(){
       try{
         const payload=JSON.parse(reader.result);
-        if(!payload || payload.type!=='MI_GIMNASIO_ALUMNO_ENTRENAMIENTO' || !payload.log || !payload.student){
-          throw new Error('Formato no válido');
-        }
-        const info=payload.student;
-        let s=(students||[]).find(x=>String(x.id)===String(info.id));
-        if(!s && info.phone){
-          const phone=String(info.phone).replace(/\D/g,'');
-          s=(students||[]).find(x=>String(x.phone||'').replace(/\D/g,'')===phone);
-        }
-        if(!s && info.name){
-          const n=String(info.name).trim().toLowerCase();
-          s=(students||[]).find(x=>String(x.name||'').trim().toLowerCase()===n);
-        }
-        if(!s){
-          s={id:Number(info.id)||Date.now(),name:String(info.name||'Alumno'),phone:String(info.phone||''),place:String(info.place||'Gimnasio'),routine:{1:[],2:[],3:[],4:[],5:[]},logs:[]};
-          students.push(s);
-        }
+        if(!payload || payload.type!=='MI_GIMNASIO_ALUMNO_ENTRENAMIENTO' || !payload.log || !payload.student){throw new Error('El archivo no tiene el formato de entrenamiento de Mi Gimnasio.');}
+        const info=payload.student, incoming=clone(payload.log);
+        const day=Number(payload.day??incoming.day);
+        if(!Number.isInteger(day)||day<1||day>5)throw new Error('El día de entrenamiento no es válido.');
+        if(Number(incoming.day)!==day)throw new Error('El día del archivo y el del entrenamiento no coinciden.');
+        if(!Array.isArray(incoming.groups)||!incoming.groups.some(g=>Array.isArray(g.exercises)&&g.exercises.length))throw new Error('El archivo no contiene ejercicios realizados.');
+        if(!incoming.date||!Number.isFinite(new Date(incoming.date).getTime()))throw new Error('La fecha del entrenamiento no es válida.');
+        let s=null;
+        if(info.id!=null)s=(students||[]).find(x=>String(x.id)===String(info.id))||null;
+        if(!s && info.phone){const phone=String(info.phone).replace(/\D/g,'');if(phone){const matches=(students||[]).filter(x=>String(x.phone||'').replace(/\D/g,'')===phone);if(matches.length===1)s=matches[0];else if(matches.length>1)throw new Error('Hay varios alumnos con ese teléfono. No se ha importado para evitar asignarlo a la ficha equivocada.');}}
+        if(!s && info.name){const n=String(info.name).trim().toLowerCase();const matches=(students||[]).filter(x=>String(x.name||'').trim().toLowerCase()===n);if(matches.length===1)s=matches[0];else if(matches.length>1)throw new Error('Hay varios alumnos con ese nombre. No se ha importado para evitar asignarlo a la ficha equivocada.');}
+        if(!s)throw new Error('No se ha encontrado una ficha de alumno coincidente. No se ha creado ningún alumno nuevo. Comprueba el identificador, teléfono y nombre.');
+        if(!s.routine||typeof s.routine!=='object'||Array.isArray(s.routine))s.routine={};
         if(!Array.isArray(s.logs))s.logs=[];
-        if(payload.routine && Array.isArray(payload.routine)){
-          s.routine[Number(payload.day)]=clone(payload.routine);
-        }
-        const incoming=clone(payload.log);
+        const incomingRoutine=payload.routine;
+        if(incomingRoutine && !Array.isArray(incomingRoutine))throw new Error('La rutina incluida en el archivo no tiene un formato válido.');
+        if(Array.isArray(incomingRoutine))s.routine[day]=clone(incomingRoutine);
         const idx=s.logs.findIndex(l=>String(l.id)===String(incoming.id));
-        if(idx>=0)s.logs[idx]=incoming;else{
-          const same=s.logs.findIndex(l=>Number(l.day)===Number(incoming.day)&&dateKey(l.date)===dateKey(incoming.date));
-          if(same>=0)s.logs[same]=incoming;else s.logs.push(incoming);
-        }
+        if(idx>=0)s.logs[idx]=incoming;else s.logs.push(incoming);
         v108NormalizeRoutine(s);
         saveMonitor();createMonitorAutoBackup();
         renderMonitorSummary();renderStudents(document.getElementById('studentSearch')?.value||'');
-        alert(`✓ Entrenamiento recibido y cargado en Monitor.\n\nAlumno: ${s.name}\nDía: ${incoming.day}\nFecha: ${dateKey(incoming.date)}`);
         monitorStudentId=s.id;
+        alert(`✓ ENTRENAMIENTO RECIBIDO Y CARGADO.\\n\\nAlumno: ${s.name}\\nDía: ${incoming.day}\\nFecha: ${dateKey(incoming.date)}\\nEjercicios: ${incoming.groups.reduce((n,g)=>n+(g.exercises||[]).length,0)}`);
         openStudent(s.id);
       }catch(err){
-        alert('⚠️ No se ha podido cargar el entrenamiento. El archivo no es válido.');
+        console.error('Error al recibir entrenamiento:',err);
+        alert('⚠️ NO SE HA PODIDO CARGAR EL ENTRENAMIENTO.\\n\\n'+(err?.message||'Error desconocido')+'\\n\\nNo se ha importado ningún alumno nuevo.');
       }finally{input.value='';}
     };
     reader.readAsText(file);
   };
-
   /* Evita que una rutina antigua por índices vuelva a romperse al entrar en Entrenar. */
   const oldStudentTraining=window.studentTraining;
   window.studentTraining=function(){const s=getMonitorStudent();if(s){v108NormalizeRoutine(s);saveMonitor()}return oldStudentTraining.apply(this,arguments)};
