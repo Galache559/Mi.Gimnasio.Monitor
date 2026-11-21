@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>MI GIMNASIO PRO MONITOR v10.28.1</title>
+<title>MI GIMNASIO PRO MONITOR v10.28.2</title>
 <meta name="theme-color" content="#121212">
 
 <style>
@@ -1182,7 +1182,7 @@ td input{font-size:.7rem;padding:5px 1px}.muscleStats{grid-template-columns:1fr 
 
 <header>
 <h1>MI GIMNASIO PRO MONITOR v10.25</h1>
-<div style="text-align:center;color:#00ff88;font-weight:800;font-size:.8rem;margin:6px 0">CONTROL MONITOR v10.28.1</div>
+<div style="text-align:center;color:#00ff88;font-weight:800;font-size:.8rem;margin:6px 0">CONTROL MONITOR v10.28.2</div>
 </header>
 
 <div class="container">
@@ -1396,8 +1396,15 @@ Selecciona un periodo.
 <button class="btn" onclick="newStudent()">➕ NUEVO ALUMNO</button>
 <button class="btn blue" onclick="showAppointments()">📅 CITAS</button>
 <button class="btn out" onclick="showAccounting()">💶 CONTABILIDAD</button>
-<button class="btn blue" onclick="document.getElementById('studentWorkoutImport').click()">📥 RECIBIR ENTRENAMIENTO</button>
-<input id="studentWorkoutImport" type="file" accept="application/json,.json" style="display:none" onchange="receiveStudentWorkoutFile(event)">
+<button class="btn blue" type="button" onclick="document.getElementById('studentWorkoutImport').click()">📥 RECIBIR ENTRENAMIENTO</button>
+<input id="studentWorkoutImport" type="file" accept=".json,application/json,application/octet-stream,text/plain" style="display:none" onchange="receiveStudentWorkoutFile(event)">
+<div style="font-size:.82rem;line-height:1.5;color:var(--sub);margin-top:10px">
+  <b style="color:var(--txt)">📱 Si usas iPhone:</b><br>
+  1. En WhatsApp, abre el archivo que te ha enviado el alumno.<br>
+  2. Pulsa Compartir y elige <b>Guardar en Archivos</b> → <b>En mi iPhone</b>.<br>
+  3. Vuelve aquí, pulsa <b>RECIBIR ENTRENAMIENTO</b> y selecciona ese archivo en Archivos.<br>
+  La selección y lectura del archivo se realiza en el propio iPhone; no necesita conexión durante la importación.
+</div>
 </div>
 <br>
 <button class="btn danger" onclick="exitMonitorApp()">🚪 SALIR Y GUARDAR</button>
@@ -6466,25 +6473,30 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
   };
 
   window.receiveStudentWorkoutFile=function(event){
-    const input=event.target, file=input?.files?.[0];
+    const input=event?.target, file=input?.files?.[0];
     if(!file)return;
     const reader=new FileReader();
-    reader.onerror=function(){alert('⚠️ No se pudo leer el archivo seleccionado.');input.value='';};
+    reader.onerror=function(){alert('⚠️ iPhone no ha podido leer el archivo. Comprueba que está guardado en Archivos y vuelve a seleccionarlo.');if(input)input.value='';};
     reader.onload=function(){
+      let target=null, snapshot=null;
       try{
-        const payload=JSON.parse(reader.result);
-        if(!payload || payload.type!=='MI_GIMNASIO_ALUMNO_ENTRENAMIENTO' || !payload.log || !payload.student){throw new Error('El archivo no tiene el formato de entrenamiento de Mi Gimnasio.');}
+        const raw=String(reader.result||'').replace(/^\uFEFF/,'');
+        const payload=JSON.parse(raw);
+        if(!payload || payload.type!=='MI_GIMNASIO_ALUMNO_ENTRENAMIENTO' || !payload.log || !payload.student){throw new Error('El archivo no tiene el formato de entrenamiento de Mi Gimnasio. Selecciona el archivo .JSON que devuelve el alumno, no el HTML de la rutina.');}
         const info=payload.student, incoming=clone(payload.log);
         const day=Number(payload.day??incoming.day);
         if(!Number.isInteger(day)||day<1||day>5)throw new Error('El día de entrenamiento no es válido.');
         if(Number(incoming.day)!==day)throw new Error('El día del archivo y el del entrenamiento no coinciden.');
         if(!Array.isArray(incoming.groups)||!incoming.groups.some(g=>Array.isArray(g.exercises)&&g.exercises.length))throw new Error('El archivo no contiene ejercicios realizados.');
         if(!incoming.date||!Number.isFinite(new Date(incoming.date).getTime()))throw new Error('La fecha del entrenamiento no es válida.');
+        if(!incoming.id)throw new Error('El archivo no contiene un identificador de entrenamiento. Pide al alumno que vuelva a guardar y devolver el entrenamiento.');
         let s=null;
         if(info.id!=null)s=(students||[]).find(x=>String(x.id)===String(info.id))||null;
         if(!s && info.phone){const phone=String(info.phone).replace(/\D/g,'');if(phone){const matches=(students||[]).filter(x=>String(x.phone||'').replace(/\D/g,'')===phone);if(matches.length===1)s=matches[0];else if(matches.length>1)throw new Error('Hay varios alumnos con ese teléfono. No se ha importado para evitar asignarlo a la ficha equivocada.');}}
         if(!s && info.name){const n=String(info.name).trim().toLowerCase();const matches=(students||[]).filter(x=>String(x.name||'').trim().toLowerCase()===n);if(matches.length===1)s=matches[0];else if(matches.length>1)throw new Error('Hay varios alumnos con ese nombre. No se ha importado para evitar asignarlo a la ficha equivocada.');}
         if(!s)throw new Error('No se ha encontrado una ficha de alumno coincidente. No se ha creado ningún alumno nuevo. Comprueba el identificador, teléfono y nombre.');
+        target=s;
+        snapshot=clone(s);
         if(!s.routine||typeof s.routine!=='object'||Array.isArray(s.routine))s.routine={};
         if(!Array.isArray(s.logs))s.logs=[];
         const incomingRoutine=payload.routine;
@@ -6493,17 +6505,26 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
         const idx=s.logs.findIndex(l=>String(l.id)===String(incoming.id));
         if(idx>=0)s.logs[idx]=incoming;else s.logs.push(incoming);
         v108NormalizeRoutine(s);
-        saveMonitor();createMonitorAutoBackup();
+        saveMonitor();
+        // En iOS Safari comprobamos que localStorage realmente haya conservado el registro.
+        const persisted=JSON.parse(localStorage.getItem(MK+'students')||'null');
+        const savedStudent=Array.isArray(persisted)?persisted.find(x=>String(x.id)===String(s.id)):null;
+        const savedLog=(savedStudent?.logs||[]).find(l=>String(l.id)===String(incoming.id));
+        if(!savedLog || JSON.stringify(savedLog)!==JSON.stringify(incoming)){
+          throw new Error('El entrenamiento se ha leído, pero el iPhone no ha confirmado su guardado. No cierres la aplicación. Comprueba el espacio disponible y vuelve a intentarlo.');
+        }
+        createMonitorAutoBackup();
         renderMonitorSummary();renderStudents(document.getElementById('studentSearch')?.value||'');
         monitorStudentId=s.id;
-        alert(`✓ ENTRENAMIENTO RECIBIDO Y CARGADO.\\n\\nAlumno: ${s.name}\\nDía: ${incoming.day}\\nFecha: ${dateKey(incoming.date)}\\nEjercicios: ${incoming.groups.reduce((n,g)=>n+(g.exercises||[]).length,0)}`);
+        alert(`✓ ENTRENAMIENTO RECIBIDO Y GUARDADO.\n\nAlumno: ${s.name}\nDía: ${incoming.day}\nFecha: ${dateKey(incoming.date)}\nEjercicios: ${incoming.groups.reduce((n,g)=>n+(g.exercises||[]).length,0)}\n\nYa está incorporado a su ficha.`);
         openStudent(s.id);
       }catch(err){
+        if(target&&snapshot){Object.keys(target).forEach(k=>delete target[k]);Object.assign(target,snapshot);try{saveMonitor()}catch(_){}}
         console.error('Error al recibir entrenamiento:',err);
-        alert('⚠️ NO SE HA PODIDO CARGAR EL ENTRENAMIENTO.\\n\\n'+(err?.message||'Error desconocido')+'\\n\\nNo se ha importado ningún alumno nuevo.');
-      }finally{input.value='';}
+        alert('⚠️ NO SE HA PODIDO CARGAR EL ENTRENAMIENTO.\n\n'+(err?.message||'Error desconocido')+'\n\nNo se ha creado ningún alumno nuevo.');
+      }finally{if(input)input.value='';}
     };
-    reader.readAsText(file);
+    reader.readAsText(file,'UTF-8');
   };
   /* Evita que una rutina antigua por índices vuelva a romperse al entrar en Entrenar. */
   const oldStudentTraining=window.studentTraining;
