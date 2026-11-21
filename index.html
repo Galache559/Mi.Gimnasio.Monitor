@@ -6210,12 +6210,53 @@ renderStudents();
       if(logs.length)history[d]=clone(logs[logs.length-1]);
     });
 
+    // FIX10.28.3: incrustar los GIF en el HTML que se envía.
+    // Así el alumno no depende de que Mail/Safari/iOS permita cargar el CDN externo.
+    const exportRoutine=clone(s.routine);
+    const imageCache=new Map();
+    let embeddedBytes=0;
+    const MAX_EMBED_BYTES=24*1024*1024;
+    const readBlobAsDataURL=blob=>new Promise((resolve,reject)=>{
+      const reader=new FileReader();
+      reader.onload=()=>resolve(String(reader.result||''));
+      reader.onerror=()=>reject(new Error('No se pudo convertir un GIF.'));
+      reader.readAsDataURL(blob);
+    });
+    try{
+      for(const d of selectedDays){
+        for(const item of (exportRoutine[d]||[])){
+          const imageUrl=String(item.image||'').trim();
+          if(!imageUrl || imageUrl.startsWith('data:') || imageCache.has(imageUrl))continue;
+          if(!/^https?:\/\//i.test(imageUrl))continue;
+          const response=await fetch(imageUrl,{mode:'cors',credentials:'omit',cache:'force-cache'});
+          if(!response.ok)throw new Error('No se pudo descargar el GIF de '+(item.name||'un ejercicio')+'.');
+          const blob=await response.blob();
+          if(!/^image\//i.test(blob.type||'') && !/\.(gif|png|jpe?g|webp)(?:[?#]|$)/i.test(imageUrl)){
+            throw new Error('El archivo recibido no es una imagen válida: '+(item.name||'ejercicio'));
+          }
+          embeddedBytes+=blob.size||0;
+          if(embeddedBytes>MAX_EMBED_BYTES)throw new Error('Los GIF de esta rutina superan 24 MB. Reduce los ejercicios o envía las rutinas por separado.');
+          const dataUrl=await readBlobAsDataURL(blob);
+          imageCache.set(imageUrl,dataUrl);
+        }
+      }
+    }catch(imageError){
+      alert('⚠️ No se ha preparado el entrenamiento porque no se pudieron incorporar todos los GIF.\\n\\n'+(imageError.message||imageError)+'\\n\\nComprueba la conexión del Monitor y vuelve a intentarlo. No se ha enviado un archivo con imágenes incompletas.');
+      return;
+    }
+    selectedDays.forEach(d=>{
+      (exportRoutine[d]||[]).forEach(item=>{
+        const imageUrl=String(item.image||'').trim();
+        if(imageCache.has(imageUrl))item.image=imageCache.get(imageUrl);
+      });
+    });
+
     const trainingData={
       type:'MI_GIMNASIO_ENTRENAMIENTO_ALUMNO',
-      version:'10.28.1',
+      version:'10.28.3',
       generatedAt:new Date().toISOString(),
       student:{id:s.id,name:s.name,phone:s.phone||'',place:s.place||'Gimnasio'},
-      routine:clone(s.routine),
+      routine:exportRoutine,
       history
     };
 
@@ -6225,7 +6266,7 @@ renderStudents();
 
     let daysHtml='';
     selectedDays.forEach(d=>{
-      const list=Array.isArray(s.routine[d])?s.routine[d]:[];
+      const list=Array.isArray(exportRoutine[d])?exportRoutine[d]:[];
       const last=history[d]||null;
       let total=list.length;
       let groups={};
@@ -6353,29 +6394,62 @@ function saveStudentTraining(){
   return true;
 }
 
-function sendStudentTrainingToMonitor(){
+async function sendStudentTrainingToMonitor(){
   const currentDate=document.getElementById('studentDate')?.value||'';
   const log=state.savedLog&&Number(state.savedLog.day)===Number(state.day)&&String(state.savedLog.date||'').slice(0,10)===currentDate?state.savedLog:null;
   if(!log){alert('Primero pulsa GUARDAR ENTRENAMIENTO y después DEVOLVER AL MONITOR.');return}
   if(!Array.isArray(log.groups)||!log.groups.length){alert('El entrenamiento guardado no contiene resultados.');return}
   state.savedLog=log;
   persistStudentDraft();
-  const payload={type:'MI_GIMNASIO_ALUMNO_ENTRENAMIENTO',version:'10.28.1',sentAt:new Date().toISOString(),student:DATA.student,day:Number(state.day),date:log.date,routine:JSON.parse(JSON.stringify(DATA.routine[state.day]||[])),log};
-  const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+  const payload={type:'MI_GIMNASIO_ALUMNO_ENTRENAMIENTO',version:'10.28.4',sentAt:new Date().toISOString(),student:DATA.student,day:Number(state.day),date:log.date,routine:JSON.parse(JSON.stringify(DATA.routine[state.day]||[])),log};
+  const json=JSON.stringify(payload,null,2);
+  const blob=new Blob([json],{type:'application/json'});
   const name=String(DATA.student.name||'alumno').replace(/[^a-z0-9áéíóúüñ _-]/gi,'').trim()||'alumno';
-  const file=new File([blob],'Entrenamiento_'+name+'_Día_'+state.day+'_'+String(log.date).slice(0,10)+'.json',{type:'application/json'});
-  if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
-    navigator.share({title:'Entrenamiento de '+DATA.student.name,text:'Entrenamiento realizado · Día '+state.day,files:[file]}).catch(e=>{if(e?.name!=='AbortError')downloadStudent(blob,file.name)});
-    return;
+  const filename='Entrenamiento_'+name+'_Dia_'+state.day+'_'+String(log.date).slice(0,10)+'.json';
+  const file=new File([blob],filename,{type:'application/json'});
+  // Primero se intenta el menú nativo de compartir del teléfono.
+  // No se exige canShare(): en algunas versiones de iOS esa comprobación
+  // devuelve false aunque navigator.share sí pueda abrir el menú.
+  if(navigator.share){
+    try{
+      await navigator.share({title:'Entrenamiento de '+DATA.student.name,text:'Entrenamiento realizado · Día '+state.day,files:[file]});
+      return;
+    }catch(err){
+      if(err&&err.name==='AbortError')return;
+      console.warn('No se pudo compartir desde el menú nativo; se muestra alternativa.',err);
+    }
   }
-  downloadStudent(blob,file.name);
+  showStudentReturnFallback(blob,filename,json);
 }
 
-function downloadStudent(blob,name){
-  const url=URL.createObjectURL(blob),a=document.createElement('a');
-  a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();
-  setTimeout(()=>URL.revokeObjectURL(url),1000);
-  alert('✓ ARCHIVO PREPARADO.\\n\\nEnvía este archivo al Monitor mediante RECIBIR ENTRENAMIENTO.');
+function showStudentReturnFallback(blob,filename,json){
+  let old=document.getElementById('studentReturnFallback');if(old)old.remove();
+  const url=URL.createObjectURL(blob);
+  const panel=document.createElement('div');
+  panel.id='studentReturnFallback';
+  panel.style.cssText='position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.92);display:flex;align-items:center;justify-content:center;padding:16px;font-family:Arial,sans-serif;color:#fff';
+  panel.innerHTML=`<div style="width:100%;max-width:520px;max-height:90vh;overflow:auto;background:#202020;border:1px solid #555;border-radius:14px;padding:18px">
+    <h2 style="margin:0 0 10px;color:#00e676;font-size:1.1rem">ENTRENAMIENTO PREPARADO</h2>
+    <p style="font-size:.9rem;line-height:1.45">El teléfono no ha abierto el menú para compartir automáticamente. Los resultados están guardados en este archivo.</p>
+    <a id="studentReturnDownload" href="${url}" download="${filename}" style="display:block;text-align:center;background:#00e676;color:#000;text-decoration:none;font-weight:bold;border-radius:9px;padding:14px;margin:14px 0">⬇️ DESCARGAR ARCHIVO DE RESULTADOS</a>
+    <button id="studentReturnCopy" type="button" style="width:100%;background:#073b55;color:#fff;border:1px solid #29b6f6;border-radius:9px;padding:13px;font-weight:bold;margin-bottom:9px">COPIAR RESULTADOS (ALTERNATIVA)</button>
+    <p id="studentReturnStatus" style="font-size:.78rem;color:#bbb">Después de descargarlo, adjúntalo en WhatsApp y envíalo al monitor.</p>
+    <button id="studentReturnClose" type="button" style="width:100%;background:#333;color:#fff;border:1px solid #666;border-radius:9px;padding:11px">VOLVER AL ENTRENAMIENTO</button>
+  </div>`;
+  document.body.appendChild(panel);
+  panel.querySelector('#studentReturnCopy').addEventListener('click',async()=>{
+    try{
+      if(navigator.clipboard&&navigator.clipboard.writeText){
+        await navigator.clipboard.writeText(json);
+        panel.querySelector('#studentReturnStatus').textContent='✓ Resultados copiados. Se pueden pegar en un mensaje al monitor si no es posible adjuntar el archivo.';
+      }else{
+        const ta=document.createElement('textarea');ta.value=json;ta.style.cssText='position:fixed;left:-9999px;top:0';panel.appendChild(ta);ta.focus();ta.select();
+        const ok=document.execCommand('copy');ta.remove();
+        panel.querySelector('#studentReturnStatus').textContent=ok?'✓ Resultados copiados.':'No se pudo copiar automáticamente. Descarga el archivo y adjúntalo en WhatsApp.';
+      }
+    }catch(e){panel.querySelector('#studentReturnStatus').textContent='No se pudo copiar. Descarga el archivo y adjúntalo en WhatsApp.';}
+  });
+  panel.querySelector('#studentReturnClose').addEventListener('click',()=>{URL.revokeObjectURL(url);panel.remove()});
 }
 
 function startStudentRest(){
